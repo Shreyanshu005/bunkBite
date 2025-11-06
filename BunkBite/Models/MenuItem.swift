@@ -10,6 +10,7 @@ import Foundation
 struct MenuItem: Codable, Identifiable, Hashable {
     let id: String
     let name: String
+    let image: String?
     let price: Double
     let availableQuantity: Int
     let createdAt: String?
@@ -17,7 +18,7 @@ struct MenuItem: Codable, Identifiable, Hashable {
 
     enum CodingKeys: String, CodingKey {
         case id = "_id"
-        case name, price, availableQuantity, createdAt, updatedAt
+        case name, image, price, availableQuantity, createdAt, updatedAt
     }
 }
 

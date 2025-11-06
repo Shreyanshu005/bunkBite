@@ -12,11 +12,46 @@ import Combine
 @MainActor
 class CanteenViewModel: ObservableObject {
     @Published var canteens: [Canteen] = []
-    @Published var selectedCanteen: Canteen?
+    @Published var selectedCanteen: Canteen? {
+        didSet {
+            saveSelectedCanteen()
+            // Notify observers that the selected canteen has changed
+            if let canteen = selectedCanteen {
+                NotificationCenter.default.post(name: .canteenDidChange, object: nil, userInfo: ["canteen": canteen])
+            }
+        }
+    }
     @Published var isLoading = false
     @Published var errorMessage: String?
 
     private let apiService = APIService.shared
+
+    init() {
+        loadSelectedCanteen()
+    }
+
+    private func saveSelectedCanteen() {
+        if let canteen = selectedCanteen,
+           let encoded = try? JSONEncoder().encode(canteen) {
+            UserDefaults.standard.set(encoded, forKey: "selectedCanteen")
+            print("💾 Saved selected canteen: \(canteen.name)")
+        } else {
+            UserDefaults.standard.removeObject(forKey: "selectedCanteen")
+            print("🗑️ Cleared selected canteen")
+        }
+    }
+
+    private func loadSelectedCanteen() {
+        if let data = UserDefaults.standard.data(forKey: "selectedCanteen"),
+           let canteen = try? JSONDecoder().decode(Canteen.self, from: data) {
+            selectedCanteen = canteen
+            print("✅ Loaded selected canteen: \(canteen.name)")
+        }
+    }
+
+    func clearSelectedCanteen() {
+        selectedCanteen = nil
+    }
 
     func fetchAllCanteens(token: String) async {
         isLoading = true

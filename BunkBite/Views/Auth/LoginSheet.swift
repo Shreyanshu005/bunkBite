@@ -67,7 +67,7 @@ struct LoginSheet: View {
                 })
             }
         }
-        .presentationDetents([.medium])
+        .presentationDetents([.large])
         .presentationDragIndicator(.visible)
     }
 }

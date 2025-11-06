@@ -9,12 +9,22 @@ import Foundation
 import Combine
 
 struct CartItem: Identifiable, Hashable {
-    let id = UUID()
+    var id: String {
+        menuItem.id
+    }
     let menuItem: MenuItem
     var quantity: Int
 
     var totalPrice: Double {
         return menuItem.price * Double(quantity)
+    }
+
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(menuItem.id)
+    }
+
+    static func == (lhs: CartItem, rhs: CartItem) -> Bool {
+        return lhs.menuItem.id == rhs.menuItem.id && lhs.quantity == rhs.quantity
     }
 }
 

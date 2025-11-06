@@ -10,6 +10,7 @@ import SwiftUI
 struct UserMainView: View {
     @ObservedObject var viewModel: AuthViewModel
     @State private var selectedTab = 0
+    @State private var showLoginSheet = false
     @Namespace private var animation
 
     var body: some View {
@@ -22,7 +23,7 @@ struct UserMainView: View {
                 UserPastOrdersView()
                     .tag(1)
 
-                UserProfileView(viewModel: viewModel)
+                UserProfileView(viewModel: viewModel, showLoginSheet: $showLoginSheet)
                     .tag(2)
             }
             .tabViewStyle(.page(indexDisplayMode: .never))
@@ -69,6 +70,9 @@ struct UserMainView: View {
                     .shadow(color: Color.black.opacity(0.08), radius: 20, x: 0, y: -5)
             )
             .edgesIgnoringSafeArea(.bottom)
+        }
+        .sheet(isPresented: $showLoginSheet) {
+            LoginSheet(authViewModel: viewModel)
         }
     }
 }

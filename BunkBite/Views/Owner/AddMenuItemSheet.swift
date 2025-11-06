@@ -78,7 +78,7 @@ struct AddMenuItemSheet: View {
                 }
             }
         }
-        .presentationDetents([.medium])
+        .presentationDetents([.large])
         .presentationDragIndicator(.visible)
     }
 }
@@ -181,7 +181,7 @@ struct EditMenuItemSheet: View {
                 }
             }
         }
-        .presentationDetents([.medium, .large])
+        .presentationDetents([.large])
         .presentationDragIndicator(.visible)
         .onAppear {
             name = item.name

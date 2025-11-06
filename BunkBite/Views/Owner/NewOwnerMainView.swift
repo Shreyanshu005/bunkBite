@@ -20,26 +20,13 @@ struct NewOwnerMainView: View {
             if !authViewModel.isAuthenticated {
                 // Show login prompt
                 loginPromptView
-            } else if canteenViewModel.selectedCanteen == nil {
-                // Show canteen selector
-                canteenSelectorView
             } else {
-                // Show main tabs for selected canteen
+                // Show main tabs (even if no canteen selected)
                 mainTabView
             }
         }
         .onAppear {
             authViewModel.checkExistingAuth()
-
-            // Show canteen selector when logged in but no canteen selected
-            if authViewModel.isAuthenticated && canteenViewModel.selectedCanteen == nil {
-                showCanteenSelector = true
-            }
-        }
-        .onChange(of: authViewModel.isAuthenticated) { oldValue, newValue in
-            if newValue && canteenViewModel.selectedCanteen == nil {
-                showCanteenSelector = true
-            }
         }
         .sheet(isPresented: $showLoginSheet) {
             LoginSheet(authViewModel: authViewModel)
@@ -69,43 +56,29 @@ struct NewOwnerMainView: View {
         }
     }
 
-    private var canteenSelectorView: some View {
-        NavigationStack {
-            ContentUnavailableView {
-                Label("No Canteen Selected", systemImage: "building.2")
-            } description: {
-                Text("Select a canteen to manage")
-            } actions: {
-                Button("Select Canteen") {
-                    showCanteenSelector = true
-                }
-                .buttonStyle(.borderedProminent)
-                .tint(Constants.primaryColor)
-            }
-            .navigationTitle("Owner Panel")
-        }
-    }
-
     private var mainTabView: some View {
         TabView {
             // Menu/Inventory Tab
             OwnerMenuTab(
-                canteen: canteenViewModel.selectedCanteen!,
+                canteen: canteenViewModel.selectedCanteen,
                 menuViewModel: menuViewModel,
                 authViewModel: authViewModel,
-                onChangeCanteen: {
-                    canteenViewModel.selectedCanteen = nil
+                canteenViewModel: canteenViewModel,
+                onSelectCanteen: {
                     showCanteenSelector = true
                 }
             )
             .tabItem {
-                Label("Menu", systemImage: "fork.knife")
+                Label("Inventory", systemImage: "fork.knife")
             }
 
             // Orders Tab
             OwnerOrdersTab(
-                canteen: canteenViewModel.selectedCanteen!,
-                authViewModel: authViewModel
+                canteen: canteenViewModel.selectedCanteen,
+                authViewModel: authViewModel,
+                onSelectCanteen: {
+                    showCanteenSelector = true
+                }
             )
             .tabItem {
                 Label("Orders", systemImage: "list.clipboard")

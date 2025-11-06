@@ -6,6 +6,14 @@
 //
 
 import SwiftUI
+import PopupView
+
+struct UPIApp: Identifiable {
+    let id = UUID()
+    let name: String
+    let scheme: String
+    let icon: String
+}
 
 struct PaymentSheet: View {
     @ObservedObject var cart: Cart
@@ -13,7 +21,17 @@ struct PaymentSheet: View {
 
     @Environment(\.dismiss) var dismiss
     @State private var upiId = ""
-    @State private var showSuccessAlert = false
+    @State private var showSuccessPopup = false
+    @State private var availableUPIApps: [UPIApp] = []
+    @State private var isCheckingPayment = false
+
+    let upiApps = [
+        UPIApp(name: "Google Pay", scheme: "tez://upi/pay", icon: "g.circle.fill"),
+        UPIApp(name: "PhonePe", scheme: "phonepe://pay", icon: "phone.circle.fill"),
+        UPIApp(name: "Paytm", scheme: "paytmmp://pay", icon: "indianrupeesign.circle.fill"),
+        UPIApp(name: "BHIM", scheme: "bhim://pay", icon: "b.circle.fill"),
+        UPIApp(name: "Amazon Pay", scheme: "amazonpay://pay", icon: "a.circle.fill")
+    ]
 
     var body: some View {
         NavigationStack {
@@ -31,32 +49,74 @@ struct PaymentSheet: View {
                     .padding(.vertical, 8)
                 }
 
+                // Available UPI Apps
+                if !availableUPIApps.isEmpty {
+                    Section {
+                        ForEach(availableUPIApps) { app in
+                            Button {
+                                openUPIApp(app)
+                            } label: {
+                                HStack(spacing: 16) {
+                                    Image(systemName: app.icon)
+                                        .font(.title2)
+                                        .foregroundStyle(Constants.primaryColor)
+                                        .frame(width: 40)
+
+                                    Text(app.name)
+                                        .font(.headline)
+                                        .foregroundStyle(.black)
+
+                                    Spacer()
+
+                                    Image(systemName: "chevron.right")
+                                        .font(.caption)
+                                        .foregroundStyle(.gray)
+                                }
+                                .padding(.vertical, 8)
+                            }
+                        }
+                    } header: {
+                        Text("Pay with UPI Apps")
+                    } footer: {
+                        Text("Select an app to complete payment")
+                    }
+                }
+
                 Section {
                     TextField("Enter UPI ID", text: $upiId)
                         .textContentType(.username)
                         .keyboardType(.emailAddress)
                         .autocapitalization(.none)
                 } header: {
-                    Text("UPI Payment")
+                    Text("Manual UPI Payment")
                 } footer: {
                     Text("Enter your UPI ID (e.g., name@paytm)")
                 }
 
                 Section {
-                    Button("Pay with UPI Apps") {
-                        openUPIDeeplink()
-                    }
-                    .frame(maxWidth: .infinity)
-                    .buttonStyle(.borderedProminent)
-                    .tint(Constants.primaryColor)
-
-                    Button("Pay with UPI ID") {
+                    Button {
                         if !upiId.isEmpty {
-                            payWithUPI()
+                            payWithUPIID()
+                        }
+                    } label: {
+                        if isCheckingPayment {
+                            HStack {
+                                Spacer()
+                                ProgressView()
+                                    .progressViewStyle(.circular)
+                                Text("Verifying Payment...")
+                                    .fontWeight(.semibold)
+                                Spacer()
+                            }
+                        } else {
+                            Text("Pay with UPI ID")
+                                .frame(maxWidth: .infinity)
+                                .fontWeight(.semibold)
                         }
                     }
-                    .frame(maxWidth: .infinity)
-                    .disabled(upiId.isEmpty)
+                    .buttonStyle(.borderedProminent)
+                    .tint(Constants.primaryColor)
+                    .disabled(upiId.isEmpty || isCheckingPayment)
                 }
                 .listRowBackground(Color.clear)
 
@@ -82,41 +142,149 @@ struct PaymentSheet: View {
                 }
             }
         }
-        .presentationDetents([.medium, .large])
+        .presentationDetents([.large])
         .presentationDragIndicator(.visible)
-        .alert("Payment Successful", isPresented: $showSuccessAlert) {
-            Button("OK") {
+        .onAppear {
+            checkAvailableUPIApps()
+        }
+        .onReceive(NotificationCenter.default.publisher(for: UIApplication.didBecomeActiveNotification)) { _ in
+            // Check payment status when app becomes active (user returns from UPI app)
+            if isCheckingPayment {
+                verifyPaymentStatus()
+            }
+        }
+        .popup(isPresented: $showSuccessPopup) {
+            PaymentSuccessPopup {
                 cart.clear()
+                showSuccessPopup = false
                 dismiss()
             }
-        } message: {
-            Text("Your order has been placed successfully!")
+        } customize: {
+            $0
+                .type(.floater(verticalPadding: 20, useSafeAreaInset: true))
+                .position(.center)
+                .animation(.spring())
+                .closeOnTapOutside(false)
+                .backgroundColor(.black.opacity(0.5))
         }
     }
 
-    private func openUPIDeeplink() {
-        let upiURL = "upi://pay?pa=merchant@upi&pn=\(canteen?.name.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? "BunkBite")&am=\(cart.totalAmount)&cu=INR"
+    private func checkAvailableUPIApps() {
+        var available: [UPIApp] = []
+
+        for app in upiApps {
+            if let url = URL(string: app.scheme), UIApplication.shared.canOpenURL(url) {
+                available.append(app)
+            }
+        }
+
+        availableUPIApps = available
+        print("✅ Found \(available.count) UPI apps: \(available.map { $0.name }.joined(separator: ", "))")
+    }
+
+    private func openUPIApp(_ app: UPIApp) {
+        let merchantUPI = "8178785849@ptyes"
+        let merchantName = canteen?.name.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? "BunkBite"
+        let amount = String(format: "%.2f", cart.totalAmount)
+        let transactionNote = "Order%20Payment"
+
+        // Build UPI URL with parameters
+        let upiURL = "upi://pay?pa=\(merchantUPI)&pn=\(merchantName)&am=\(amount)&cu=INR&tn=\(transactionNote)"
 
         if let url = URL(string: upiURL) {
-            if UIApplication.shared.canOpenURL(url) {
-                UIApplication.shared.open(url) { success in
-                    if success {
-                        // Simulate payment success after opening UPI app
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
-                            showSuccessAlert = true
-                        }
-                    }
+            isCheckingPayment = true
+            UIApplication.shared.open(url) { success in
+                if success {
+                    print("✅ \(app.name) opened successfully")
+                } else {
+                    print("❌ Failed to open \(app.name)")
+                    isCheckingPayment = false
                 }
-            } else {
-                // Fallback to payment success for testing
-                showSuccessAlert = true
             }
         }
     }
 
-    private func payWithUPI() {
-        // Here you would normally integrate with actual UPI payment gateway
-        // For now, we'll simulate success
-        showSuccessAlert = true
+    private func payWithUPIID() {
+        let merchantUPI = "8178785849@ptyes"
+        let merchantName = canteen?.name.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? "BunkBite"
+        let amount = String(format: "%.2f", cart.totalAmount)
+
+        let upiURL = "upi://pay?pa=\(merchantUPI)&pn=\(merchantName)&am=\(amount)&cu=INR&tn=Order%20Payment"
+
+        if let url = URL(string: upiURL) {
+            isCheckingPayment = true
+            UIApplication.shared.open(url) { success in
+                if !success {
+                    print("❌ No UPI app found")
+                    isCheckingPayment = false
+                }
+            }
+        }
+    }
+
+    private func verifyPaymentStatus() {
+        // Simulate payment verification
+        // In production, this would call your backend API to verify the payment
+        print("🔍 Verifying payment status...")
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+            // For demo purposes, we'll assume payment is successful
+            // In production, check with your payment gateway/backend
+            isCheckingPayment = false
+            showSuccessPopup = true
+            print("✅ Payment verified successfully")
+        }
+    }
+}
+
+// MARK: - Payment Success Popup
+struct PaymentSuccessPopup: View {
+    let onDismiss: () -> Void
+
+    var body: some View {
+        VStack(spacing: 24) {
+            // Success animation icon
+            Circle()
+                .fill(Color.green.gradient)
+                .frame(width: 80, height: 80)
+                .overlay(
+                    Image(systemName: "checkmark")
+                        .font(.system(size: 40, weight: .bold))
+                        .foregroundStyle(.white)
+                )
+                .shadow(color: .green.opacity(0.3), radius: 10, x: 0, y: 5)
+
+            // Success message
+            VStack(spacing: 8) {
+                Text("Payment Successful!")
+                    .font(.title2)
+                    .fontWeight(.bold)
+                    .foregroundStyle(.black)
+
+                Text("Your order has been placed")
+                    .font(.subheadline)
+                    .foregroundStyle(.gray)
+            }
+
+            // Done button
+            Button {
+                onDismiss()
+            } label: {
+                Text("Done")
+                    .font(.headline)
+                    .foregroundStyle(.white)
+                    .frame(maxWidth: .infinity)
+                    .padding()
+                    .background(Constants.primaryColor)
+                    .cornerRadius(12)
+            }
+        }
+        .padding(32)
+        .background(
+            RoundedRectangle(cornerRadius: 24)
+                .fill(.white)
+                .shadow(color: .black.opacity(0.2), radius: 20, x: 0, y: 10)
+        )
+        .padding(40)
     }
 }

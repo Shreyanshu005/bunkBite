@@ -69,7 +69,7 @@ struct CreateCanteenSheet: View {
                 }
             }
         }
-        .presentationDetents([.medium])
+        .presentationDetents([.large])
         .presentationDragIndicator(.visible)
     }
 }

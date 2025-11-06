@@ -19,5 +19,14 @@
 			</dict>
 		</dict>
 	</dict>
+	<key>LSApplicationQueriesSchemes</key>
+	<array>
+		<string>tez</string>
+		<string>phonepe</string>
+		<string>paytmmp</string>
+		<string>bhim</string>
+		<string>amazonpay</string>
+		<string>upi</string>
+	</array>
 </dict>
 </plist>

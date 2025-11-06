@@ -6,6 +6,10 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		639395B52EBCA17E00A70F09 /* PopupView in Frameworks */ = {isa = PBXBuildFile; productRef = 639395B42EBCA17E00A70F09 /* PopupView */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		63B2D7032EBC558500D6B594 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -65,6 +69,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				639395B52EBCA17E00A70F09 /* PopupView in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -125,6 +130,7 @@
 			);
 			name = BunkBite;
 			packageProductDependencies = (
+				639395B42EBCA17E00A70F09 /* PopupView */,
 			);
 			productName = BunkBite;
 			productReference = 63B2D6F52EBC558200D6B594 /* BunkBite.app */;
@@ -208,6 +214,9 @@
 			);
 			mainGroup = 63B2D6EC2EBC558200D6B594;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				639395B32EBCA17E00A70F09 /* XCRemoteSwiftPackageReference "PopupView" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 63B2D6F62EBC558200D6B594 /* Products */;
 			projectDirPath = "";
@@ -593,6 +602,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		639395B32EBCA17E00A70F09 /* XCRemoteSwiftPackageReference "PopupView" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/exyte/PopupView";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 4.1.15;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		639395B42EBCA17E00A70F09 /* PopupView */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 639395B32EBCA17E00A70F09 /* XCRemoteSwiftPackageReference "PopupView" */;
+			productName = PopupView;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 63B2D6ED2EBC558200D6B594 /* Project object */;
 }

@@ -1,5 +1,5 @@
 //
-//  CanteenSelectorSheet.swift
+//  OwnerCanteenSelectorSheet.swift
 //  BunkBite
 //
 //  Created by Shreyanshu on 06/11/25.
@@ -7,13 +7,13 @@
 
 import SwiftUI
 
-struct CanteenSelectorSheet: View {
+struct OwnerCanteenSelectorSheet: View {
     @ObservedObject var canteenViewModel: CanteenViewModel
     @ObservedObject var authViewModel: AuthViewModel
-    @ObservedObject var menuViewModel: MenuViewModel
 
     @Environment(\.dismiss) var dismiss
     @State private var searchText = ""
+    @State private var showCreateCanteen = false
 
     var filteredCanteens: [Canteen] {
         if searchText.isEmpty {
@@ -34,18 +34,27 @@ struct CanteenSelectorSheet: View {
                         ProgressView()
                         Spacer()
                     }
-                } else if filteredCanteens.isEmpty {
-                    ContentUnavailableView("No canteens found", systemImage: "building.2")
+                } else if canteenViewModel.canteens.isEmpty {
+                    ContentUnavailableView {
+                        Label("No Canteens", systemImage: "building.2")
+                    } description: {
+                        Text("Create your first canteen to get started")
+                    } actions: {
+                        Button("Create Canteen") {
+                            showCreateCanteen = true
+                        }
+                        .buttonStyle(.borderedProminent)
+                        .tint(Constants.primaryColor)
+                    }
+                    .listRowBackground(Color.clear)
                 } else {
                     Section {
                         ForEach(filteredCanteens) { canteen in
                             Button {
                                 canteenViewModel.selectedCanteen = canteen
-                                // Clear menu when changing canteen
-                                menuViewModel.menuItems = []
                                 dismiss()
                             } label: {
-                            HStack(spacing: 16) {
+                                HStack(spacing: 16) {
                                 // Icon
                                 Circle()
                                     .fill(Constants.primaryColor.opacity(0.1))
@@ -96,19 +105,34 @@ struct CanteenSelectorSheet: View {
                         dismiss()
                     }
                 }
+
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button {
+                        showCreateCanteen = true
+                    } label: {
+                        Image(systemName: "plus")
+                    }
+                }
             }
             .searchable(text: $searchText, prompt: "Search canteens")
             .refreshable {
                 if let token = authViewModel.authToken {
-                    await canteenViewModel.fetchAllCanteens(token: token)
+                    await canteenViewModel.fetchMyCanteens(token: token)
                 }
+            }
+            .sheet(isPresented: $showCreateCanteen) {
+                CreateCanteenSheet(
+                    canteenViewModel: canteenViewModel,
+                    authViewModel: authViewModel
+                )
             }
         }
         .presentationDetents([.large])
         .presentationDragIndicator(.visible)
+        .interactiveDismissDisabled(canteenViewModel.selectedCanteen == nil)
         .task {
             if let token = authViewModel.authToken {
-                await canteenViewModel.fetchAllCanteens(token: token)
+                await canteenViewModel.fetchMyCanteens(token: token)
             }
         }
     }

@@ -60,13 +60,17 @@ struct CartSheet: View {
                         Button {
                             showPaymentSheet = true
                         } label: {
-                            Text("Proceed to Payment")
-                                .frame(maxWidth: .infinity)
-                                .fontWeight(.semibold)
+                            HStack {
+                                Spacer()
+                                Text("Proceed to Payment")
+                                    .fontWeight(.semibold)
+                                Spacer()
+                            }
+                            .padding(.vertical, 8)
                         }
                         .buttonStyle(.borderedProminent)
                         .tint(Constants.primaryColor)
-                        .listRowBackground(Color.clear)
+                        .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
                     }
                 }
             }
@@ -93,7 +97,7 @@ struct CartSheet: View {
                 PaymentSheet(cart: cart, canteen: canteen)
             }
         }
-        .presentationDetents([.medium, .large])
+        .presentationDetents([.large])
         .presentationDragIndicator(.visible)
     }
 }
@@ -103,49 +107,75 @@ struct CartItemRow: View {
     @ObservedObject var cart: Cart
 
     var body: some View {
-        HStack(spacing: 12) {
-            // Item image
-            RoundedRectangle(cornerRadius: 8)
-                .fill(.ultraThinMaterial)
-                .frame(width: 60, height: 60)
-                .overlay(
-                    Image(systemName: "fork.knife")
-                        .foregroundStyle(.secondary)
-                )
+        VStack(spacing: 12) {
+            HStack(spacing: 12) {
+                // Item image
+                RoundedRectangle(cornerRadius: 8)
+                    .fill(.ultraThinMaterial)
+                    .frame(width: 60, height: 60)
+                    .overlay(
+                        Image(systemName: "fork.knife")
+                            .foregroundStyle(.secondary)
+                    )
 
-            // Item details
-            VStack(alignment: .leading, spacing: 4) {
-                Text(cartItem.menuItem.name)
+                // Item details
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(cartItem.menuItem.name)
+                        .font(.headline)
+                        .foregroundStyle(.black)
+
+                    Text("₹\(Int(cartItem.menuItem.price)) each")
+                        .font(.subheadline)
+                        .foregroundStyle(.gray)
+                }
+
+                Spacer()
+
+                // Total price for this item
+                Text("₹\(Int(cartItem.totalPrice))")
                     .font(.headline)
-
-                Text("₹\(Int(cartItem.menuItem.price))")
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(Constants.primaryColor)
             }
-
-            Spacer()
 
             // Quantity controls
-            HStack(spacing: 12) {
-                Button {
-                    cart.removeItem(cartItem.menuItem)
-                } label: {
-                    Image(systemName: "minus.circle.fill")
-                        .font(.title3)
-                }
+            HStack {
+                Spacer()
 
-                Text("\(cartItem.quantity)")
-                    .font(.headline)
-                    .frame(minWidth: 20)
+                HStack(spacing: 0) {
+                    Button {
+                        if cartItem.quantity > 1 {
+                            cart.updateQuantity(for: cartItem.menuItem, quantity: cartItem.quantity - 1)
+                        } else {
+                            cart.removeItem(cartItem.menuItem)
+                        }
+                    } label: {
+                        Image(systemName: cartItem.quantity == 1 ? "trash.fill" : "minus.circle.fill")
+                            .font(.title3)
+                            .foregroundStyle(cartItem.quantity == 1 ? .red : Constants.primaryColor)
+                            .frame(width: 36, height: 36)
+                    }
 
-                Button {
-                    cart.addItem(cartItem.menuItem)
-                } label: {
-                    Image(systemName: "plus.circle.fill")
-                        .font(.title3)
+                    Text("\(cartItem.quantity)")
+                        .font(.headline)
+                        .foregroundStyle(.black)
+                        .frame(width: 40)
+
+                    Button {
+                        cart.updateQuantity(for: cartItem.menuItem, quantity: cartItem.quantity + 1)
+                    } label: {
+                        Image(systemName: "plus.circle.fill")
+                            .font(.title3)
+                            .foregroundStyle(Constants.primaryColor)
+                            .frame(width: 36, height: 36)
+                    }
                 }
+                .padding(.horizontal, 8)
+                .padding(.vertical, 4)
+                .background(
+                    RoundedRectangle(cornerRadius: 10)
+                        .fill(Color.gray.opacity(0.1))
+                )
             }
-            .foregroundStyle(Constants.primaryColor)
         }
         .padding(.vertical, 4)
     }

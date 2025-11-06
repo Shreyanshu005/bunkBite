@@ -76,6 +76,7 @@ class MenuViewModel: ObservableObject {
                 menuItems[index] = MenuItem(
                     id: updatedItem.id,
                     name: updatedItem.name,
+                    image: updatedItem.image,
                     price: updatedItem.price,
                     availableQuantity: quantity,
                     createdAt: updatedItem.createdAt,

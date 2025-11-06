@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import PopupView
 
 struct UserMenuView: View {
     @ObservedObject var authViewModel: AuthViewModel
@@ -18,12 +19,60 @@ struct UserMenuView: View {
 
     @State private var showCart = false
     @State private var searchText = ""
+    @State private var selectedCategory: String? = nil
+    @State private var showFilters = false
+    @State private var menuLoadingTask: Task<Void, Never>?
+
+    var categories: [String] {
+        let allCategories = menuViewModel.menuItems.compactMap { item -> String? in
+            // Extract category from item name or use a simple classification
+            if item.name.localizedCaseInsensitiveContains("samosa") ||
+               item.name.localizedCaseInsensitiveContains("pakora") {
+                return "Snacks"
+            } else if item.name.localizedCaseInsensitiveContains("rice") ||
+                      item.name.localizedCaseInsensitiveContains("dal") ||
+                      item.name.localizedCaseInsensitiveContains("chawal") {
+                return "Main Course"
+            } else if item.name.localizedCaseInsensitiveContains("tea") ||
+                      item.name.localizedCaseInsensitiveContains("coffee") ||
+                      item.name.localizedCaseInsensitiveContains("chai") {
+                return "Beverages"
+            }
+            return "Other"
+        }
+        return Array(Set(allCategories)).sorted()
+    }
+
+    func getCategory(for item: MenuItem) -> String {
+        if item.name.localizedCaseInsensitiveContains("samosa") ||
+           item.name.localizedCaseInsensitiveContains("pakora") {
+            return "Snacks"
+        } else if item.name.localizedCaseInsensitiveContains("rice") ||
+                  item.name.localizedCaseInsensitiveContains("dal") ||
+                  item.name.localizedCaseInsensitiveContains("chawal") {
+            return "Main Course"
+        } else if item.name.localizedCaseInsensitiveContains("tea") ||
+                  item.name.localizedCaseInsensitiveContains("coffee") ||
+                  item.name.localizedCaseInsensitiveContains("chai") {
+            return "Beverages"
+        }
+        return "Other"
+    }
 
     var filteredItems: [MenuItem] {
-        if searchText.isEmpty {
-            return menuViewModel.menuItems
+        var items = menuViewModel.menuItems
+
+        // Apply category filter
+        if let category = selectedCategory {
+            items = items.filter { getCategory(for: $0) == category }
         }
-        return menuViewModel.menuItems.filter { $0.name.localizedCaseInsensitiveContains(searchText) }
+
+        // Apply search filter
+        if !searchText.isEmpty {
+            items = items.filter { $0.name.localizedCaseInsensitiveContains(searchText) }
+        }
+
+        return items
     }
 
     var body: some View {
@@ -37,6 +86,27 @@ struct UserMenuView: View {
                     }
                 } else {
                     loginPrompt
+                }
+            }
+            .onChange(of: canteenViewModel.selectedCanteen) { newCanteen in
+                if let canteen = newCanteen, let token = authViewModel.authToken {
+                    // Cancel any existing loading task
+                    menuLoadingTask?.cancel()
+                    
+                    // Start a new loading task
+                    menuLoadingTask = Task {
+                        await menuViewModel.fetchMenu(canteenId: canteen.id, token: token)
+                    }
+                }
+            }
+            .onAppear {
+                // Load menu if a canteen is already selected
+                if let canteen = canteenViewModel.selectedCanteen, 
+                   let token = authViewModel.authToken,
+                   menuViewModel.menuItems.isEmpty {
+                    menuLoadingTask = Task {
+                        await menuViewModel.fetchMenu(canteenId: canteen.id, token: token)
+                    }
                 }
             }
             .navigationTitle("Menu")
@@ -65,7 +135,9 @@ struct UserMenuView: View {
                     }
                 }
             }
-            .searchable(text: $searchText, prompt: "Search items")
+            .if(authViewModel.isAuthenticated) { view in
+                view.searchable(text: $searchText, prompt: "Search items")
+            }
             .sheet(isPresented: $showCart) {
                 CartSheet(cart: cart, canteen: canteenViewModel.selectedCanteen)
             }
@@ -73,16 +145,78 @@ struct UserMenuView: View {
     }
 
     private var loginPrompt: some View {
-        ContentUnavailableView {
-            Label("Not Logged In", systemImage: "person.crop.circle.badge.xmark")
-        } description: {
-            Text("Please log in to view the menu")
-        } actions: {
-            Button("Log In") {
-                showLoginSheet = true
+        ScrollView {
+            VStack(spacing: 24) {
+                // Animated food icons
+                HStack(spacing: 20) {
+                    ForEach(["🍕", "🍔", "☕️", "🍜", "🌮"], id: \.self) { emoji in
+                        Text(emoji)
+                            .font(.system(size: 40))
+                    }
+                }
+                .padding(.top, 40)
+
+                // Main message
+                VStack(spacing: 12) {
+                    Text("Hungry?")
+                        .font(.system(size: 36, weight: .bold))
+                        .foregroundStyle(Constants.primaryColor)
+
+                    Text("Order from your")
+                        .font(.title3)
+                        .foregroundStyle(.gray)
+
+                    Text("Favorite Canteen")
+                        .font(.title2)
+                        .fontWeight(.bold)
+                        .foregroundStyle(.black)
+                }
+
+                // Feature cards
+                VStack(spacing: 16) {
+                    FeatureCard(
+                        icon: "clock",
+                        title: "Quick Orders",
+                        description: "Get your food in minutes"
+                    )
+
+                    FeatureCard(
+                        icon: "creditcard",
+                        title: "Easy Payments",
+                        description: "Pay with UPI instantly"
+                    )
+
+                    FeatureCard(
+                        icon: "star.fill",
+                        title: "Best Quality",
+                        description: "Fresh food, every time"
+                    )
+                }
+                .padding(.horizontal)
+
+                // CTA Button
+                Button {
+                    showLoginSheet = true
+                } label: {
+                    HStack {
+                        Text("Start Ordering")
+                            .fontWeight(.semibold)
+                        Image(systemName: "arrow.right")
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding()
+                    .background(Constants.primaryColor)
+                    .foregroundStyle(.white)
+                    .cornerRadius(12)
+                }
+                .padding(.horizontal)
+                .padding(.top, 8)
+
+                Text("Join hundreds of hungry students!")
+                    .font(.caption)
+                    .foregroundStyle(.gray)
+                    .padding(.bottom, 40)
             }
-            .buttonStyle(.borderedProminent)
-            .tint(Constants.primaryColor)
         }
     }
 
@@ -129,6 +263,42 @@ struct UserMenuView: View {
                 RoundedRectangle(cornerRadius: 12)
                     .fill(.ultraThinMaterial)
             )
+
+            // Category Filter Chips
+            if !categories.isEmpty {
+                Section {
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        HStack(spacing: 12) {
+                            // All filter
+                            MenuFilterChip(
+                                title: "All",
+                                isSelected: selectedCategory == nil,
+                                action: {
+                                    withAnimation {
+                                        selectedCategory = nil
+                                    }
+                                }
+                            )
+
+                            // Category filters
+                            ForEach(categories, id: \.self) { category in
+                                MenuFilterChip(
+                                    title: category,
+                                    isSelected: selectedCategory == category,
+                                    action: {
+                                        withAnimation {
+                                            selectedCategory = category
+                                        }
+                                    }
+                                )
+                            }
+                        }
+                        .padding(.horizontal, 4)
+                    }
+                }
+                .listRowInsets(EdgeInsets(top: 8, leading: 0, bottom: 8, trailing: 0))
+                .listRowBackground(Color.clear)
+            }
 
             // Menu Items
             if menuViewModel.isLoading {
@@ -240,5 +410,17 @@ struct MenuItemRow: View {
             }
         }
         .padding(.vertical, 4)
+    }
+}
+
+// MARK: - View Extension
+extension View {
+    @ViewBuilder
+    func `if`<Transform: View>(_ condition: Bool, transform: (Self) -> Transform) -> some View {
+        if condition {
+            transform(self)
+        } else {
+            self
+        }
     }
 }
