@@ -15,6 +15,37 @@ struct UPIApp: Identifiable {
     let icon: String
 }
 
+struct PaymentDetails {
+    let transactionId: String
+    let amount: Double
+    let timestamp: Date
+    let status: PaymentStatus
+    let upiApp: String
+    let merchantUPI: String
+    let customerUPI: String?
+    let canteenName: String
+    let itemCount: Int
+    let paymentMethod: String
+
+    enum PaymentStatus: String {
+        case pending = "Pending"
+        case success = "Success"
+        case failed = "Failed"
+        case verifying = "Verifying"
+    }
+
+    var formattedTimestamp: String {
+        let formatter = DateFormatter()
+        formatter.dateStyle = .medium
+        formatter.timeStyle = .short
+        return formatter.string(from: timestamp)
+    }
+
+    var formattedAmount: String {
+        return String(format: "₹%.2f", amount)
+    }
+}
+
 struct PaymentSheet: View {
     @ObservedObject var cart: Cart
     let canteen: Canteen?
@@ -24,6 +55,9 @@ struct PaymentSheet: View {
     @State private var showSuccessPopup = false
     @State private var availableUPIApps: [UPIApp] = []
     @State private var isCheckingPayment = false
+    @State private var paymentDetails: PaymentDetails?
+    @State private var selectedUPIApp: UPIApp?
+    @State private var showPaymentDetails = false
 
     let upiApps = [
         UPIApp(name: "Google Pay", scheme: "tez://upi/pay", icon: "g.circle.fill"),
@@ -39,11 +73,10 @@ struct PaymentSheet: View {
                 Section {
                     HStack {
                         Text("Total Amount")
-                            .font(.headline)
+                            .font(.urbanist(size: 17, weight: .semibold))
                         Spacer()
                         Text("₹\(Int(cart.totalAmount))")
-                            .font(.title2)
-                            .fontWeight(.bold)
+                            .font(.urbanist(size: 22, weight: .bold))
                             .foregroundStyle(Constants.primaryColor)
                     }
                     .padding(.vertical, 8)
@@ -63,7 +96,7 @@ struct PaymentSheet: View {
                                         .frame(width: 40)
 
                                     Text(app.name)
-                                        .font(.headline)
+                                        .font(.urbanist(size: 17, weight: .semibold))
                                         .foregroundStyle(.black)
 
                                     Spacer()
@@ -188,8 +221,47 @@ struct PaymentSheet: View {
         let amount = String(format: "%.2f", cart.totalAmount)
         let transactionNote = "Order%20Payment"
 
-        // Build UPI URL with parameters
-        let upiURL = "upi://pay?pa=\(merchantUPI)&pn=\(merchantName)&am=\(amount)&cu=INR&tn=\(transactionNote)"
+        selectedUPIApp = app
+
+        // Build app-specific UPI URL with parameters
+        var upiURL: String
+
+        switch app.name {
+        case "Google Pay":
+            // Google Pay (Tez) format
+            upiURL = "tez://upi/pay?pa=\(merchantUPI)&pn=\(merchantName)&am=\(amount)&cu=INR&tn=\(transactionNote)"
+        case "PhonePe":
+            // PhonePe format
+            upiURL = "phonepe://pay?pa=\(merchantUPI)&pn=\(merchantName)&am=\(amount)&cu=INR&tn=\(transactionNote)"
+        case "Paytm":
+            // Paytm format
+            upiURL = "paytmmp://upi/pay?pa=\(merchantUPI)&pn=\(merchantName)&am=\(amount)&cu=INR&tn=\(transactionNote)"
+        case "BHIM":
+            // BHIM format
+            upiURL = "bhim://upi/pay?pa=\(merchantUPI)&pn=\(merchantName)&am=\(amount)&cu=INR&tn=\(transactionNote)"
+        case "Amazon Pay":
+            // Amazon Pay format
+            upiURL = "amazonpay://upi/pay?pa=\(merchantUPI)&pn=\(merchantName)&am=\(amount)&cu=INR&tn=\(transactionNote)"
+        default:
+            // Generic UPI format as fallback
+            upiURL = "upi://pay?pa=\(merchantUPI)&pn=\(merchantName)&am=\(amount)&cu=INR&tn=\(transactionNote)"
+        }
+
+        // Generate transaction details
+        paymentDetails = PaymentDetails(
+            transactionId: "TXN\(Int(Date().timeIntervalSince1970))",
+            amount: cart.totalAmount,
+            timestamp: Date(),
+            status: .verifying,
+            upiApp: app.name,
+            merchantUPI: merchantUPI,
+            customerUPI: upiId.isEmpty ? nil : upiId,
+            canteenName: canteen?.name ?? "BunkBite",
+            itemCount: cart.items.count,
+            paymentMethod: "UPI"
+        )
+
+        print("🔗 Opening \(app.name) with URL: \(upiURL)")
 
         if let url = URL(string: upiURL) {
             isCheckingPayment = true

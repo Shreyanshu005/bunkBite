@@ -45,11 +45,10 @@ struct CartSheet: View {
 
                         HStack {
                             Text("Total")
-                                .font(.headline)
+                                .font(.urbanist(size: 17, weight: .semibold))
                             Spacer()
                             Text("₹\(Int(cart.totalAmount))")
-                                .font(.title3)
-                                .fontWeight(.bold)
+                                .font(.urbanist(size: 20, weight: .bold))
                                 .foregroundStyle(Constants.primaryColor)
                         }
                     } header: {
@@ -63,7 +62,7 @@ struct CartSheet: View {
                             HStack {
                                 Spacer()
                                 Text("Proceed to Payment")
-                                    .fontWeight(.semibold)
+                                    .font(.urbanist(size: 16, weight: .semibold))
                                 Spacer()
                             }
                             .padding(.vertical, 8)
@@ -121,11 +120,11 @@ struct CartItemRow: View {
                 // Item details
                 VStack(alignment: .leading, spacing: 4) {
                     Text(cartItem.menuItem.name)
-                        .font(.headline)
+                        .font(.urbanist(size: 16, weight: .semibold))
                         .foregroundStyle(.black)
 
                     Text("₹\(Int(cartItem.menuItem.price)) each")
-                        .font(.subheadline)
+                        .font(.urbanist(size: 14, weight: .regular))
                         .foregroundStyle(.gray)
                 }
 
@@ -133,7 +132,7 @@ struct CartItemRow: View {
 
                 // Total price for this item
                 Text("₹\(Int(cartItem.totalPrice))")
-                    .font(.headline)
+                    .font(.urbanist(size: 16, weight: .semibold))
                     .foregroundStyle(Constants.primaryColor)
             }
 

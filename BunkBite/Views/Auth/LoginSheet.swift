@@ -44,8 +44,8 @@ struct LoginSheet: View {
                                 .frame(maxWidth: .infinity)
                         } else {
                             Text("Send OTP")
+                                .font(.urbanist(size: 16, weight: .semibold))
                                 .frame(maxWidth: .infinity)
-                                .fontWeight(.semibold)
                         }
                     }
                     .disabled(authViewModel.isLoading || authViewModel.email.isEmpty)
@@ -93,10 +93,10 @@ struct OTPSheet: View {
                                 .foregroundStyle(Constants.primaryColor)
 
                             Text("Check your email")
-                                .font(.headline)
+                                .font(.urbanist(size: 18, weight: .semibold))
 
                             Text(authViewModel.email)
-                                .font(.subheadline)
+                                .font(.urbanist(size: 14, weight: .regular))
                                 .foregroundStyle(.secondary)
                         }
                         .padding()
@@ -111,7 +111,7 @@ struct OTPSheet: View {
                         .keyboardType(.numberPad)
                         .focused($isOTPFocused)
                         .multilineTextAlignment(.center)
-                        .font(.title2)
+                        .font(.urbanist(size: 28, weight: .semibold))
                         .onChange(of: authViewModel.otp) { oldValue, newValue in
                             if newValue.count > 6 {
                                 authViewModel.otp = String(newValue.prefix(6))
@@ -140,8 +140,8 @@ struct OTPSheet: View {
                                 .frame(maxWidth: .infinity)
                         } else {
                             Text("Verify OTP")
+                                .font(.urbanist(size: 16, weight: .semibold))
                                 .frame(maxWidth: .infinity)
-                                .fontWeight(.semibold)
                         }
                     }
                     .disabled(authViewModel.isLoading || authViewModel.otp.count != 6)
@@ -157,9 +157,11 @@ struct OTPSheet: View {
                                 startCountdown()
                             }
                         }
+                        .font(.urbanist(size: 15, weight: .medium))
                         .frame(maxWidth: .infinity)
                     } else {
                         Text("Resend OTP in \(countdown)s")
+                            .font(.urbanist(size: 15, weight: .regular))
                             .frame(maxWidth: .infinity)
                             .foregroundStyle(.secondary)
                     }

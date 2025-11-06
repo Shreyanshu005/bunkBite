@@ -52,9 +52,7 @@ struct LaunchScreenView: View {
                                 .font(.system(size: 40, weight: .bold))
                                 .foregroundColor(Constants.primaryColor)
 
-                            Text("BB")
-                                .font(.system(size: 16, weight: .black))
-                                .foregroundColor(Constants.primaryColor)
+
                         }
                     }
                     .scaleEffect(scale)
@@ -64,12 +62,12 @@ struct LaunchScreenView: View {
                 // App Name with Bouncy Animation
                 VStack(spacing: 8) {
                     Text("BunkBite")
-                        .font(.system(size: 42, weight: .bold))
+                        .font(.urbanist(size: 42, weight: .bold))
                         .foregroundColor(.white)
                         .scaleEffect(isAnimating ? 1.0 : 0.8)
 
                     Text("Fresh Food, Instant Delivery")
-                        .font(.system(size: 16, weight: .medium))
+                        .font(.urbanist(size: 16, weight: .medium))
                         .foregroundColor(.white.opacity(0.9))
                 }
                 .opacity(opacity)

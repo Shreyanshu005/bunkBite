@@ -2,7 +2,7 @@
 //  CanteenSelectorSheet.swift
 //  BunkBite
 //
-//  Created by Shreyanshu on 06/11/25.
+//  Created by Anjali on 06/11/25.
 //
 
 import SwiftUI
@@ -59,11 +59,11 @@ struct CanteenSelectorSheet: View {
                                 // Details
                                 VStack(alignment: .leading, spacing: 4) {
                                     Text(canteen.name)
-                                        .font(.headline)
+                                        .font(.urbanist(size: 17, weight: .semibold))
                                         .foregroundStyle(.black)
 
                                     Label(canteen.place, systemImage: "mappin.circle.fill")
-                                        .font(.subheadline)
+                                        .font(.urbanist(size: 14, weight: .regular))
                                         .foregroundStyle(.gray)
                                 }
 
@@ -80,10 +80,10 @@ struct CanteenSelectorSheet: View {
                         .listRowBackground(
                             RoundedRectangle(cornerRadius: 12)
                                 .fill(.white)
-                                .shadow(color: .black.opacity(0.05), radius: 2, x: 0, y: 1)
+                                .shadow(color: .black.opacity(0.08), radius: 4, x: 0, y: 2)
                         )
                         .listRowSeparator(.hidden)
-                        .listRowInsets(EdgeInsets(top: 6, leading: 16, bottom: 6, trailing: 16))
+                        .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
                     }
                     }
                 }

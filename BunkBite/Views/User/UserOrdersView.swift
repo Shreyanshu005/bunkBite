@@ -39,15 +39,14 @@ struct UserOrdersView: View {
                 // Main message
                 VStack(spacing: 12) {
                     Text("Track Your Orders")
-                        .font(.system(size: 32, weight: .bold))
+                        .font(.urbanist(size: 32, weight: .bold))
                         .foregroundStyle(Constants.primaryColor)
 
                     Text("Your Order History")
-                        .font(.title3)
-                        .fontWeight(.semibold)
+                        .font(.urbanist(size: 20, weight: .semibold))
 
                     Text("Awaits You!")
-                        .font(.title3)
+                        .font(.urbanist(size: 20, weight: .regular))
                         .foregroundStyle(.gray)
                 }
 
@@ -77,7 +76,7 @@ struct UserOrdersView: View {
                 } label: {
                     HStack(spacing: 12) {
                         Text("View My Orders")
-                            .fontWeight(.semibold)
+                            .font(.urbanist(size: 16, weight: .semibold))
                         Image(systemName: "arrow.right")
                     }
                     .foregroundStyle(.white)
@@ -90,7 +89,7 @@ struct UserOrdersView: View {
                 .padding(.top, 8)
 
                 Text("Login to access your order history")
-                    .font(.caption)
+                    .font(.urbanist(size: 12, weight: .regular))
                     .foregroundStyle(.gray)
                     .padding(.bottom, 40)
             }

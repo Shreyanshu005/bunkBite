@@ -28,8 +28,7 @@ struct MenuFilterChip: View {
             action()
         }) {
             Text(title)
-                .font(.subheadline)
-                .fontWeight(isSelected ? .semibold : .regular)
+                .font(.urbanist(size: 14, weight: isSelected ? .semibold : .regular))
                 .foregroundStyle(isSelected ? .white : Constants.primaryColor)
                 .padding(.horizontal, 16)
                 .padding(.vertical, 8)
@@ -65,11 +64,11 @@ struct FeatureCard: View {
 
             VStack(alignment: .leading, spacing: 4) {
                 Text(title)
-                    .font(.headline)
+                    .font(.urbanist(size: 16, weight: .semibold))
                     .foregroundStyle(.black)
 
                 Text(description)
-                    .font(.caption)
+                    .font(.urbanist(size: 13, weight: .regular))
                     .foregroundStyle(.gray)
             }
 

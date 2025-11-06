@@ -8,6 +8,13 @@
 
 /* Begin PBXBuildFile section */
 		639395B52EBCA17E00A70F09 /* PopupView in Frameworks */ = {isa = PBXBuildFile; productRef = 639395B42EBCA17E00A70F09 /* PopupView */; };
+		63A1C9DA2EBCAB4100DB1141 /* Urbanist-Light.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 63A1C9D52EBCAB4100DB1141 /* Urbanist-Light.ttf */; };
+		63A1C9DB2EBCAB4100DB1141 /* Urbanist-Thin.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 63A1C9D92EBCAB4100DB1141 /* Urbanist-Thin.ttf */; };
+		63A1C9DC2EBCAB4100DB1141 /* Urbanist-Medium.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 63A1C9D62EBCAB4100DB1141 /* Urbanist-Medium.ttf */; };
+		63A1C9DD2EBCAB4100DB1141 /* Urbanist-Bold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 63A1C9D42EBCAB4100DB1141 /* Urbanist-Bold.ttf */; };
+		63A1C9DE2EBCAB4100DB1141 /* Urbanist-SemiBold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 63A1C9D82EBCAB4100DB1141 /* Urbanist-SemiBold.ttf */; };
+		63A1C9DF2EBCAB4100DB1141 /* Urbanist-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 63A1C9D72EBCAB4100DB1141 /* Urbanist-Regular.ttf */; };
+		63A1C9E02EBCAB4100DB1141 /* Urbanist-Black.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 63A1C9D32EBCAB4100DB1141 /* Urbanist-Black.ttf */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -28,6 +35,13 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		63A1C9D32EBCAB4100DB1141 /* Urbanist-Black.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Urbanist-Black.ttf"; sourceTree = "<group>"; };
+		63A1C9D42EBCAB4100DB1141 /* Urbanist-Bold.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Urbanist-Bold.ttf"; sourceTree = "<group>"; };
+		63A1C9D52EBCAB4100DB1141 /* Urbanist-Light.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Urbanist-Light.ttf"; sourceTree = "<group>"; };
+		63A1C9D62EBCAB4100DB1141 /* Urbanist-Medium.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Urbanist-Medium.ttf"; sourceTree = "<group>"; };
+		63A1C9D72EBCAB4100DB1141 /* Urbanist-Regular.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Urbanist-Regular.ttf"; sourceTree = "<group>"; };
+		63A1C9D82EBCAB4100DB1141 /* Urbanist-SemiBold.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Urbanist-SemiBold.ttf"; sourceTree = "<group>"; };
+		63A1C9D92EBCAB4100DB1141 /* Urbanist-Thin.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Urbanist-Thin.ttf"; sourceTree = "<group>"; };
 		63B2D6F52EBC558200D6B594 /* BunkBite.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BunkBite.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		63B2D7022EBC558500D6B594 /* BunkBiteTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = BunkBiteTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		63B2D70C2EBC558500D6B594 /* BunkBiteUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = BunkBiteUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -90,9 +104,24 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		63A1C9D22EBCAADB00DB1141 /* fonts */ = {
+			isa = PBXGroup;
+			children = (
+				63A1C9D32EBCAB4100DB1141 /* Urbanist-Black.ttf */,
+				63A1C9D42EBCAB4100DB1141 /* Urbanist-Bold.ttf */,
+				63A1C9D52EBCAB4100DB1141 /* Urbanist-Light.ttf */,
+				63A1C9D62EBCAB4100DB1141 /* Urbanist-Medium.ttf */,
+				63A1C9D72EBCAB4100DB1141 /* Urbanist-Regular.ttf */,
+				63A1C9D82EBCAB4100DB1141 /* Urbanist-SemiBold.ttf */,
+				63A1C9D92EBCAB4100DB1141 /* Urbanist-Thin.ttf */,
+			);
+			path = fonts;
+			sourceTree = "<group>";
+		};
 		63B2D6EC2EBC558200D6B594 = {
 			isa = PBXGroup;
 			children = (
+				63A1C9D22EBCAADB00DB1141 /* fonts */,
 				63B2D6F72EBC558200D6B594 /* BunkBite */,
 				63B2D7052EBC558500D6B594 /* BunkBiteTests */,
 				63B2D70F2EBC558500D6B594 /* BunkBiteUITests */,
@@ -234,6 +263,13 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				63A1C9DA2EBCAB4100DB1141 /* Urbanist-Light.ttf in Resources */,
+				63A1C9DB2EBCAB4100DB1141 /* Urbanist-Thin.ttf in Resources */,
+				63A1C9DC2EBCAB4100DB1141 /* Urbanist-Medium.ttf in Resources */,
+				63A1C9DD2EBCAB4100DB1141 /* Urbanist-Bold.ttf in Resources */,
+				63A1C9DE2EBCAB4100DB1141 /* Urbanist-SemiBold.ttf in Resources */,
+				63A1C9DF2EBCAB4100DB1141 /* Urbanist-Regular.ttf in Resources */,
+				63A1C9E02EBCAB4100DB1141 /* Urbanist-Black.ttf in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

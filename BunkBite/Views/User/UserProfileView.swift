@@ -55,15 +55,14 @@ struct UserProfileView: View {
                 // Main message
                 VStack(spacing: 12) {
                     Text("Your Profile")
-                        .font(.system(size: 32, weight: .bold))
+                        .font(.urbanist(size: 32, weight: .bold))
                         .foregroundStyle(Constants.primaryColor)
 
                     Text("Personalize Your")
-                        .font(.title3)
-                        .fontWeight(.semibold)
+                        .font(.urbanist(size: 20, weight: .semibold))
 
                     Text("Experience!")
-                        .font(.title3)
+                        .font(.urbanist(size: 20, weight: .regular))
                         .foregroundStyle(.gray)
                 }
 
@@ -93,7 +92,7 @@ struct UserProfileView: View {
                 } label: {
                     HStack(spacing: 12) {
                         Text("Access Profile")
-                            .fontWeight(.semibold)
+                            .font(.urbanist(size: 16, weight: .semibold))
                         Image(systemName: "arrow.right")
                     }
                     .foregroundStyle(.white)
@@ -106,7 +105,7 @@ struct UserProfileView: View {
                 .padding(.top, 8)
 
                 Text("Login to manage your account")
-                    .font(.caption)
+                    .font(.urbanist(size: 12, weight: .regular))
                     .foregroundStyle(.gray)
                     .padding(.bottom, 40)
             }
@@ -131,11 +130,11 @@ struct UserProfileView: View {
 
                     VStack(spacing: 4) {
                         Text(viewModel.currentUser?.name ?? "User")
-                            .font(.system(size: 24, weight: .bold))
+                            .font(.urbanist(size: 24, weight: .bold))
                             .foregroundColor(Constants.textColor)
 
                         Text(viewModel.currentUser?.email ?? "")
-                            .font(.system(size: 14))
+                            .font(.urbanist(size: 14, weight: .regular))
                             .foregroundColor(Constants.darkGray)
                     }
                     .offset(y: showContent ? 0 : 20)
@@ -166,7 +165,7 @@ struct UserProfileView: View {
                         Image(systemName: "rectangle.portrait.and.arrow.right")
                             .font(.system(size: 20))
                         Text("Logout")
-                            .font(.system(size: 16, weight: .semibold))
+                            .font(.urbanist(size: 16, weight: .semibold))
                     }
                     .foregroundColor(Constants.primaryColor)
                     .frame(maxWidth: .infinity)
@@ -180,7 +179,7 @@ struct UserProfileView: View {
                 .opacity(showContent ? 1 : 0)
 
                 Text("Version 1.0.0")
-                    .font(.system(size: 12))
+                    .font(.urbanist(size: 12, weight: .regular))
                     .foregroundColor(Constants.darkGray)
                     .padding(.top, 16)
                     .opacity(showContent ? 1 : 0)
@@ -220,11 +219,11 @@ struct ProfileOptionCard: View {
 
                 VStack(alignment: .leading, spacing: 4) {
                     Text(title)
-                        .font(.system(size: 16, weight: .semibold))
+                        .font(.urbanist(size: 16, weight: .semibold))
                         .foregroundColor(Constants.textColor)
 
                     Text(subtitle)
-                        .font(.system(size: 13))
+                        .font(.urbanist(size: 13, weight: .regular))
                         .foregroundColor(Constants.darkGray)
                 }
 
