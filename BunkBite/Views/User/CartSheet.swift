@@ -153,9 +153,10 @@ struct CartItemRow: View {
                             .foregroundStyle(cartItem.quantity == 1 ? .red : Constants.primaryColor)
                             .frame(width: 36, height: 36)
                     }
+                    .buttonStyle(.plain)
 
                     Text("\(cartItem.quantity)")
-                        .font(.headline)
+                        .font(.urbanist(size: 17, weight: .semibold))
                         .foregroundStyle(.black)
                         .frame(width: 40)
 
@@ -167,6 +168,7 @@ struct CartItemRow: View {
                             .foregroundStyle(Constants.primaryColor)
                             .frame(width: 36, height: 36)
                     }
+                    .buttonStyle(.plain)
                 }
                 .padding(.horizontal, 8)
                 .padding(.vertical, 4)

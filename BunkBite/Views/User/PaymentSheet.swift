@@ -7,6 +7,7 @@
 
 import SwiftUI
 import PopupView
+import ConfettiSwiftUI
 
 struct UPIApp: Identifiable {
     let id = UUID()
@@ -156,14 +157,56 @@ struct PaymentSheet: View {
                 Section {
                     VStack(alignment: .leading, spacing: 8) {
                         Label("Secure Payment", systemImage: "lock.shield")
-                            .font(.caption)
+                            .font(.urbanist(size: 12, weight: .regular))
                             .foregroundStyle(.secondary)
 
                         Label("Quick Checkout", systemImage: "bolt.fill")
-                            .font(.caption)
+                            .font(.urbanist(size: 12, weight: .regular))
                             .foregroundStyle(.secondary)
+
+                        Label("Note: For testing, some UPI apps may block payments due to risk policy. Payment verification is simulated for demo purposes.", systemImage: "info.circle")
+                            .font(.urbanist(size: 11, weight: .regular))
+                            .foregroundStyle(.orange)
+                            .padding(.top, 4)
                     }
                 }
+
+                #if DEBUG
+                Section {
+                    Button {
+                        paymentDetails = PaymentDetails(
+                            transactionId: "TEST\(Int(Date().timeIntervalSince1970))",
+                            amount: cart.totalAmount,
+                            timestamp: Date(),
+                            status: .success,
+                            upiApp: "Mock Payment",
+                            merchantUPI: "8178785849@fam",
+                            customerUPI: nil,
+                            canteenName: canteen?.name ?? "BunkBite",
+                            itemCount: cart.items.count,
+                            paymentMethod: "TEST"
+                        )
+                        isCheckingPayment = true
+                        verifyPaymentStatus()
+                    } label: {
+                        HStack {
+                            Spacer()
+                            Image(systemName: "checkmark.seal.fill")
+                            Text("Mock Successful Payment")
+                                .font(.urbanist(size: 16, weight: .semibold))
+                            Spacer()
+                        }
+                        .padding(.vertical, 8)
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .tint(.green)
+                    .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
+                } header: {
+                    Text("Development Testing")
+                } footer: {
+                    Text("This button only appears in debug builds and instantly triggers successful payment for testing the order flow.")
+                }
+                #endif
             }
             .navigationTitle("Payment")
             .navigationBarTitleDisplayMode(.large)
@@ -216,7 +259,7 @@ struct PaymentSheet: View {
     }
 
     private func openUPIApp(_ app: UPIApp) {
-        let merchantUPI = "8178785849@ptyes"
+        let merchantUPI = "8178785849@fam"
         let merchantName = canteen?.name.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? "BunkBite"
         let amount = String(format: "%.2f", cart.totalAmount)
         let transactionNote = "Order%20Payment"
@@ -277,7 +320,7 @@ struct PaymentSheet: View {
     }
 
     private func payWithUPIID() {
-        let merchantUPI = "8178785849@ptyes"
+        let merchantUPI = "8178785849@fam"
         let merchantName = canteen?.name.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? "BunkBite"
         let amount = String(format: "%.2f", cart.totalAmount)
 
@@ -312,44 +355,64 @@ struct PaymentSheet: View {
 // MARK: - Payment Success Popup
 struct PaymentSuccessPopup: View {
     let onDismiss: () -> Void
+    @State private var isAnimating = false
+    @State private var showCheckmark = false
+    @State private var showContent = false
+    @State private var pulseScale: CGFloat = 1.0
+    @State private var confettiCounter = 0
 
     var body: some View {
         VStack(spacing: 24) {
-            // Success animation icon
-            Circle()
-                .fill(Color.green.gradient)
-                .frame(width: 80, height: 80)
-                .overlay(
-                    Image(systemName: "checkmark")
-                        .font(.system(size: 40, weight: .bold))
-                        .foregroundStyle(.white)
-                )
-                .shadow(color: .green.opacity(0.3), radius: 10, x: 0, y: 5)
+            // Success animation icon with pulse effect
+            ZStack {
+                // Outer pulsing circle
+                Circle()
+                    .fill(Color.green.opacity(0.2))
+                    .frame(width: 120, height: 120)
+                    .scaleEffect(pulseScale)
+
+                // Main circle
+                Circle()
+                    .fill(Color.green.gradient)
+                    .frame(width: 80, height: 80)
+                    .overlay(
+                        Image(systemName: "checkmark")
+                            .font(.system(size: 40, weight: .bold))
+                            .foregroundStyle(.white)
+                            .scaleEffect(showCheckmark ? 1 : 0)
+                            .rotationEffect(.degrees(showCheckmark ? 0 : -180))
+                    )
+                    .shadow(color: .green.opacity(0.3), radius: 10, x: 0, y: 5)
+                    .scaleEffect(isAnimating ? 1 : 0)
+            }
 
             // Success message
             VStack(spacing: 8) {
                 Text("Payment Successful!")
-                    .font(.title2)
-                    .fontWeight(.bold)
+                    .font(.urbanist(size: 22, weight: .bold))
                     .foregroundStyle(.black)
 
                 Text("Your order has been placed")
-                    .font(.subheadline)
+                    .font(.urbanist(size: 14, weight: .regular))
                     .foregroundStyle(.gray)
             }
+            .opacity(showContent ? 1 : 0)
+            .offset(y: showContent ? 0 : 20)
 
             // Done button
             Button {
                 onDismiss()
             } label: {
                 Text("Done")
-                    .font(.headline)
+                    .font(.urbanist(size: 17, weight: .semibold))
                     .foregroundStyle(.white)
                     .frame(maxWidth: .infinity)
                     .padding()
                     .background(Constants.primaryColor)
                     .cornerRadius(12)
             }
+            .opacity(showContent ? 1 : 0)
+            .scaleEffect(showContent ? 1 : 0.8)
         }
         .padding(32)
         .background(
@@ -358,5 +421,31 @@ struct PaymentSuccessPopup: View {
                 .shadow(color: .black.opacity(0.2), radius: 20, x: 0, y: 10)
         )
         .padding(40)
+        .scaleEffect(isAnimating ? 1 : 0.8)
+        .confettiCannon(trigger: $confettiCounter, num: 50, confettis: [.text("🎉"), .text("✨"), .text("🍕"), .text("🍔"), .text("☕️")], confettiSize: 20, rainHeight: 600, radius: 400)
+        .onAppear {
+            // Sequence animations
+            withAnimation(.spring(response: 0.6, dampingFraction: 0.6)) {
+                isAnimating = true
+            }
+
+            withAnimation(.spring(response: 0.4, dampingFraction: 0.6).delay(0.2)) {
+                showCheckmark = true
+            }
+
+            withAnimation(.easeOut(duration: 0.5).delay(0.4)) {
+                showContent = true
+            }
+
+            // Pulse animation
+            withAnimation(.easeInOut(duration: 1.5).repeatForever(autoreverses: true)) {
+                pulseScale = 1.3
+            }
+
+            // Trigger confetti celebration
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                confettiCounter += 1
+            }
+        }
     }
 }

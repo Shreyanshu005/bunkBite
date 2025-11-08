@@ -34,6 +34,7 @@ struct OwnerCanteenSelectorSheet: View {
                         ProgressView()
                         Spacer()
                     }
+                    .listRowBackground(Color.clear)
                 } else if canteenViewModel.canteens.isEmpty {
                     ContentUnavailableView {
                         Label("No Canteens", systemImage: "building.2")
@@ -47,56 +48,57 @@ struct OwnerCanteenSelectorSheet: View {
                         .tint(Constants.primaryColor)
                     }
                     .listRowBackground(Color.clear)
-                } else {
-                    Section {
-                        ForEach(filteredCanteens) { canteen in
-                            Button {
-                                canteenViewModel.selectedCanteen = canteen
-                                dismiss()
-                            } label: {
-                                HStack(spacing: 16) {
-                                // Icon
-                                Circle()
-                                    .fill(Constants.primaryColor.opacity(0.1))
-                                    .frame(width: 50, height: 50)
-                                    .overlay(
-                                        Image(systemName: "building.2.fill")
-                                            .foregroundStyle(Constants.primaryColor)
-                                            .font(.title3)
-                                    )
-
-                                // Details
-                                VStack(alignment: .leading, spacing: 4) {
-                                    Text(canteen.name)
-                                        .font(.headline)
-                                        .foregroundStyle(.black)
-
-                                    Label(canteen.place, systemImage: "mappin.circle.fill")
-                                        .font(.subheadline)
-                                        .foregroundStyle(.gray)
-                                }
-
-                                Spacer()
-
-                                if canteenViewModel.selectedCanteen?.id == canteen.id {
-                                    Image(systemName: "checkmark.circle.fill")
+                }
+                
+                ForEach(filteredCanteens) { canteen in
+                    Button {
+                        canteenViewModel.selectedCanteen = canteen
+                        dismiss()
+                    } label: {
+                        HStack(spacing: 16) {
+                            // Icon
+                            Circle()
+                                .fill(Constants.primaryColor.opacity(0.1))
+                                .frame(width: 50, height: 50)
+                                .overlay(
+                                    Image(systemName: "building.2.fill")
                                         .foregroundStyle(Constants.primaryColor)
-                                        .font(.title2)
-                                }
+                                        .font(.title3)
+                                )
+
+                            // Details
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text(canteen.name)
+                                    .font(.headline)
+                                    .foregroundStyle(.black)
+
+                                Label(canteen.place, systemImage: "mappin.circle.fill")
+                                    .font(.subheadline)
+                                    .foregroundStyle(.gray)
                             }
-                            .padding(.vertical, 8)
+
+                            Spacer()
+
+                            if canteenViewModel.selectedCanteen?.id == canteen.id {
+                                Image(systemName: "checkmark.circle.fill")
+                                    .foregroundStyle(Constants.primaryColor)
+                                    .font(.title2)
+                            }
+                        }
+                            .padding(.vertical, 12)
+                            .padding(.horizontal, 4)
                         }
                         .listRowBackground(
                             RoundedRectangle(cornerRadius: 12)
                                 .fill(.white)
-                                .shadow(color: .black.opacity(0.05), radius: 2, x: 0, y: 1)
+                                .shadow(color: .black.opacity(0.08), radius: 4, x: 0, y: 2)
                         )
                         .listRowSeparator(.hidden)
-                        .listRowInsets(EdgeInsets(top: 6, leading: 16, bottom: 6, trailing: 16))
-                    }
-                    }
+                        .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
+                        .padding(.vertical, 4)
                 }
             }
+            .listStyle(.plain)
             .navigationTitle("Select Canteen")
             .navigationBarTitleDisplayMode(.large)
             .toolbar {

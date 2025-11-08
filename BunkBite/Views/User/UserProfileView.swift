@@ -146,12 +146,8 @@ struct UserProfileView: View {
                 // Profile Options
                 VStack(spacing: 16) {
                     ProfileOptionCard(icon: "person.fill", title: "Edit Profile", subtitle: "Update your details")
-                    ProfileOptionCard(icon: "bell.fill", title: "Notifications", subtitle: "Manage notifications")
-                    ProfileOptionCard(icon: "creditcard.fill", title: "Payment Methods", subtitle: "Manage payment options")
-                    ProfileOptionCard(icon: "mappin.circle.fill", title: "Saved Addresses", subtitle: "Manage delivery addresses")
                     ProfileOptionCard(icon: "heart.fill", title: "Favorites", subtitle: "Your favorite items")
-                    ProfileOptionCard(icon: "questionmark.circle.fill", title: "Help & Support", subtitle: "Get help with your orders")
-                    ProfileOptionCard(icon: "doc.text.fill", title: "Terms & Privacy", subtitle: "Legal information")
+                    ProfileOptionCard(icon: "questionmark.circle.fill", title: "Help & Support", subtitle: "Get help")
                 }
                 .padding(.horizontal, 24)
                 .offset(y: showContent ? 0 : 30)

@@ -7,6 +7,7 @@
 
 import SwiftUI
 import PopupView
+import Shimmer
 
 struct UserMenuView: View {
     @ObservedObject var authViewModel: AuthViewModel
@@ -22,6 +23,7 @@ struct UserMenuView: View {
     @State private var selectedCategory: String? = nil
     @State private var showFilters = false
     @State private var menuLoadingTask: Task<Void, Never>?
+    @State private var cartShake: CGFloat = 0
 
     var categories: [String] {
         let allCategories = menuViewModel.menuItems.compactMap { item -> String? in
@@ -116,21 +118,25 @@ struct UserMenuView: View {
                         Button {
                             showCart = true
                         } label: {
-                            ZStack(alignment: .topTrailing) {
-                                Image(systemName: "cart")
-                                    .font(.title3)
-
-                                if cart.totalItems > 0 {
-                                    Text("\(cart.totalItems)")
-                                        .font(.caption2)
-                                        .fontWeight(.bold)
-                                        .foregroundStyle(.white)
-                                        .padding(4)
-                                        .background(Constants.primaryColor)
-                                        .clipShape(Circle())
-                                        .offset(x: 8, y: -8)
+                            Image(systemName: cart.totalItems > 0 ? "cart.fill" : "cart")
+                                .font(.title2)
+                                .foregroundStyle(Constants.primaryColor)
+                                .padding(8)
+                                .rotationEffect(.degrees(cartShake))
+                                .onChange(of: cart.totalItems) { oldValue, newValue in
+                                    if newValue > oldValue {
+                                        // Shake animation
+                                        withAnimation(.spring(response: 0.3, dampingFraction: 0.3)) {
+                                            cartShake = 10
+                                        }
+                                        withAnimation(.spring(response: 0.3, dampingFraction: 0.3).delay(0.1)) {
+                                            cartShake = -10
+                                        }
+                                        withAnimation(.spring(response: 0.3, dampingFraction: 0.3).delay(0.2)) {
+                                            cartShake = 0
+                                        }
+                                    }
                                 }
-                            }
                         }
                     }
                 }
@@ -159,16 +165,15 @@ struct UserMenuView: View {
                 // Main message
                 VStack(spacing: 12) {
                     Text("Hungry?")
-                        .font(.system(size: 36, weight: .bold))
+                        .font(.urbanist(size: 36, weight: .bold))
                         .foregroundStyle(Constants.primaryColor)
 
                     Text("Order from your")
-                        .font(.title3)
+                        .font(.urbanist(size: 20, weight: .regular))
                         .foregroundStyle(.gray)
 
                     Text("Favorite Canteen")
-                        .font(.title2)
-                        .fontWeight(.bold)
+                        .font(.urbanist(size: 22, weight: .bold))
                         .foregroundStyle(.black)
                 }
 
@@ -213,7 +218,7 @@ struct UserMenuView: View {
                 .padding(.top, 8)
 
                 Text("Join hundreds of hungry students!")
-                    .font(.caption)
+                    .font(.urbanist(size: 12, weight: .regular))
                     .foregroundStyle(.gray)
                     .padding(.bottom, 40)
             }
@@ -241,11 +246,10 @@ struct UserMenuView: View {
                 HStack {
                     VStack(alignment: .leading, spacing: 4) {
                         Text(canteenViewModel.selectedCanteen?.name ?? "")
-                            .font(.title2)
-                            .fontWeight(.bold)
+                            .font(.urbanist(size: 22, weight: .bold))
 
                         Label(canteenViewModel.selectedCanteen?.place ?? "", systemImage: "mappin.circle")
-                            .font(.subheadline)
+                            .font(.urbanist(size: 14, weight: .regular))
                             .foregroundStyle(.secondary)
                     }
 
@@ -302,12 +306,8 @@ struct UserMenuView: View {
 
             // Menu Items
             if menuViewModel.isLoading {
-                Section {
-                    HStack {
-                        Spacer()
-                        ProgressView()
-                        Spacer()
-                    }
+                ForEach(0..<6, id: \.self) { _ in
+                    ShimmerMenuItemRow()
                 }
             } else if filteredItems.isEmpty {
                 ContentUnavailableView("No items available", systemImage: "tray")
@@ -351,20 +351,19 @@ struct MenuItemRow: View {
             // Item details
             VStack(alignment: .leading, spacing: 6) {
                 Text(item.name)
-                    .font(.headline)
+                    .font(.urbanist(size: 17, weight: .semibold))
 
                 Text("₹\(Int(item.price))")
-                    .font(.title3)
-                    .fontWeight(.bold)
+                    .font(.urbanist(size: 20, weight: .bold))
                     .foregroundStyle(Constants.primaryColor)
 
                 if item.availableQuantity > 0 {
                     Text("\(item.availableQuantity) available")
-                        .font(.caption)
+                        .font(.urbanist(size: 12, weight: .regular))
                         .foregroundStyle(.secondary)
                 } else {
                     Text("Out of stock")
-                        .font(.caption)
+                        .font(.urbanist(size: 12, weight: .regular))
                         .foregroundStyle(.red)
                 }
             }
@@ -376,30 +375,39 @@ struct MenuItemRow: View {
                 if cart.getQuantity(for: item) > 0 {
                     HStack(spacing: 12) {
                         Button {
-                            cart.removeItem(item)
+                            let currentQuantity = cart.getQuantity(for: item)
+                            if currentQuantity > 1 {
+                                cart.updateQuantity(for: item, quantity: currentQuantity - 1)
+                            } else {
+                                cart.removeItem(item)
+                            }
                         } label: {
-                            Image(systemName: "minus.circle.fill")
+                            Image(systemName: cart.getQuantity(for: item) == 1 ? "trash.fill" : "minus.circle.fill")
                                 .font(.title3)
+                                .foregroundStyle(cart.getQuantity(for: item) == 1 ? .red : Constants.primaryColor)
                         }
+                        .buttonStyle(.plain)
 
                         Text("\(cart.getQuantity(for: item))")
-                            .font(.headline)
-                            .frame(minWidth: 20)
+                            .font(.urbanist(size: 17, weight: .semibold))
+                            .foregroundStyle(.black)
+                            .frame(minWidth: 30)
 
                         Button {
                             cart.addItem(item)
                         } label: {
                             Image(systemName: "plus.circle.fill")
                                 .font(.title3)
+                                .foregroundStyle(Constants.primaryColor)
                         }
+                        .buttonStyle(.plain)
                     }
-                    .foregroundStyle(Constants.primaryColor)
                 } else {
                     Button {
                         cart.addItem(item)
                     } label: {
                         Text("Add")
-                            .fontWeight(.semibold)
+                            .font(.urbanist(size: 15, weight: .semibold))
                             .padding(.horizontal, 20)
                             .padding(.vertical, 8)
                             .background(Constants.primaryColor)
@@ -408,6 +416,41 @@ struct MenuItemRow: View {
                     }
                 }
             }
+        }
+        .padding(.vertical, 4)
+    }
+}
+
+// MARK: - Shimmer Loading Skeleton
+struct ShimmerMenuItemRow: View {
+    var body: some View {
+        HStack(spacing: 16) {
+            // Placeholder image
+            RoundedRectangle(cornerRadius: 12)
+                .fill(Color.gray.opacity(0.3))
+                .frame(width: 70, height: 70)
+                .shimmering()
+
+            // Placeholder text
+            VStack(alignment: .leading, spacing: 8) {
+                RoundedRectangle(cornerRadius: 4)
+                    .fill(Color.gray.opacity(0.3))
+                    .frame(width: 150, height: 16)
+                    .shimmering()
+
+                RoundedRectangle(cornerRadius: 4)
+                    .fill(Color.gray.opacity(0.3))
+                    .frame(width: 100, height: 14)
+                    .shimmering()
+            }
+
+            Spacer()
+
+            // Placeholder button
+            RoundedRectangle(cornerRadius: 20)
+                .fill(Color.gray.opacity(0.3))
+                .frame(width: 60, height: 36)
+                .shimmering()
         }
         .padding(.vertical, 4)
     }

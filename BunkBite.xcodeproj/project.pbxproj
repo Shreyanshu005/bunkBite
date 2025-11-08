@@ -15,6 +15,8 @@
 		63A1C9DE2EBCAB4100DB1141 /* Urbanist-SemiBold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 63A1C9D82EBCAB4100DB1141 /* Urbanist-SemiBold.ttf */; };
 		63A1C9DF2EBCAB4100DB1141 /* Urbanist-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 63A1C9D72EBCAB4100DB1141 /* Urbanist-Regular.ttf */; };
 		63A1C9E02EBCAB4100DB1141 /* Urbanist-Black.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 63A1C9D32EBCAB4100DB1141 /* Urbanist-Black.ttf */; };
+		63CA39CF2EBDA8A100BA14DC /* ConfettiSwiftUI in Frameworks */ = {isa = PBXBuildFile; productRef = 63CA39CE2EBDA8A100BA14DC /* ConfettiSwiftUI */; };
+		63CA39D22EBDA8D700BA14DC /* Shimmer in Frameworks */ = {isa = PBXBuildFile; productRef = 63CA39D12EBDA8D700BA14DC /* Shimmer */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -83,6 +85,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				63CA39D22EBDA8D700BA14DC /* Shimmer in Frameworks */,
+				63CA39CF2EBDA8A100BA14DC /* ConfettiSwiftUI in Frameworks */,
 				639395B52EBCA17E00A70F09 /* PopupView in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -160,6 +164,8 @@
 			name = BunkBite;
 			packageProductDependencies = (
 				639395B42EBCA17E00A70F09 /* PopupView */,
+				63CA39CE2EBDA8A100BA14DC /* ConfettiSwiftUI */,
+				63CA39D12EBDA8D700BA14DC /* Shimmer */,
 			);
 			productName = BunkBite;
 			productReference = 63B2D6F52EBC558200D6B594 /* BunkBite.app */;
@@ -245,6 +251,8 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				639395B32EBCA17E00A70F09 /* XCRemoteSwiftPackageReference "PopupView" */,
+				63CA39CD2EBDA8A100BA14DC /* XCRemoteSwiftPackageReference "ConfettiSwiftUI" */,
+				63CA39D02EBDA8D700BA14DC /* XCRemoteSwiftPackageReference "SwiftUI-Shimmer" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 63B2D6F62EBC558200D6B594 /* Products */;
@@ -455,13 +463,12 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = 3S9PPRUG6U;
+				DEVELOPMENT_TEAM = 3BJDK999HQ;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = BunkBite/Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
-				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -469,7 +476,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = canteen.BunkBite;
+				PRODUCT_BUNDLE_IDENTIFIER = com.shreyanshu.canteenapp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
@@ -488,13 +495,12 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = 3S9PPRUG6U;
+				DEVELOPMENT_TEAM = 3BJDK999HQ;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = BunkBite/Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
-				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -502,7 +508,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = canteen.BunkBite;
+				PRODUCT_BUNDLE_IDENTIFIER = com.shreyanshu.canteenapp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
@@ -648,6 +654,22 @@
 				minimumVersion = 4.1.15;
 			};
 		};
+		63CA39CD2EBDA8A100BA14DC /* XCRemoteSwiftPackageReference "ConfettiSwiftUI" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/simibac/ConfettiSwiftUI";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.0.3;
+			};
+		};
+		63CA39D02EBDA8D700BA14DC /* XCRemoteSwiftPackageReference "SwiftUI-Shimmer" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/markiv/SwiftUI-Shimmer";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.5.1;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -655,6 +677,16 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 639395B32EBCA17E00A70F09 /* XCRemoteSwiftPackageReference "PopupView" */;
 			productName = PopupView;
+		};
+		63CA39CE2EBDA8A100BA14DC /* ConfettiSwiftUI */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 63CA39CD2EBDA8A100BA14DC /* XCRemoteSwiftPackageReference "ConfettiSwiftUI" */;
+			productName = ConfettiSwiftUI;
+		};
+		63CA39D12EBDA8D700BA14DC /* Shimmer */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 63CA39D02EBDA8D700BA14DC /* XCRemoteSwiftPackageReference "SwiftUI-Shimmer" */;
+			productName = Shimmer;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

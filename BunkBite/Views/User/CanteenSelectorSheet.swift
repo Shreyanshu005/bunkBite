@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import Shimmer
 
 struct CanteenSelectorSheet: View {
     @ObservedObject var canteenViewModel: CanteenViewModel
@@ -29,65 +30,65 @@ struct CanteenSelectorSheet: View {
         NavigationStack {
             List {
                 if canteenViewModel.isLoading {
-                    HStack {
-                        Spacer()
-                        ProgressView()
-                        Spacer()
+                    ForEach(0..<4, id: \.self) { _ in
+                        ShimmerCanteenRow()
                     }
                 } else if filteredCanteens.isEmpty {
                     ContentUnavailableView("No canteens found", systemImage: "building.2")
+                        .listRowBackground(Color.clear)
                 } else {
-                    Section {
-                        ForEach(filteredCanteens) { canteen in
-                            Button {
-                                canteenViewModel.selectedCanteen = canteen
-                                // Clear menu when changing canteen
-                                menuViewModel.menuItems = []
-                                dismiss()
-                            } label: {
-                            HStack(spacing: 16) {
-                                // Icon
-                                Circle()
-                                    .fill(Constants.primaryColor.opacity(0.1))
-                                    .frame(width: 50, height: 50)
-                                    .overlay(
-                                        Image(systemName: "building.2.fill")
+                    ForEach(filteredCanteens) { canteen in
+                        Button {
+                            canteenViewModel.selectedCanteen = canteen
+                            menuViewModel.menuItems = []
+                            dismiss()
+                        } label: {
+                                HStack(spacing: 16) {
+                                    // Icon
+                                    Circle()
+                                        .fill(Constants.primaryColor.opacity(0.1))
+                                        .frame(width: 50, height: 50)
+                                        .overlay(
+                                            Image(systemName: "building.2.fill")
+                                                .foregroundStyle(Constants.primaryColor)
+                                                .font(.title3)
+                                        )
+
+                                    // Details
+                                    VStack(alignment: .leading, spacing: 4) {
+                                        Text(canteen.name)
+                                            .font(.urbanist(size: 17, weight: .semibold))
+                                            .foregroundStyle(.black)
+
+                                        Label(canteen.place, systemImage: "mappin.circle.fill")
+                                            .font(.urbanist(size: 14, weight: .regular))
+                                            .foregroundStyle(.gray)
+                                    }
+
+                                    Spacer()
+
+                                    if canteenViewModel.selectedCanteen?.id == canteen.id {
+                                        Image(systemName: "checkmark.circle.fill")
                                             .foregroundStyle(Constants.primaryColor)
-                                            .font(.title3)
-                                    )
-
-                                // Details
-                                VStack(alignment: .leading, spacing: 4) {
-                                    Text(canteen.name)
-                                        .font(.urbanist(size: 17, weight: .semibold))
-                                        .foregroundStyle(.black)
-
-                                    Label(canteen.place, systemImage: "mappin.circle.fill")
-                                        .font(.urbanist(size: 14, weight: .regular))
-                                        .foregroundStyle(.gray)
+                                            .font(.title2)
+                                    }
                                 }
-
-                                Spacer()
-
-                                if canteenViewModel.selectedCanteen?.id == canteen.id {
-                                    Image(systemName: "checkmark.circle.fill")
-                                        .foregroundStyle(Constants.primaryColor)
-                                        .font(.title2)
-                                }
+                                .padding(.vertical, 12)
+                                .padding(.horizontal, 4)
                             }
-                            .padding(.vertical, 8)
+                            .listRowBackground(
+                                RoundedRectangle(cornerRadius: 12)
+                                    .fill(.white)
+                                    .shadow(color: .black.opacity(0.08), radius: 4, x: 0, y: 2)
+                            )
+                            .listRowSeparator(.hidden)
+                            .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
                         }
-                        .listRowBackground(
-                            RoundedRectangle(cornerRadius: 12)
-                                .fill(.white)
-                                .shadow(color: .black.opacity(0.08), radius: 4, x: 0, y: 2)
-                        )
-                        .listRowSeparator(.hidden)
-                        .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
-                    }
+                        .padding(.vertical, 4)
                     }
                 }
             }
+            .listStyle(.plain)
             .navigationTitle("Select Canteen")
             .navigationBarTitleDisplayMode(.large)
             .toolbar {
@@ -103,13 +104,49 @@ struct CanteenSelectorSheet: View {
                     await canteenViewModel.fetchAllCanteens(token: token)
                 }
             }
-        }
-        .presentationDetents([.large])
-        .presentationDragIndicator(.visible)
-        .task {
-            if let token = authViewModel.authToken {
-                await canteenViewModel.fetchAllCanteens(token: token)
+            .presentationDetents([.large])
+            .presentationDragIndicator(.visible)
+            .task {
+                if let token = authViewModel.authToken {
+                    await canteenViewModel.fetchAllCanteens(token: token)
+                }
             }
+    }
+}
+
+// MARK: - Shimmer Loading Skeleton
+struct ShimmerCanteenRow: View {
+    var body: some View {
+        HStack(spacing: 16) {
+            // Placeholder icon
+            Circle()
+                .fill(Color.gray.opacity(0.3))
+                .frame(width: 50, height: 50)
+                .shimmering()
+
+            // Placeholder text
+            VStack(alignment: .leading, spacing: 4) {
+                RoundedRectangle(cornerRadius: 4)
+                    .fill(Color.gray.opacity(0.3))
+                    .frame(width: 120, height: 17)
+                    .shimmering()
+
+                RoundedRectangle(cornerRadius: 4)
+                    .fill(Color.gray.opacity(0.3))
+                    .frame(width: 80, height: 14)
+                    .shimmering()
+            }
+
+            Spacer()
         }
+        .padding(.vertical, 12)
+        .padding(.horizontal, 4)
+        .listRowBackground(
+            RoundedRectangle(cornerRadius: 12)
+                .fill(.white)
+                .shadow(color: .black.opacity(0.08), radius: 4, x: 0, y: 2)
+        )
+        .listRowSeparator(.hidden)
+        .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
     }
 }

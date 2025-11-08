@@ -99,7 +99,7 @@ struct OwnerTabBarButton: View {
                 .frame(height: 56)
 
                 Text(title)
-                    .font(.system(size: 11, weight: isSelected ? .semibold : .regular))
+                    .font(.urbanist(size: 11, weight: isSelected ? .semibold : .regular))
                     .foregroundColor(isSelected ? Constants.primaryColor : Constants.darkGray)
             }
             .frame(maxWidth: .infinity)
