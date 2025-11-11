@@ -204,8 +204,9 @@ struct CategoryCard: View {
                     .foregroundColor(Constants.textColor)
             }
             .frame(width: 140, height: 120)
-            .background(Constants.lightGray)
+            .background(Color.white)
             .cornerRadius(16)
+            .shadow(color: .black.opacity(0.05), radius: 8, x: 0, y: 2)
         }
         .scaleEffect(isPressed ? 0.95 : 1.0)
     }

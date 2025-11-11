@@ -9,7 +9,7 @@ import SwiftUI
 
 struct Constants {
     // API
-    static let baseURL = "http://13.204.203.159"
+    static let baseURL = "https://api.bunkbite.me"
 
     // Colors
     static let primaryColor = Color(hex: "#f62f56")

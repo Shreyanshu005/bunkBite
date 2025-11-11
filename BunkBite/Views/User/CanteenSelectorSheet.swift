@@ -15,6 +15,7 @@ struct CanteenSelectorSheet: View {
 
     @Environment(\.dismiss) var dismiss
     @State private var searchText = ""
+    @State private var isAnimating = false
 
     var filteredCanteens: [Canteen] {
         if searchText.isEmpty {
@@ -27,126 +28,227 @@ struct CanteenSelectorSheet: View {
     }
 
     var body: some View {
-        NavigationStack {
-            List {
-                if canteenViewModel.isLoading {
-                    ForEach(0..<4, id: \.self) { _ in
-                        ShimmerCanteenRow()
+        ZStack {
+            // Gradient Background
+            LinearGradient(
+                colors: [
+                    Constants.primaryColor.opacity(0.05),
+                    Color.white
+                ],
+                startPoint: .top,
+                endPoint: .bottom
+            )
+            .ignoresSafeArea()
+
+            VStack(spacing: 0) {
+                // Header with icon
+                VStack(spacing: 16) {
+                    ZStack {
+                        Circle()
+                            .fill(Constants.primaryColor.opacity(0.1))
+                            .frame(width: 80, height: 80)
+                            .scaleEffect(isAnimating ? 1 : 0.8)
+
+                        Image(systemName: "building.2.fill")
+                            .font(.system(size: 40))
+                            .foregroundStyle(Constants.primaryColor)
+                            .scaleEffect(isAnimating ? 1 : 0.5)
                     }
-                } else if filteredCanteens.isEmpty {
-                    ContentUnavailableView("No canteens found", systemImage: "building.2")
-                        .listRowBackground(Color.clear)
-                } else {
-                    ForEach(filteredCanteens) { canteen in
-                        Button {
-                            canteenViewModel.selectedCanteen = canteen
-                            menuViewModel.menuItems = []
-                            dismiss()
-                        } label: {
-                                HStack(spacing: 16) {
-                                    // Icon
-                                    Circle()
-                                        .fill(Constants.primaryColor.opacity(0.1))
-                                        .frame(width: 50, height: 50)
-                                        .overlay(
-                                            Image(systemName: "building.2.fill")
-                                                .foregroundStyle(Constants.primaryColor)
-                                                .font(.title3)
-                                        )
+                    .padding(.top, 40)
 
-                                    // Details
-                                    VStack(alignment: .leading, spacing: 4) {
-                                        Text(canteen.name)
-                                            .font(.urbanist(size: 17, weight: .semibold))
-                                            .foregroundStyle(.black)
+                    VStack(spacing: 8) {
+                        Text("Select Canteen")
+                            .font(.urbanist(size: 28, weight: .bold))
+                            .foregroundStyle(.black)
 
-                                        Label(canteen.place, systemImage: "mappin.circle.fill")
-                                            .font(.urbanist(size: 14, weight: .regular))
-                                            .foregroundStyle(.gray)
-                                    }
+                        Text("Choose your favorite canteen")
+                            .font(.urbanist(size: 15, weight: .regular))
+                            .foregroundStyle(.gray)
+                    }
+                    .opacity(isAnimating ? 1 : 0)
+                    .offset(y: isAnimating ? 0 : 20)
+                }
+                .padding(.horizontal, 24)
+                .padding(.bottom, 24)
 
-                                    Spacer()
+                // Search bar
+                HStack {
+                    Image(systemName: "magnifyingglass")
+                        .foregroundStyle(.gray)
 
-                                    if canteenViewModel.selectedCanteen?.id == canteen.id {
-                                        Image(systemName: "checkmark.circle.fill")
-                                            .foregroundStyle(Constants.primaryColor)
-                                            .font(.title2)
-                                    }
-                                }
-                                .padding(.vertical, 12)
-                                .padding(.horizontal, 4)
+                    TextField("Search canteens", text: $searchText)
+                        .font(.urbanist(size: 16, weight: .regular))
+                }
+                .padding()
+                .background(Color.white)
+                .cornerRadius(12)
+                .shadow(color: .black.opacity(0.05), radius: 8, x: 0, y: 2)
+                .padding(.horizontal, 24)
+                .padding(.bottom, 16)
+                .opacity(isAnimating ? 1 : 0)
+
+                // Canteen List
+                ScrollView {
+                    VStack(spacing: 12) {
+                        if canteenViewModel.isLoading {
+                            ForEach(0..<4, id: \.self) { _ in
+                                ShimmerCanteenCard()
                             }
-                            .listRowBackground(
-                                RoundedRectangle(cornerRadius: 12)
-                                    .fill(.white)
-                                    .shadow(color: .black.opacity(0.08), radius: 4, x: 0, y: 2)
-                            )
-                            .listRowSeparator(.hidden)
-                            .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
+                        } else if filteredCanteens.isEmpty {
+                            VStack(spacing: 16) {
+                                Image(systemName: "building.2")
+                                    .font(.system(size: 50))
+                                    .foregroundStyle(.gray.opacity(0.5))
+                                    .padding(.top, 60)
+
+                                Text("No canteens found")
+                                    .font(.urbanist(size: 20, weight: .semibold))
+                                    .foregroundStyle(.gray)
+                            }
+                        } else {
+                            ForEach(filteredCanteens) { canteen in
+                                Button {
+                                    canteenViewModel.selectedCanteen = canteen
+                                    menuViewModel.menuItems = []
+                                    dismiss()
+                                } label: {
+                                    CanteenCard(
+                                        canteen: canteen,
+                                        isSelected: canteenViewModel.selectedCanteen?.id == canteen.id
+                                    )
+                                }
+                            }
                         }
-                        .padding(.vertical, 4)
                     }
+                    .padding(.horizontal, 24)
+                    .padding(.bottom, 40)
                 }
+                .opacity(isAnimating ? 1 : 0)
             }
-            .listStyle(.plain)
-            .navigationTitle("Select Canteen")
-            .navigationBarTitleDisplayMode(.large)
-            .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") {
+
+            // Close button
+            VStack {
+                HStack {
+                    Button {
                         dismiss()
+                    } label: {
+                        HStack(spacing: 8) {
+                            Image(systemName: "chevron.left.circle.fill")
+                                .font(.system(size: 32))
+                            Text("Back")
+                                .font(.urbanist(size: 16, weight: .semibold))
+                        }
+                        .foregroundStyle(.gray.opacity(0.6))
                     }
+                    .padding()
+                    Spacer()
+                }
+                Spacer()
+            }
+        }
+        .onAppear {
+            withAnimation(.spring(response: 0.6, dampingFraction: 0.7)) {
+                isAnimating = true
+            }
+        }
+        .task {
+            if let token = authViewModel.authToken {
+                await canteenViewModel.fetchAllCanteens(token: token)
+            }
+        }
+    }
+}
+
+// MARK: - Canteen Card
+struct CanteenCard: View {
+    let canteen: Canteen
+    let isSelected: Bool
+
+    var body: some View {
+        HStack(spacing: 16) {
+            // Icon
+            Circle()
+                .fill(Constants.primaryColor.opacity(0.1))
+                .frame(width: 60, height: 60)
+                .overlay(
+                    Image(systemName: "building.2.fill")
+                        .font(.system(size: 28))
+                        .foregroundStyle(Constants.primaryColor)
+                )
+
+            // Details
+            VStack(alignment: .leading, spacing: 6) {
+                Text(canteen.name)
+                    .font(.urbanist(size: 18, weight: .semibold))
+                    .foregroundStyle(.black)
+
+                HStack(spacing: 6) {
+                    Image(systemName: "mappin.circle.fill")
+                        .font(.system(size: 14))
+                        .foregroundStyle(.gray)
+
+                    Text(canteen.place)
+                        .font(.urbanist(size: 15, weight: .regular))
+                        .foregroundStyle(.gray)
                 }
             }
-            .searchable(text: $searchText, prompt: "Search canteens")
-            .refreshable {
-                if let token = authViewModel.authToken {
-                    await canteenViewModel.fetchAllCanteens(token: token)
-                }
+
+            Spacer()
+
+            if isSelected {
+                Circle()
+                    .fill(Constants.primaryColor)
+                    .frame(width: 28, height: 28)
+                    .overlay(
+                        Image(systemName: "checkmark")
+                            .font(.system(size: 14, weight: .bold))
+                            .foregroundStyle(.white)
+                    )
+            } else {
+                Image(systemName: "chevron.right")
+                    .font(.system(size: 16))
+                    .foregroundStyle(.gray.opacity(0.5))
             }
-            .presentationDetents([.large])
-            .presentationDragIndicator(.visible)
-            .task {
-                if let token = authViewModel.authToken {
-                    await canteenViewModel.fetchAllCanteens(token: token)
-                }
-            }
+        }
+        .padding(16)
+        .background(Color.white)
+        .cornerRadius(16)
+        .shadow(color: .black.opacity(0.05), radius: 8, x: 0, y: 2)
+        .overlay(
+            RoundedRectangle(cornerRadius: 16)
+                .stroke(isSelected ? Constants.primaryColor : Color.clear, lineWidth: 2)
+        )
     }
 }
 
 // MARK: - Shimmer Loading Skeleton
-struct ShimmerCanteenRow: View {
+struct ShimmerCanteenCard: View {
     var body: some View {
         HStack(spacing: 16) {
             // Placeholder icon
             Circle()
                 .fill(Color.gray.opacity(0.3))
-                .frame(width: 50, height: 50)
+                .frame(width: 60, height: 60)
                 .shimmering()
 
             // Placeholder text
-            VStack(alignment: .leading, spacing: 4) {
+            VStack(alignment: .leading, spacing: 6) {
                 RoundedRectangle(cornerRadius: 4)
                     .fill(Color.gray.opacity(0.3))
-                    .frame(width: 120, height: 17)
+                    .frame(width: 140, height: 18)
                     .shimmering()
 
                 RoundedRectangle(cornerRadius: 4)
                     .fill(Color.gray.opacity(0.3))
-                    .frame(width: 80, height: 14)
+                    .frame(width: 100, height: 15)
                     .shimmering()
             }
 
             Spacer()
         }
-        .padding(.vertical, 12)
-        .padding(.horizontal, 4)
-        .listRowBackground(
-            RoundedRectangle(cornerRadius: 12)
-                .fill(.white)
-                .shadow(color: .black.opacity(0.08), radius: 4, x: 0, y: 2)
-        )
-        .listRowSeparator(.hidden)
-        .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
+        .padding(16)
+        .background(Color.white)
+        .cornerRadius(16)
+        .shadow(color: .black.opacity(0.05), radius: 8, x: 0, y: 2)
     }
 }

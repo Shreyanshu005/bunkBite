@@ -10,6 +10,7 @@ import SwiftUI
 struct UserOrdersView: View {
     @ObservedObject var authViewModel: AuthViewModel
     @Binding var showLoginSheet: Bool
+    @State private var isAnimating = false
 
     var body: some View {
         NavigationStack {
@@ -25,76 +26,63 @@ struct UserOrdersView: View {
     }
 
     private var loginPrompt: some View {
-        ScrollView {
-            VStack(spacing: 28) {
-                // Animated icons
-                HStack(spacing: 20) {
-                    ForEach(["📦", "🛵", "✅", "🎉"], id: \.self) { emoji in
-                        Text(emoji)
-                            .font(.system(size: 40))
-                    }
-                }
-                .padding(.top, 60)
+        VStack(spacing: 0) {
+            Spacer()
 
-                // Main message
-                VStack(spacing: 12) {
-                    Text("Track Your Orders")
-                        .font(.urbanist(size: 32, weight: .bold))
+            VStack(spacing: 32) {
+                // Icon with animation
+                ZStack {
+                    Circle()
+                        .fill(Constants.primaryColor.opacity(0.1))
+                        .frame(width: 120, height: 120)
+                        .scaleEffect(isAnimating ? 1 : 0.8)
+
+                    Image(systemName: "clock.arrow.circlepath")
+                        .font(.urbanist(size: 50, weight: .light))
                         .foregroundStyle(Constants.primaryColor)
+                        .rotationEffect(.degrees(isAnimating ? 360 : 0))
+                }
 
-                    Text("Your Order History")
-                        .font(.urbanist(size: 20, weight: .semibold))
+                // Message
+                VStack(spacing: 12) {
+                    Text("No Orders Yet")
+                        .font(.urbanist(size: 28, weight: .bold))
+                        .foregroundStyle(.black)
 
-                    Text("Awaits You!")
-                        .font(.urbanist(size: 20, weight: .regular))
+                    Text("Login to track your orders")
+                        .font(.urbanist(size: 16, weight: .regular))
                         .foregroundStyle(.gray)
                 }
-
-                // Feature cards
-                VStack(spacing: 16) {
-                    FeatureCard(
-                        icon: "clock.arrow.circlepath",
-                        title: "Order History",
-                        description: "View all your past orders"
-                    )
-                    FeatureCard(
-                        icon: "location.fill",
-                        title: "Real-time Tracking",
-                        description: "Track your order status"
-                    )
-                    FeatureCard(
-                        icon: "arrow.counterclockwise",
-                        title: "Reorder Easily",
-                        description: "Order your favorites again"
-                    )
-                }
-                .padding(.horizontal, 24)
+                .opacity(isAnimating ? 1 : 0)
+                .offset(y: isAnimating ? 0 : 20)
 
                 // CTA Button
                 Button {
                     showLoginSheet = true
                 } label: {
-                    HStack(spacing: 12) {
-                        Text("View My Orders")
-                            .font(.urbanist(size: 16, weight: .semibold))
-                        Image(systemName: "arrow.right")
-                    }
-                    .foregroundStyle(.white)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 16)
-                    .background(Constants.primaryColor)
-                    .cornerRadius(16)
+                    Text("Login")
+                        .font(.urbanist(size: 17, weight: .semibold))
+                        .foregroundStyle(.white)
+                        .frame(width: 200)
+                        .padding(.vertical, 16)
+                        .background(Constants.primaryColor)
+                        .cornerRadius(12)
                 }
-                .padding(.horizontal, 24)
                 .padding(.top, 8)
+                .opacity(isAnimating ? 1 : 0)
+                .scaleEffect(isAnimating ? 1 : 0.9)
+            }
+            .padding(.horizontal, 40)
 
-                Text("Login to access your order history")
-                    .font(.urbanist(size: 12, weight: .regular))
-                    .foregroundStyle(.gray)
-                    .padding(.bottom, 40)
+            Spacer()
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(Constants.backgroundColor)
+        .onAppear {
+            withAnimation(.spring(response: 0.6, dampingFraction: 0.7)) {
+                isAnimating = true
             }
         }
-        .background(Constants.backgroundColor)
     }
 
     private var ordersContent: some View {

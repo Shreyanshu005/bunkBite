@@ -24,6 +24,7 @@ struct UserMenuView: View {
     @State private var showFilters = false
     @State private var menuLoadingTask: Task<Void, Never>?
     @State private var cartShake: CGFloat = 0
+    @State private var isAnimating = false
 
     var categories: [String] {
         let allCategories = menuViewModel.menuItems.compactMap { item -> String? in
@@ -151,76 +152,61 @@ struct UserMenuView: View {
     }
 
     private var loginPrompt: some View {
-        ScrollView {
-            VStack(spacing: 24) {
-                // Animated food icons
-                HStack(spacing: 20) {
-                    ForEach(["🍕", "🍔", "☕️", "🍜", "🌮"], id: \.self) { emoji in
-                        Text(emoji)
-                            .font(.system(size: 40))
-                    }
-                }
-                .padding(.top, 40)
+        VStack(spacing: 0) {
+            Spacer()
 
-                // Main message
+            VStack(spacing: 32) {
+                // Icon with animation
+                ZStack {
+                    Circle()
+                        .fill(Constants.primaryColor.opacity(0.1))
+                        .frame(width: 120, height: 120)
+                        .scaleEffect(isAnimating ? 1 : 0.8)
+
+                    Image(systemName: "fork.knife")
+                        .font(.urbanist(size: 50, weight: .light))
+                        .foregroundStyle(Constants.primaryColor)
+                        .rotationEffect(.degrees(isAnimating ? 0 : -90))
+                }
+
+                // Message
                 VStack(spacing: 12) {
                     Text("Hungry?")
-                        .font(.urbanist(size: 36, weight: .bold))
-                        .foregroundStyle(Constants.primaryColor)
-
-                    Text("Order from your")
-                        .font(.urbanist(size: 20, weight: .regular))
-                        .foregroundStyle(.gray)
-
-                    Text("Favorite Canteen")
-                        .font(.urbanist(size: 22, weight: .bold))
+                        .font(.urbanist(size: 28, weight: .bold))
                         .foregroundStyle(.black)
+
+                    Text("Login to start ordering")
+                        .font(.urbanist(size: 16, weight: .regular))
+                        .foregroundStyle(.gray)
                 }
-
-                // Feature cards
-                VStack(spacing: 16) {
-                    FeatureCard(
-                        icon: "clock",
-                        title: "Quick Orders",
-                        description: "Get your food in minutes"
-                    )
-
-                    FeatureCard(
-                        icon: "creditcard",
-                        title: "Easy Payments",
-                        description: "Pay with UPI instantly"
-                    )
-
-                    FeatureCard(
-                        icon: "star.fill",
-                        title: "Best Quality",
-                        description: "Fresh food, every time"
-                    )
-                }
-                .padding(.horizontal)
+                .opacity(isAnimating ? 1 : 0)
+                .offset(y: isAnimating ? 0 : 20)
 
                 // CTA Button
                 Button {
                     showLoginSheet = true
                 } label: {
-                    HStack {
-                        Text("Start Ordering")
-                            .fontWeight(.semibold)
-                        Image(systemName: "arrow.right")
-                    }
-                    .frame(maxWidth: .infinity)
-                    .padding()
-                    .background(Constants.primaryColor)
-                    .foregroundStyle(.white)
-                    .cornerRadius(12)
+                    Text("Login")
+                        .font(.urbanist(size: 17, weight: .semibold))
+                        .foregroundStyle(.white)
+                        .frame(width: 200)
+                        .padding(.vertical, 16)
+                        .background(Constants.primaryColor)
+                        .cornerRadius(12)
                 }
-                .padding(.horizontal)
                 .padding(.top, 8)
+                .opacity(isAnimating ? 1 : 0)
+                .scaleEffect(isAnimating ? 1 : 0.9)
+            }
+            .padding(.horizontal, 40)
 
-                Text("Join hundreds of hungry students!")
-                    .font(.urbanist(size: 12, weight: .regular))
-                    .foregroundStyle(.gray)
-                    .padding(.bottom, 40)
+            Spacer()
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(Constants.backgroundColor)
+        .onAppear {
+            withAnimation(.spring(response: 0.6, dampingFraction: 0.7)) {
+                isAnimating = true
             }
         }
     }

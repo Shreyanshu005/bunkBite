@@ -68,160 +68,309 @@ struct PaymentSheet: View {
         UPIApp(name: "Amazon Pay", scheme: "amazonpay://pay", icon: "a.circle.fill")
     ]
 
+    @State private var isAnimating = false
+
     var body: some View {
-        NavigationStack {
-            Form {
-                Section {
+        ZStack {
+            // Gradient Background
+            LinearGradient(
+                colors: [
+                    Constants.primaryColor.opacity(0.05),
+                    Color.white
+                ],
+                startPoint: .top,
+                endPoint: .bottom
+            )
+            .ignoresSafeArea()
+
+            ScrollView {
+                VStack(spacing: 32) {
+                    // Header with animated payment icon
+                    VStack(spacing: 16) {
+                        ZStack {
+                            Circle()
+                                .fill(Constants.primaryColor.opacity(0.1))
+                                .frame(width: 100, height: 100)
+                                .scaleEffect(isAnimating ? 1 : 0.8)
+
+                            Image(systemName: "creditcard.fill")
+                                .font(.system(size: 50))
+                                .foregroundStyle(Constants.primaryColor)
+                                .scaleEffect(isAnimating ? 1 : 0.5)
+                        }
+                        .padding(.top, 40)
+
+                        VStack(spacing: 8) {
+                            Text("Complete Payment")
+                                .font(.urbanist(size: 28, weight: .bold))
+                                .foregroundStyle(.black)
+
+                            Text("Choose your payment method")
+                                .font(.urbanist(size: 15, weight: .regular))
+                                .foregroundStyle(.gray)
+                        }
+                        .opacity(isAnimating ? 1 : 0)
+                        .offset(y: isAnimating ? 0 : 20)
+                    }
+                    .padding(.horizontal, 24)
+
+                    // Total Amount Card
                     HStack {
-                        Text("Total Amount")
-                            .font(.urbanist(size: 17, weight: .semibold))
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("Total Amount")
+                                .font(.urbanist(size: 14, weight: .medium))
+                                .foregroundStyle(.gray)
+
+                            Text("₹\(Int(cart.totalAmount))")
+                                .font(.urbanist(size: 32, weight: .bold))
+                                .foregroundStyle(Constants.primaryColor)
+                        }
                         Spacer()
-                        Text("₹\(Int(cart.totalAmount))")
-                            .font(.urbanist(size: 22, weight: .bold))
-                            .foregroundStyle(Constants.primaryColor)
                     }
-                    .padding(.vertical, 8)
-                }
+                    .padding(20)
+                    .background(Color.white)
+                    .cornerRadius(16)
+                    .shadow(color: .black.opacity(0.05), radius: 10, x: 0, y: 2)
+                    .padding(.horizontal, 24)
+                    .opacity(isAnimating ? 1 : 0)
+                    .offset(y: isAnimating ? 0 : 20)
 
-                // Available UPI Apps
-                if !availableUPIApps.isEmpty {
-                    Section {
-                        ForEach(availableUPIApps) { app in
-                            Button {
-                                openUPIApp(app)
-                            } label: {
-                                HStack(spacing: 16) {
-                                    Image(systemName: app.icon)
-                                        .font(.title2)
-                                        .foregroundStyle(Constants.primaryColor)
-                                        .frame(width: 40)
+                    // Available UPI Apps
+                    if !availableUPIApps.isEmpty {
+                        VStack(alignment: .leading, spacing: 16) {
+                            Text("Quick Pay with UPI")
+                                .font(.urbanist(size: 14, weight: .semibold))
+                                .foregroundStyle(.gray)
+                                .textCase(.uppercase)
+                                .tracking(1)
+                                .padding(.horizontal, 24)
 
-                                    Text(app.name)
-                                        .font(.urbanist(size: 17, weight: .semibold))
-                                        .foregroundStyle(.black)
+                            VStack(spacing: 12) {
+                                ForEach(availableUPIApps) { app in
+                                    Button {
+                                        openUPIApp(app)
+                                    } label: {
+                                        HStack(spacing: 16) {
+                                            Circle()
+                                                .fill(Constants.primaryColor.opacity(0.1))
+                                                .frame(width: 50, height: 50)
+                                                .overlay(
+                                                    Image(systemName: app.icon)
+                                                        .font(.system(size: 24))
+                                                        .foregroundStyle(Constants.primaryColor)
+                                                )
 
-                                    Spacer()
+                                            Text(app.name)
+                                                .font(.urbanist(size: 17, weight: .semibold))
+                                                .foregroundStyle(.black)
 
-                                    Image(systemName: "chevron.right")
-                                        .font(.caption)
-                                        .foregroundStyle(.gray)
+                                            Spacer()
+
+                                            Image(systemName: "arrow.right.circle.fill")
+                                                .font(.system(size: 24))
+                                                .foregroundStyle(Constants.primaryColor.opacity(0.3))
+                                        }
+                                        .padding(16)
+                                        .background(Color.white)
+                                        .cornerRadius(12)
+                                    }
                                 }
-                                .padding(.vertical, 8)
                             }
+                            .padding(.horizontal, 24)
                         }
-                    } header: {
-                        Text("Pay with UPI Apps")
-                    } footer: {
-                        Text("Select an app to complete payment")
+                        .opacity(isAnimating ? 1 : 0)
+                        .offset(y: isAnimating ? 0 : 30)
                     }
-                }
 
-                Section {
-                    TextField("Enter UPI ID", text: $upiId)
-                        .textContentType(.username)
-                        .keyboardType(.emailAddress)
-                        .autocapitalization(.none)
-                } header: {
-                    Text("Manual UPI Payment")
-                } footer: {
-                    Text("Enter your UPI ID (e.g., name@paytm)")
-                }
+                    // Manual UPI Payment Card
+                    VStack(alignment: .leading, spacing: 16) {
+                        Text("Or Pay with UPI ID")
+                            .font(.urbanist(size: 14, weight: .semibold))
+                            .foregroundStyle(.gray)
+                            .textCase(.uppercase)
+                            .tracking(1)
 
-                Section {
-                    Button {
-                        if !upiId.isEmpty {
-                            payWithUPIID()
-                        }
-                    } label: {
-                        if isCheckingPayment {
-                            HStack {
-                                Spacer()
-                                ProgressView()
-                                    .progressViewStyle(.circular)
-                                Text("Verifying Payment...")
-                                    .fontWeight(.semibold)
-                                Spacer()
+                        TextField("", text: $upiId, prompt: Text("Enter UPI ID (e.g., name@paytm)").foregroundColor(.gray.opacity(0.5)))
+                            .textContentType(.username)
+                            .keyboardType(.emailAddress)
+                            .autocapitalization(.none)
+                            .font(.urbanist(size: 18, weight: .medium))
+                            .padding()
+                            .background(Color.white)
+                            .cornerRadius(12)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 12)
+                                    .stroke(upiId.isEmpty ? Color.gray.opacity(0.2) : Constants.primaryColor, lineWidth: 2)
+                            )
+
+                        Button {
+                            if !upiId.isEmpty {
+                                payWithUPIID()
                             }
-                        } else {
-                            Text("Pay with UPI ID")
-                                .frame(maxWidth: .infinity)
-                                .fontWeight(.semibold)
+                        } label: {
+                            HStack(spacing: 12) {
+                                if isCheckingPayment {
+                                    ProgressView()
+                                        .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                                    Text("Verifying Payment...")
+                                        .font(.urbanist(size: 18, weight: .semibold))
+                                } else {
+                                    Text("Pay Now")
+                                        .font(.urbanist(size: 18, weight: .semibold))
+                                    Image(systemName: "arrow.right.circle.fill")
+                                        .font(.system(size: 22))
+                                }
+                            }
+                            .foregroundStyle(.white)
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 18)
+                            .background(
+                                LinearGradient(
+                                    colors: [
+                                        upiId.isEmpty ? Color.gray : Constants.primaryColor,
+                                        upiId.isEmpty ? Color.gray.opacity(0.8) : Constants.primaryColor.opacity(0.8)
+                                    ],
+                                    startPoint: .leading,
+                                    endPoint: .trailing
+                                )
+                            )
+                            .cornerRadius(16)
+                            .shadow(color: upiId.isEmpty ? .clear : Constants.primaryColor.opacity(0.3), radius: 10, x: 0, y: 5)
                         }
+                        .disabled(upiId.isEmpty || isCheckingPayment)
                     }
-                    .buttonStyle(.borderedProminent)
-                    .tint(Constants.primaryColor)
-                    .disabled(upiId.isEmpty || isCheckingPayment)
-                }
-                .listRowBackground(Color.clear)
+                    .padding(20)
+                    .background(Color.white)
+                    .cornerRadius(16)
+                    .shadow(color: .black.opacity(0.05), radius: 10, x: 0, y: 2)
+                    .padding(.horizontal, 24)
+                    .opacity(isAnimating ? 1 : 0)
+                    .offset(y: isAnimating ? 0 : 30)
 
-                Section {
-                    VStack(alignment: .leading, spacing: 8) {
-                        Label("Secure Payment", systemImage: "lock.shield")
-                            .font(.urbanist(size: 12, weight: .regular))
-                            .foregroundStyle(.secondary)
+                    // Security Features
+                    VStack(spacing: 12) {
+                        HStack(spacing: 12) {
+                            Image(systemName: "lock.shield.fill")
+                                .font(.system(size: 16))
+                                .foregroundStyle(Constants.primaryColor)
+                                .frame(width: 24)
 
-                        Label("Quick Checkout", systemImage: "bolt.fill")
-                            .font(.urbanist(size: 12, weight: .regular))
-                            .foregroundStyle(.secondary)
+                            Text("Secure Payment Gateway")
+                                .font(.urbanist(size: 15, weight: .regular))
+                                .foregroundStyle(.gray)
 
-                        Label("Note: For testing, some UPI apps may block payments due to risk policy. Payment verification is simulated for demo purposes.", systemImage: "info.circle")
-                            .font(.urbanist(size: 11, weight: .regular))
-                            .foregroundStyle(.orange)
-                            .padding(.top, 4)
-                    }
-                }
-
-                #if DEBUG
-                Section {
-                    Button {
-                        paymentDetails = PaymentDetails(
-                            transactionId: "TEST\(Int(Date().timeIntervalSince1970))",
-                            amount: cart.totalAmount,
-                            timestamp: Date(),
-                            status: .success,
-                            upiApp: "Mock Payment",
-                            merchantUPI: "8178785849@fam",
-                            customerUPI: nil,
-                            canteenName: canteen?.name ?? "BunkBite",
-                            itemCount: cart.items.count,
-                            paymentMethod: "TEST"
-                        )
-                        isCheckingPayment = true
-                        verifyPaymentStatus()
-                    } label: {
-                        HStack {
-                            Spacer()
-                            Image(systemName: "checkmark.seal.fill")
-                            Text("Mock Successful Payment")
-                                .font(.urbanist(size: 16, weight: .semibold))
                             Spacer()
                         }
-                        .padding(.vertical, 8)
+
+                        HStack(spacing: 12) {
+                            Image(systemName: "bolt.fill")
+                                .font(.system(size: 16))
+                                .foregroundStyle(Constants.primaryColor)
+                                .frame(width: 24)
+
+                            Text("Quick & Easy Checkout")
+                                .font(.urbanist(size: 15, weight: .regular))
+                                .foregroundStyle(.gray)
+
+                            Spacer()
+                        }
+
+                        HStack(spacing: 12) {
+                            Image(systemName: "info.circle.fill")
+                                .font(.system(size: 16))
+                                .foregroundStyle(.orange)
+                                .frame(width: 24)
+
+                            Text("Test mode: Payment verification is simulated")
+                                .font(.urbanist(size: 13, weight: .regular))
+                                .foregroundStyle(.orange)
+
+                            Spacer()
+                        }
                     }
-                    .buttonStyle(.borderedProminent)
-                    .tint(.green)
-                    .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
-                } header: {
-                    Text("Development Testing")
-                } footer: {
-                    Text("This button only appears in debug builds and instantly triggers successful payment for testing the order flow.")
+                    .padding(.horizontal, 24)
+                    .opacity(isAnimating ? 1 : 0)
+
+                    #if DEBUG
+                    // Mock Payment Button
+                    VStack(alignment: .leading, spacing: 12) {
+                        Text("Development Testing")
+                            .font(.urbanist(size: 14, weight: .semibold))
+                            .foregroundStyle(.gray)
+                            .textCase(.uppercase)
+                            .tracking(1)
+                            .padding(.horizontal, 24)
+
+                        Button {
+                            paymentDetails = PaymentDetails(
+                                transactionId: "TEST\(Int(Date().timeIntervalSince1970))",
+                                amount: cart.totalAmount,
+                                timestamp: Date(),
+                                status: .success,
+                                upiApp: "Mock Payment",
+                                merchantUPI: "8178785849@fam",
+                                customerUPI: nil,
+                                canteenName: canteen?.name ?? "BunkBite",
+                                itemCount: cart.items.count,
+                                paymentMethod: "TEST"
+                            )
+                            isCheckingPayment = true
+                            verifyPaymentStatus()
+                        } label: {
+                            HStack(spacing: 12) {
+                                Image(systemName: "checkmark.seal.fill")
+                                    .font(.system(size: 20))
+                                Text("Mock Successful Payment")
+                                    .font(.urbanist(size: 17, weight: .semibold))
+                            }
+                            .foregroundStyle(.white)
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 18)
+                            .background(
+                                LinearGradient(
+                                    colors: [Color.green, Color.green.opacity(0.8)],
+                                    startPoint: .leading,
+                                    endPoint: .trailing
+                                )
+                            )
+                            .cornerRadius(16)
+                            .shadow(color: Color.green.opacity(0.3), radius: 10, x: 0, y: 5)
+                        }
+                        .padding(.horizontal, 24)
+
+                        Text("Instantly triggers successful payment for testing")
+                            .font(.urbanist(size: 13, weight: .regular))
+                            .foregroundStyle(.gray)
+                            .padding(.horizontal, 24)
+                    }
+                    .opacity(isAnimating ? 1 : 0)
+                    #endif
+
+                    Spacer(minLength: 40)
                 }
-                #endif
             }
-            .navigationTitle("Payment")
-            .navigationBarTitleDisplayMode(.large)
-            .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") {
+
+            // Close button
+            VStack {
+                HStack {
+                    Spacer()
+                    Button {
                         dismiss()
+                    } label: {
+                        Image(systemName: "xmark.circle.fill")
+                            .font(.system(size: 32))
+                            .foregroundStyle(.gray.opacity(0.3))
                     }
+                    .padding()
                 }
+                Spacer()
             }
         }
-        .presentationDetents([.large])
-        .presentationDragIndicator(.visible)
         .onAppear {
             checkAvailableUPIApps()
+            withAnimation(.spring(response: 0.6, dampingFraction: 0.7)) {
+                isAnimating = true
+            }
         }
         .onReceive(NotificationCenter.default.publisher(for: UIApplication.didBecomeActiveNotification)) { _ in
             // Check payment status when app becomes active (user returns from UPI app)
