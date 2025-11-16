@@ -71,7 +71,7 @@ class MenuViewModel: ObservableObject {
         do {
             try await apiService.updateMenuItemQuantity(canteenId: canteenId, itemId: itemId, quantity: quantity, token: token)
             if let index = menuItems.firstIndex(where: { $0.id == itemId }) {
-                var updatedItem = menuItems[index]
+                let updatedItem = menuItems[index]
                 // Create a new MenuItem with updated quantity (since MenuItem properties are let)
                 menuItems[index] = MenuItem(
                     id: updatedItem.id,

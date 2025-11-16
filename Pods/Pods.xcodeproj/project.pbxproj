@@ -20,9 +20,15 @@
 /* End PBXAggregateTarget section */
 
 /* Begin PBXBuildFile section */
-		4EC999560F7ED9999183B5E33ADEFA74 /* Pods-BunkBite-umbrella.h in Headers */ = {isa = PBXBuildFile; fileRef = 285B03E3EB696786FEE0BE5B14CE304C /* Pods-BunkBite-umbrella.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		248036B5729F92B21047A8F350358477 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 384DDA2CB25005BD6479B5987C619DD4 /* Foundation.framework */; };
+		4C9B95B90A6F4FEA1EED3E683E55AD4C /* Pods-BunkBite-BunkBiteUITests-umbrella.h in Headers */ = {isa = PBXBuildFile; fileRef = DDFA07CF5990160B0685C9FD02A0EA3E /* Pods-BunkBite-BunkBiteUITests-umbrella.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		4EC999560F7ED9999183B5E33ADEFA74 /* Pods-BunkBite-umbrella.h in Headers */ = {isa = PBXBuildFile; fileRef = 4573B692C0084C17FBC65F8706034B32 /* Pods-BunkBite-umbrella.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		64D69A9BF698223DB82B3449D838FF42 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 384DDA2CB25005BD6479B5987C619DD4 /* Foundation.framework */; };
-		B82170641FE6076280D877159B01B5B2 /* Pods-BunkBite-dummy.m in Sources */ = {isa = PBXBuildFile; fileRef = 3EA1F14877949F69F80FA25FD1DF376B /* Pods-BunkBite-dummy.m */; };
+		71C001020F0B798A39B87D6B8F1AA62C /* Pods-BunkBite-BunkBiteUITests-dummy.m in Sources */ = {isa = PBXBuildFile; fileRef = DE25287AB21431C62D5E407ED045AA42 /* Pods-BunkBite-BunkBiteUITests-dummy.m */; };
+		807DE3544EE8FD3AEC5CA71EB7D59F21 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 384DDA2CB25005BD6479B5987C619DD4 /* Foundation.framework */; };
+		B82170641FE6076280D877159B01B5B2 /* Pods-BunkBite-dummy.m in Sources */ = {isa = PBXBuildFile; fileRef = 5C095A7684BB51A79C91DDCF2ACD3244 /* Pods-BunkBite-dummy.m */; };
+		CEFE101D7A60195C0A18CE72EF3B9337 /* Pods-BunkBiteTests-dummy.m in Sources */ = {isa = PBXBuildFile; fileRef = C7AC91FA5A8C011F60B901EDFD32A19F /* Pods-BunkBiteTests-dummy.m */; };
+		ED6A4B452BED89A43FC084D86DE733FC /* Pods-BunkBiteTests-umbrella.h in Headers */ = {isa = PBXBuildFile; fileRef = 6E5FAF4743A68BA9D300594FAFE84B63 /* Pods-BunkBiteTests-umbrella.h */; settings = {ATTRIBUTES = (Public, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -33,24 +39,57 @@
 			remoteGlobalIDString = 84CA3424E172CD651235AF0783D01D39;
 			remoteInfo = "razorpay-pod";
 		};
+		0EDD96B931FB07659E4AC7444BFD18C8 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = BFDFE7DC352907FC980B868725387E98 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = DEBFE4C6C4D579E20AA9C818E2ACA65E;
+			remoteInfo = "Pods-BunkBite";
+		};
+		F0382E94424B07D3BCB9CB981D67E037 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = BFDFE7DC352907FC980B868725387E98 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 84CA3424E172CD651235AF0783D01D39;
+			remoteInfo = "razorpay-pod";
+		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		02C8C147BC72DF4832A26340D12177CF /* Pods-BunkBite.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-BunkBite.release.xcconfig"; sourceTree = "<group>"; };
+		059BDFDF534316AF7F5209EAAE11CCB8 /* Pods-BunkBite.modulemap */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.module; path = "Pods-BunkBite.modulemap"; sourceTree = "<group>"; };
 		080C11D2D8319FE180F262BF3D38FA4C /* Razorpay.xcframework */ = {isa = PBXFileReference; includeInIndex = 1; name = Razorpay.xcframework; path = Pod/Razorpay.xcframework; sourceTree = "<group>"; };
-		0D72087B6958355343A3736F9D7F0891 /* Pods-BunkBite-acknowledgements.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "Pods-BunkBite-acknowledgements.plist"; sourceTree = "<group>"; };
+		1B351722B3C45EAB93656968B293844E /* Pods-BunkBite-BunkBiteUITests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-BunkBite-BunkBiteUITests.release.xcconfig"; sourceTree = "<group>"; };
 		21BEBA77726B8C519C762E580C97180F /* razorpay-pod.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "razorpay-pod.release.xcconfig"; sourceTree = "<group>"; };
-		285B03E3EB696786FEE0BE5B14CE304C /* Pods-BunkBite-umbrella.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "Pods-BunkBite-umbrella.h"; sourceTree = "<group>"; };
-		381F42A03FD037D3811C2D643362C65F /* Pods-BunkBite-acknowledgements.markdown */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; path = "Pods-BunkBite-acknowledgements.markdown"; sourceTree = "<group>"; };
+		24053B9031A959C86B1BC1F95770810E /* Pods-BunkBiteTests */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; name = "Pods-BunkBiteTests"; path = Pods_BunkBiteTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		329FED6545FF2E044978F578F9945BBA /* Pods-BunkBiteTests-acknowledgements.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "Pods-BunkBiteTests-acknowledgements.plist"; sourceTree = "<group>"; };
 		384DDA2CB25005BD6479B5987C619DD4 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS18.0.sdk/System/Library/Frameworks/Foundation.framework; sourceTree = DEVELOPER_DIR; };
-		3EA1F14877949F69F80FA25FD1DF376B /* Pods-BunkBite-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = "Pods-BunkBite-dummy.m"; sourceTree = "<group>"; };
-		4A4630712B8D6EF642CFE95B5A2C5D12 /* Pods-BunkBite-frameworks.sh */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.script.sh; path = "Pods-BunkBite-frameworks.sh"; sourceTree = "<group>"; };
+		3EDE64C643E2611D64ED51FB1E578D0D /* Pods-BunkBite-BunkBiteUITests-Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "Pods-BunkBite-BunkBiteUITests-Info.plist"; sourceTree = "<group>"; };
+		421175F077940EF1E1002B9567E5AA91 /* Pods-BunkBite-BunkBiteUITests.modulemap */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.module; path = "Pods-BunkBite-BunkBiteUITests.modulemap"; sourceTree = "<group>"; };
+		4573B692C0084C17FBC65F8706034B32 /* Pods-BunkBite-umbrella.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "Pods-BunkBite-umbrella.h"; sourceTree = "<group>"; };
+		4746E88D81B6542BF73F19D494F62001 /* Pods-BunkBiteTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-BunkBiteTests.debug.xcconfig"; sourceTree = "<group>"; };
 		4E3A1E14A2C9B2B2E8A26F26E877C9DA /* razorpay-pod.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "razorpay-pod.debug.xcconfig"; sourceTree = "<group>"; };
+		54E341DEA3F7FDFC27C0ED5113ED8CB9 /* Pods-BunkBite-BunkBiteUITests-frameworks.sh */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.script.sh; path = "Pods-BunkBite-BunkBiteUITests-frameworks.sh"; sourceTree = "<group>"; };
+		594D21BBDD0F878BF604A6BCAB3C452E /* Pods-BunkBite-Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "Pods-BunkBite-Info.plist"; sourceTree = "<group>"; };
+		5C095A7684BB51A79C91DDCF2ACD3244 /* Pods-BunkBite-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = "Pods-BunkBite-dummy.m"; sourceTree = "<group>"; };
+		60C67F9195C9B8C5EDADF988436E8B60 /* Pods-BunkBite-BunkBiteUITests-acknowledgements.markdown */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; path = "Pods-BunkBite-BunkBiteUITests-acknowledgements.markdown"; sourceTree = "<group>"; };
+		68FB5C36C74546F3F4028F5199D12872 /* Pods-BunkBiteTests-acknowledgements.markdown */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; path = "Pods-BunkBiteTests-acknowledgements.markdown"; sourceTree = "<group>"; };
 		6C53BC799C90FACA5D5805B8DFDA8C3F /* razorpay-pod-xcframeworks.sh */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.script.sh; path = "razorpay-pod-xcframeworks.sh"; sourceTree = "<group>"; };
+		6E5FAF4743A68BA9D300594FAFE84B63 /* Pods-BunkBiteTests-umbrella.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "Pods-BunkBiteTests-umbrella.h"; sourceTree = "<group>"; };
+		726CCE4BE22CF1EF998819108D83A27D /* Pods-BunkBite-frameworks.sh */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.script.sh; path = "Pods-BunkBite-frameworks.sh"; sourceTree = "<group>"; };
+		82C6BB059303182CB01B05BFE69C9DA3 /* Pods-BunkBite-BunkBiteUITests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-BunkBite-BunkBiteUITests.debug.xcconfig"; sourceTree = "<group>"; };
+		82F6C9EB2EFB8BB7F4E6D0BFF5DFAD62 /* Pods-BunkBite-acknowledgements.markdown */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; path = "Pods-BunkBite-acknowledgements.markdown"; sourceTree = "<group>"; };
+		8F35B9CE1D3B4445E7137E16E36F8FFD /* Pods-BunkBiteTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-BunkBiteTests.release.xcconfig"; sourceTree = "<group>"; };
 		9D940727FF8FB9C785EB98E56350EF41 /* Podfile */ = {isa = PBXFileReference; explicitFileType = text.script.ruby; includeInIndex = 1; indentWidth = 2; lastKnownFileType = text; name = Podfile; path = ../Podfile; sourceTree = SOURCE_ROOT; tabWidth = 2; xcLanguageSpecificationIdentifier = xcode.lang.ruby; };
-		C495C2F3E10A55613F3C72E39D491518 /* Pods-BunkBite-Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "Pods-BunkBite-Info.plist"; sourceTree = "<group>"; };
-		C5E1B3743F4F184448E0509B815F1B40 /* Pods-BunkBite.modulemap */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.module; path = "Pods-BunkBite.modulemap"; sourceTree = "<group>"; };
-		DB7C9FAC57F4986AD459271DBF6F8331 /* Pods-BunkBite.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-BunkBite.debug.xcconfig"; sourceTree = "<group>"; };
+		B8C269DB8015652168BCE9AC310A927C /* Pods-BunkBite-BunkBiteUITests */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; name = "Pods-BunkBite-BunkBiteUITests"; path = Pods_BunkBite_BunkBiteUITests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		BBB9F3096A516DD01988F23063756306 /* Pods-BunkBite.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-BunkBite.debug.xcconfig"; sourceTree = "<group>"; };
+		C60E4FDA5E3887E83795FFD8E9DDBAC8 /* Pods-BunkBite-BunkBiteUITests-acknowledgements.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "Pods-BunkBite-BunkBiteUITests-acknowledgements.plist"; sourceTree = "<group>"; };
+		C7AC91FA5A8C011F60B901EDFD32A19F /* Pods-BunkBiteTests-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = "Pods-BunkBiteTests-dummy.m"; sourceTree = "<group>"; };
+		D0966CED723CD1A081CDC179701C4C1C /* Pods-BunkBiteTests-Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "Pods-BunkBiteTests-Info.plist"; sourceTree = "<group>"; };
+		D0FE79740B1C9DB504883B42EAEFCF93 /* Pods-BunkBiteTests.modulemap */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.module; path = "Pods-BunkBiteTests.modulemap"; sourceTree = "<group>"; };
+		DDFA07CF5990160B0685C9FD02A0EA3E /* Pods-BunkBite-BunkBiteUITests-umbrella.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "Pods-BunkBite-BunkBiteUITests-umbrella.h"; sourceTree = "<group>"; };
+		DE25287AB21431C62D5E407ED045AA42 /* Pods-BunkBite-BunkBiteUITests-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = "Pods-BunkBite-BunkBiteUITests-dummy.m"; sourceTree = "<group>"; };
+		E27F20334CDA2B467C4DC356D70CBB6D /* Pods-BunkBite.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-BunkBite.release.xcconfig"; sourceTree = "<group>"; };
+		E3E3243DB0603DFD5CBE638B76940A9B /* Pods-BunkBite-acknowledgements.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "Pods-BunkBite-acknowledgements.plist"; sourceTree = "<group>"; };
 		F76EAD8B7B50FBED08991C784B36F92A /* Pods-BunkBite */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; name = "Pods-BunkBite"; path = Pods_BunkBite.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -63,23 +102,48 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		7341C46C692351DD2505BC57C2B9B2E4 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				807DE3544EE8FD3AEC5CA71EB7D59F21 /* Foundation.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		C0E4294C7B3A0170F4CDD542506B1F21 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				248036B5729F92B21047A8F350358477 /* Foundation.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		0E4DE231BD08140CCA4D658561C338A4 /* Pods-BunkBite-BunkBiteUITests */ = {
+			isa = PBXGroup;
+			children = (
+				421175F077940EF1E1002B9567E5AA91 /* Pods-BunkBite-BunkBiteUITests.modulemap */,
+				60C67F9195C9B8C5EDADF988436E8B60 /* Pods-BunkBite-BunkBiteUITests-acknowledgements.markdown */,
+				C60E4FDA5E3887E83795FFD8E9DDBAC8 /* Pods-BunkBite-BunkBiteUITests-acknowledgements.plist */,
+				DE25287AB21431C62D5E407ED045AA42 /* Pods-BunkBite-BunkBiteUITests-dummy.m */,
+				54E341DEA3F7FDFC27C0ED5113ED8CB9 /* Pods-BunkBite-BunkBiteUITests-frameworks.sh */,
+				3EDE64C643E2611D64ED51FB1E578D0D /* Pods-BunkBite-BunkBiteUITests-Info.plist */,
+				DDFA07CF5990160B0685C9FD02A0EA3E /* Pods-BunkBite-BunkBiteUITests-umbrella.h */,
+				82C6BB059303182CB01B05BFE69C9DA3 /* Pods-BunkBite-BunkBiteUITests.debug.xcconfig */,
+				1B351722B3C45EAB93656968B293844E /* Pods-BunkBite-BunkBiteUITests.release.xcconfig */,
+			);
+			name = "Pods-BunkBite-BunkBiteUITests";
+			path = "Target Support Files/Pods-BunkBite-BunkBiteUITests";
+			sourceTree = "<group>";
+		};
 		1152387DB52F96FF4B1C12CDB3C42AEC /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
 				080C11D2D8319FE180F262BF3D38FA4C /* Razorpay.xcframework */,
 			);
 			name = Frameworks;
-			sourceTree = "<group>";
-		};
-		3F9EDE9A7D136F035D983951A5F23C8E /* Products */ = {
-			isa = PBXGroup;
-			children = (
-				F76EAD8B7B50FBED08991C784B36F92A /* Pods-BunkBite */,
-			);
-			name = Products;
 			sourceTree = "<group>";
 		};
 		4BD2AE21C8E5E6AD25904BFEF16D0076 /* Pods */ = {
@@ -90,21 +154,14 @@
 			name = Pods;
 			sourceTree = "<group>";
 		};
-		65D6D3D800B1A12101EFE4BE966C5318 /* Pods-BunkBite */ = {
+		595FA4BC318DC9709C6C299A877222F9 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				C5E1B3743F4F184448E0509B815F1B40 /* Pods-BunkBite.modulemap */,
-				381F42A03FD037D3811C2D643362C65F /* Pods-BunkBite-acknowledgements.markdown */,
-				0D72087B6958355343A3736F9D7F0891 /* Pods-BunkBite-acknowledgements.plist */,
-				3EA1F14877949F69F80FA25FD1DF376B /* Pods-BunkBite-dummy.m */,
-				4A4630712B8D6EF642CFE95B5A2C5D12 /* Pods-BunkBite-frameworks.sh */,
-				C495C2F3E10A55613F3C72E39D491518 /* Pods-BunkBite-Info.plist */,
-				285B03E3EB696786FEE0BE5B14CE304C /* Pods-BunkBite-umbrella.h */,
-				DB7C9FAC57F4986AD459271DBF6F8331 /* Pods-BunkBite.debug.xcconfig */,
-				02C8C147BC72DF4832A26340D12177CF /* Pods-BunkBite.release.xcconfig */,
+				F76EAD8B7B50FBED08991C784B36F92A /* Pods-BunkBite */,
+				B8C269DB8015652168BCE9AC310A927C /* Pods-BunkBite-BunkBiteUITests */,
+				24053B9031A959C86B1BC1F95770810E /* Pods-BunkBiteTests */,
 			);
-			name = "Pods-BunkBite";
-			path = "Target Support Files/Pods-BunkBite";
+			name = Products;
 			sourceTree = "<group>";
 		};
 		6888521189BB2945905871A01CC3E319 /* razorpay-pod */ = {
@@ -128,12 +185,20 @@
 			path = "../Target Support Files/razorpay-pod";
 			sourceTree = "<group>";
 		};
-		920594EC62A48E1AF9E49867B3D4D85C /* Targets Support Files */ = {
+		CCA4243D2766C61214ABF6E64C234946 /* Pods-BunkBiteTests */ = {
 			isa = PBXGroup;
 			children = (
-				65D6D3D800B1A12101EFE4BE966C5318 /* Pods-BunkBite */,
+				D0FE79740B1C9DB504883B42EAEFCF93 /* Pods-BunkBiteTests.modulemap */,
+				68FB5C36C74546F3F4028F5199D12872 /* Pods-BunkBiteTests-acknowledgements.markdown */,
+				329FED6545FF2E044978F578F9945BBA /* Pods-BunkBiteTests-acknowledgements.plist */,
+				C7AC91FA5A8C011F60B901EDFD32A19F /* Pods-BunkBiteTests-dummy.m */,
+				D0966CED723CD1A081CDC179701C4C1C /* Pods-BunkBiteTests-Info.plist */,
+				6E5FAF4743A68BA9D300594FAFE84B63 /* Pods-BunkBiteTests-umbrella.h */,
+				4746E88D81B6542BF73F19D494F62001 /* Pods-BunkBiteTests.debug.xcconfig */,
+				8F35B9CE1D3B4445E7137E16E36F8FFD /* Pods-BunkBiteTests.release.xcconfig */,
 			);
-			name = "Targets Support Files";
+			name = "Pods-BunkBiteTests";
+			path = "Target Support Files/Pods-BunkBiteTests";
 			sourceTree = "<group>";
 		};
 		CF1408CF629C7361332E53B88F7BD30C = {
@@ -142,8 +207,8 @@
 				9D940727FF8FB9C785EB98E56350EF41 /* Podfile */,
 				D210D550F4EA176C3123ED886F8F87F5 /* Frameworks */,
 				4BD2AE21C8E5E6AD25904BFEF16D0076 /* Pods */,
-				3F9EDE9A7D136F035D983951A5F23C8E /* Products */,
-				920594EC62A48E1AF9E49867B3D4D85C /* Targets Support Files */,
+				595FA4BC318DC9709C6C299A877222F9 /* Products */,
+				E70C848829AF170514D9CB3B8191FC80 /* Targets Support Files */,
 			);
 			sourceTree = "<group>";
 		};
@@ -163,9 +228,44 @@
 			name = iOS;
 			sourceTree = "<group>";
 		};
+		E70C848829AF170514D9CB3B8191FC80 /* Targets Support Files */ = {
+			isa = PBXGroup;
+			children = (
+				E83233E8FE1CCB05C431ACAEF054DD71 /* Pods-BunkBite */,
+				0E4DE231BD08140CCA4D658561C338A4 /* Pods-BunkBite-BunkBiteUITests */,
+				CCA4243D2766C61214ABF6E64C234946 /* Pods-BunkBiteTests */,
+			);
+			name = "Targets Support Files";
+			sourceTree = "<group>";
+		};
+		E83233E8FE1CCB05C431ACAEF054DD71 /* Pods-BunkBite */ = {
+			isa = PBXGroup;
+			children = (
+				059BDFDF534316AF7F5209EAAE11CCB8 /* Pods-BunkBite.modulemap */,
+				82F6C9EB2EFB8BB7F4E6D0BFF5DFAD62 /* Pods-BunkBite-acknowledgements.markdown */,
+				E3E3243DB0603DFD5CBE638B76940A9B /* Pods-BunkBite-acknowledgements.plist */,
+				5C095A7684BB51A79C91DDCF2ACD3244 /* Pods-BunkBite-dummy.m */,
+				726CCE4BE22CF1EF998819108D83A27D /* Pods-BunkBite-frameworks.sh */,
+				594D21BBDD0F878BF604A6BCAB3C452E /* Pods-BunkBite-Info.plist */,
+				4573B692C0084C17FBC65F8706034B32 /* Pods-BunkBite-umbrella.h */,
+				BBB9F3096A516DD01988F23063756306 /* Pods-BunkBite.debug.xcconfig */,
+				E27F20334CDA2B467C4DC356D70CBB6D /* Pods-BunkBite.release.xcconfig */,
+			);
+			name = "Pods-BunkBite";
+			path = "Target Support Files/Pods-BunkBite";
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXHeadersBuildPhase section */
+		468AABCEA804FA4E0D5E96A4917B326A /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				ED6A4B452BED89A43FC084D86DE733FC /* Pods-BunkBiteTests-umbrella.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		B97E9F8634A74224A693EE0079912856 /* Headers */ = {
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
@@ -174,9 +274,55 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		D1E3D122FC28680AA7040D8186D41ADF /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				4C9B95B90A6F4FEA1EED3E683E55AD4C /* Pods-BunkBite-BunkBiteUITests-umbrella.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXHeadersBuildPhase section */
 
 /* Begin PBXNativeTarget section */
+		3E2FAFCAD2523BA4C64EF055394E2581 /* Pods-BunkBiteTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = F9C21D538D31E60A6E35A8B61141928A /* Build configuration list for PBXNativeTarget "Pods-BunkBiteTests" */;
+			buildPhases = (
+				468AABCEA804FA4E0D5E96A4917B326A /* Headers */,
+				DC04EAA1A3B38977903C079DD498AC4F /* Sources */,
+				C0E4294C7B3A0170F4CDD542506B1F21 /* Frameworks */,
+				BF17BE48FE38020B7129E11A6A883E50 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				2B0A064F33A831B99DE90AF9B185CFDD /* PBXTargetDependency */,
+			);
+			name = "Pods-BunkBiteTests";
+			productName = Pods_BunkBiteTests;
+			productReference = 24053B9031A959C86B1BC1F95770810E /* Pods-BunkBiteTests */;
+			productType = "com.apple.product-type.framework";
+		};
+		B7B35A46CF82E092AC89660F747FA2CA /* Pods-BunkBite-BunkBiteUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 6D6BD6256162B41CC62E9BE72C83E3CC /* Build configuration list for PBXNativeTarget "Pods-BunkBite-BunkBiteUITests" */;
+			buildPhases = (
+				D1E3D122FC28680AA7040D8186D41ADF /* Headers */,
+				DEEF3C10CDDA98144206EF3845B09A1B /* Sources */,
+				7341C46C692351DD2505BC57C2B9B2E4 /* Frameworks */,
+				A904DCB5F957962B8C1939F77FBE2D31 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				21FEDB15E6E074F1BB91B1D93C4E6507 /* PBXTargetDependency */,
+			);
+			name = "Pods-BunkBite-BunkBiteUITests";
+			productName = Pods_BunkBite_BunkBiteUITests;
+			productReference = B8C269DB8015652168BCE9AC310A927C /* Pods-BunkBite-BunkBiteUITests */;
+			productType = "com.apple.product-type.framework";
+		};
 		DEBFE4C6C4D579E20AA9C818E2ACA65E /* Pods-BunkBite */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = CCC1FD17BD287094D26C670CE87CDA14 /* Build configuration list for PBXNativeTarget "Pods-BunkBite" */;
@@ -216,17 +362,33 @@
 			mainGroup = CF1408CF629C7361332E53B88F7BD30C;
 			minimizedProjectReferenceProxies = 0;
 			preferredProjectObjectVersion = 77;
-			productRefGroup = 3F9EDE9A7D136F035D983951A5F23C8E /* Products */;
+			productRefGroup = 595FA4BC318DC9709C6C299A877222F9 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
 				DEBFE4C6C4D579E20AA9C818E2ACA65E /* Pods-BunkBite */,
+				B7B35A46CF82E092AC89660F747FA2CA /* Pods-BunkBite-BunkBiteUITests */,
+				3E2FAFCAD2523BA4C64EF055394E2581 /* Pods-BunkBiteTests */,
 				84CA3424E172CD651235AF0783D01D39 /* razorpay-pod */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		A904DCB5F957962B8C1939F77FBE2D31 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		BF17BE48FE38020B7129E11A6A883E50 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		D47AD42DA81C45E564CDA976E84D7234 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -265,9 +427,37 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		DC04EAA1A3B38977903C079DD498AC4F /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				CEFE101D7A60195C0A18CE72EF3B9337 /* Pods-BunkBiteTests-dummy.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		DEEF3C10CDDA98144206EF3845B09A1B /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				71C001020F0B798A39B87D6B8F1AA62C /* Pods-BunkBite-BunkBiteUITests-dummy.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		21FEDB15E6E074F1BB91B1D93C4E6507 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = "razorpay-pod";
+			target = 84CA3424E172CD651235AF0783D01D39 /* razorpay-pod */;
+			targetProxy = F0382E94424B07D3BCB9CB981D67E037 /* PBXContainerItemProxy */;
+		};
+		2B0A064F33A831B99DE90AF9B185CFDD /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = "Pods-BunkBite";
+			target = DEBFE4C6C4D579E20AA9C818E2ACA65E /* Pods-BunkBite */;
+			targetProxy = 0EDD96B931FB07659E4AC7444BFD18C8 /* PBXContainerItemProxy */;
+		};
 		6CCF43EB723ED41A5D49A49E940EBC7C /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			name = "razorpay-pod";
@@ -277,6 +467,46 @@
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
+		0C14DF6E7EBBA1A2AD1840A439CB3841 /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 1B351722B3C45EAB93656968B293844E /* Pods-BunkBite-BunkBiteUITests.release.xcconfig */;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = NO;
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "";
+				CURRENT_PROJECT_VERSION = 1;
+				DEFINES_MODULE = YES;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				ENABLE_MODULE_VERIFIER = NO;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
+				INFOPLIST_FILE = "Target Support Files/Pods-BunkBite-BunkBiteUITests/Pods-BunkBite-BunkBiteUITests-Info.plist";
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				MACH_O_TYPE = staticlib;
+				MODULEMAP_FILE = "Target Support Files/Pods-BunkBite-BunkBiteUITests/Pods-BunkBite-BunkBiteUITests.modulemap";
+				OTHER_LDFLAGS = "";
+				OTHER_LIBTOOLFLAGS = "";
+				PODS_ROOT = "$(SRCROOT)";
+				PRODUCT_BUNDLE_IDENTIFIER = "org.cocoapods.${PRODUCT_NAME:rfc1034identifier}";
+				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VALIDATE_PRODUCT = YES;
+				VERSIONING_SYSTEM = "apple-generic";
+				VERSION_INFO_PREFIX = "";
+			};
+			name = Release;
+		};
 		22404EA4C39CA0915141B0949B2F6CF8 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 4E3A1E14A2C9B2B2E8A26F26E877C9DA /* razorpay-pod.debug.xcconfig */;
@@ -285,7 +515,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CLANG_ENABLE_OBJC_WEAK = NO;
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
-				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -295,9 +525,48 @@
 			};
 			name = Debug;
 		};
-		78158D454EB213F92BB4634382706589 /* Debug */ = {
+		2434C3D7FF87F3C7B0D4C1C0FE6ADA31 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = DB7C9FAC57F4986AD459271DBF6F8331 /* Pods-BunkBite.debug.xcconfig */;
+			baseConfigurationReference = 4746E88D81B6542BF73F19D494F62001 /* Pods-BunkBiteTests.debug.xcconfig */;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = NO;
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "";
+				CURRENT_PROJECT_VERSION = 1;
+				DEFINES_MODULE = YES;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				ENABLE_MODULE_VERIFIER = NO;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
+				INFOPLIST_FILE = "Target Support Files/Pods-BunkBiteTests/Pods-BunkBiteTests-Info.plist";
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				MACH_O_TYPE = staticlib;
+				MODULEMAP_FILE = "Target Support Files/Pods-BunkBiteTests/Pods-BunkBiteTests.modulemap";
+				OTHER_LDFLAGS = "";
+				OTHER_LIBTOOLFLAGS = "";
+				PODS_ROOT = "$(SRCROOT)";
+				PRODUCT_BUNDLE_IDENTIFIER = "org.cocoapods.${PRODUCT_NAME:rfc1034identifier}";
+				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VERSIONING_SYSTEM = "apple-generic";
+				VERSION_INFO_PREFIX = "";
+			};
+			name = Debug;
+		};
+		6A7B52740038B6D2427D0C4C901F34C9 /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = E27F20334CDA2B467C4DC356D70CBB6D /* Pods-BunkBite.release.xcconfig */;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = NO;
 				CLANG_ENABLE_OBJC_WEAK = NO;
@@ -313,7 +582,7 @@
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				INFOPLIST_FILE = "Target Support Files/Pods-BunkBite/Pods-BunkBite-Info.plist";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
-				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -329,12 +598,92 @@
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
 				TARGETED_DEVICE_FAMILY = "1,2";
+				VALIDATE_PRODUCT = YES;
+				VERSIONING_SYSTEM = "apple-generic";
+				VERSION_INFO_PREFIX = "";
+			};
+			name = Release;
+		};
+		8A3577E22E9035B2790B12BB352A6369 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 82C6BB059303182CB01B05BFE69C9DA3 /* Pods-BunkBite-BunkBiteUITests.debug.xcconfig */;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = NO;
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "";
+				CURRENT_PROJECT_VERSION = 1;
+				DEFINES_MODULE = YES;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				ENABLE_MODULE_VERIFIER = NO;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
+				INFOPLIST_FILE = "Target Support Files/Pods-BunkBite-BunkBiteUITests/Pods-BunkBite-BunkBiteUITests-Info.plist";
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				MACH_O_TYPE = staticlib;
+				MODULEMAP_FILE = "Target Support Files/Pods-BunkBite-BunkBiteUITests/Pods-BunkBite-BunkBiteUITests.modulemap";
+				OTHER_LDFLAGS = "";
+				OTHER_LIBTOOLFLAGS = "";
+				PODS_ROOT = "$(SRCROOT)";
+				PRODUCT_BUNDLE_IDENTIFIER = "org.cocoapods.${PRODUCT_NAME:rfc1034identifier}";
+				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				TARGETED_DEVICE_FAMILY = "1,2";
 				VERSIONING_SYSTEM = "apple-generic";
 				VERSION_INFO_PREFIX = "";
 			};
 			name = Debug;
 		};
-		90D4D09BCB6A4660E43ACBE9ECB6FE9A /* Debug */ = {
+		8DBC05E8A866845CE0331003AC30AAAC /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 8F35B9CE1D3B4445E7137E16E36F8FFD /* Pods-BunkBiteTests.release.xcconfig */;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = NO;
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "";
+				CURRENT_PROJECT_VERSION = 1;
+				DEFINES_MODULE = YES;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				ENABLE_MODULE_VERIFIER = NO;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
+				INFOPLIST_FILE = "Target Support Files/Pods-BunkBiteTests/Pods-BunkBiteTests-Info.plist";
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				MACH_O_TYPE = staticlib;
+				MODULEMAP_FILE = "Target Support Files/Pods-BunkBiteTests/Pods-BunkBiteTests.modulemap";
+				OTHER_LDFLAGS = "";
+				OTHER_LIBTOOLFLAGS = "";
+				PODS_ROOT = "$(SRCROOT)";
+				PRODUCT_BUNDLE_IDENTIFIER = "org.cocoapods.${PRODUCT_NAME:rfc1034identifier}";
+				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VALIDATE_PRODUCT = YES;
+				VERSIONING_SYSTEM = "apple-generic";
+				VERSION_INFO_PREFIX = "";
+			};
+			name = Release;
+		};
+		8DE5143C03248BB6CD542DE3963D6F3A /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -387,7 +736,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -400,7 +749,7 @@
 			};
 			name = Debug;
 		};
-		9553C89E183877A5CB2F3C6801BEC129 /* Release */ = {
+		9E406C6AAF85E580207CD97B0044DEAB /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -450,7 +799,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -462,9 +811,28 @@
 			};
 			name = Release;
 		};
-		C525AA1C7F3EFE023576E295C3F7916A /* Release */ = {
+		CE44AB14E7C83F8B540816206942AC1A /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 02C8C147BC72DF4832A26340D12177CF /* Pods-BunkBite.release.xcconfig */;
+			baseConfigurationReference = 21BEBA77726B8C519C762E580C97180F /* razorpay-pod.release.xcconfig */;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		FA394BBE61467B37DADF14CA6298544F /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = BBB9F3096A516DD01988F23063756306 /* Pods-BunkBite.debug.xcconfig */;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = NO;
 				CLANG_ENABLE_OBJC_WEAK = NO;
@@ -480,7 +848,7 @@
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				INFOPLIST_FILE = "Target Support Files/Pods-BunkBite/Pods-BunkBite-Info.plist";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
-				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -496,30 +864,10 @@
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				VALIDATE_PRODUCT = YES;
 				VERSIONING_SYSTEM = "apple-generic";
 				VERSION_INFO_PREFIX = "";
 			};
-			name = Release;
-		};
-		CE44AB14E7C83F8B540816206942AC1A /* Release */ = {
-			isa = XCBuildConfiguration;
-			baseConfigurationReference = 21BEBA77726B8C519C762E580C97180F /* razorpay-pod.release.xcconfig */;
-			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CLANG_ENABLE_OBJC_WEAK = NO;
-				ENABLE_USER_SCRIPT_SANDBOXING = NO;
-				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-				);
-				SDKROOT = iphoneos;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				VALIDATE_PRODUCT = YES;
-			};
-			name = Release;
+			name = Debug;
 		};
 /* End XCBuildConfiguration section */
 
@@ -527,8 +875,17 @@
 		4821239608C13582E20E6DA73FD5F1F9 /* Build configuration list for PBXProject "Pods" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				90D4D09BCB6A4660E43ACBE9ECB6FE9A /* Debug */,
-				9553C89E183877A5CB2F3C6801BEC129 /* Release */,
+				8DE5143C03248BB6CD542DE3963D6F3A /* Debug */,
+				9E406C6AAF85E580207CD97B0044DEAB /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		6D6BD6256162B41CC62E9BE72C83E3CC /* Build configuration list for PBXNativeTarget "Pods-BunkBite-BunkBiteUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				8A3577E22E9035B2790B12BB352A6369 /* Debug */,
+				0C14DF6E7EBBA1A2AD1840A439CB3841 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
@@ -536,8 +893,8 @@
 		CCC1FD17BD287094D26C670CE87CDA14 /* Build configuration list for PBXNativeTarget "Pods-BunkBite" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				78158D454EB213F92BB4634382706589 /* Debug */,
-				C525AA1C7F3EFE023576E295C3F7916A /* Release */,
+				FA394BBE61467B37DADF14CA6298544F /* Debug */,
+				6A7B52740038B6D2427D0C4C901F34C9 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
@@ -547,6 +904,15 @@
 			buildConfigurations = (
 				22404EA4C39CA0915141B0949B2F6CF8 /* Debug */,
 				CE44AB14E7C83F8B540816206942AC1A /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		F9C21D538D31E60A6E35A8B61141928A /* Build configuration list for PBXNativeTarget "Pods-BunkBiteTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				2434C3D7FF87F3C7B0D4C1C0FE6ADA31 /* Debug */,
+				8DBC05E8A866845CE0331003AC30AAAC /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

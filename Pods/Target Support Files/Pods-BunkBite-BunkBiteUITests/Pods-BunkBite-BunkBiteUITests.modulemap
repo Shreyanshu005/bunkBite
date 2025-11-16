@@ -1,0 +1,6 @@
+framework module Pods_BunkBite_BunkBiteUITests {
+  umbrella header "Pods-BunkBite-BunkBiteUITests-umbrella.h"
+
+  export *
+  module * { export * }
+}

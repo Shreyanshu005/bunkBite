@@ -182,7 +182,7 @@ class OrderSubmissionHelper {
         let encoder = JSONEncoder()
         encoder.dateEncodingStrategy = .iso8601
 
-        if let encoded = try? encoder.encode(submission) {
+        if (try? encoder.encode(submission)) != nil {
             // Save to UserDefaults (for now)
             var savedOrders = getSavedOrders()
             savedOrders.append(submission)

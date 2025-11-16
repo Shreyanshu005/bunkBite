@@ -7,7 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		08627B1F2D89B7283CA054CC /* Pods_BunkBite.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 82AAF4FA92080D48814C9AD5 /* Pods_BunkBite.framework */; };
+		0F203D135843B717D9506EDB /* Pods_BunkBite.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = EC5D3A03BF5CF5942C09DED4 /* Pods_BunkBite.framework */; };
 		639395B52EBCA17E00A70F09 /* PopupView in Frameworks */ = {isa = PBXBuildFile; productRef = 639395B42EBCA17E00A70F09 /* PopupView */; };
 		63A1C9DA2EBCAB4100DB1141 /* Urbanist-Light.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 63A1C9D52EBCAB4100DB1141 /* Urbanist-Light.ttf */; };
 		63A1C9DB2EBCAB4100DB1141 /* Urbanist-Thin.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 63A1C9D92EBCAB4100DB1141 /* Urbanist-Thin.ttf */; };
@@ -18,6 +18,8 @@
 		63A1C9E02EBCAB4100DB1141 /* Urbanist-Black.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 63A1C9D32EBCAB4100DB1141 /* Urbanist-Black.ttf */; };
 		63CA39CF2EBDA8A100BA14DC /* ConfettiSwiftUI in Frameworks */ = {isa = PBXBuildFile; productRef = 63CA39CE2EBDA8A100BA14DC /* ConfettiSwiftUI */; };
 		63CA39D22EBDA8D700BA14DC /* Shimmer in Frameworks */ = {isa = PBXBuildFile; productRef = 63CA39D12EBDA8D700BA14DC /* Shimmer */; };
+		7741F97A98FD77848B03A071 /* Pods_BunkBite_BunkBiteUITests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C60DB521007097E70925C17D /* Pods_BunkBite_BunkBiteUITests.framework */; };
+		A5E0E8A5419739B7AFB830DE /* Pods_BunkBiteTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5F423CCBC0FFEE8B591DCF5D /* Pods_BunkBiteTests.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -38,7 +40,9 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		0E060DFDE2BCD087DD33080D /* Pods-BunkBite.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-BunkBite.debug.xcconfig"; path = "Target Support Files/Pods-BunkBite/Pods-BunkBite.debug.xcconfig"; sourceTree = "<group>"; };
+		3B6601629447871CBE15B808 /* Pods-BunkBite-BunkBiteUITests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-BunkBite-BunkBiteUITests.debug.xcconfig"; path = "Target Support Files/Pods-BunkBite-BunkBiteUITests/Pods-BunkBite-BunkBiteUITests.debug.xcconfig"; sourceTree = "<group>"; };
+		4C7AB19D281E2047FCCCF5D4 /* Pods-BunkBiteTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-BunkBiteTests.release.xcconfig"; path = "Target Support Files/Pods-BunkBiteTests/Pods-BunkBiteTests.release.xcconfig"; sourceTree = "<group>"; };
+		5F423CCBC0FFEE8B591DCF5D /* Pods_BunkBiteTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_BunkBiteTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		63A1C9D32EBCAB4100DB1141 /* Urbanist-Black.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Urbanist-Black.ttf"; sourceTree = "<group>"; };
 		63A1C9D42EBCAB4100DB1141 /* Urbanist-Bold.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Urbanist-Bold.ttf"; sourceTree = "<group>"; };
 		63A1C9D52EBCAB4100DB1141 /* Urbanist-Light.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Urbanist-Light.ttf"; sourceTree = "<group>"; };
@@ -49,8 +53,14 @@
 		63B2D6F52EBC558200D6B594 /* BunkBite.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BunkBite.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		63B2D7022EBC558500D6B594 /* BunkBiteTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = BunkBiteTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		63B2D70C2EBC558500D6B594 /* BunkBiteUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = BunkBiteUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		82AAF4FA92080D48814C9AD5 /* Pods_BunkBite.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_BunkBite.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		CD5C4F9BC66027A1B4DEF478 /* Pods-BunkBite.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-BunkBite.release.xcconfig"; path = "Target Support Files/Pods-BunkBite/Pods-BunkBite.release.xcconfig"; sourceTree = "<group>"; };
+		9DC0C0E3B2972A7EA03E5F25 /* Pods-BunkBite.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-BunkBite.release.xcconfig"; path = "Target Support Files/Pods-BunkBite/Pods-BunkBite.release.xcconfig"; sourceTree = "<group>"; };
+		A92C07AC138F574EA4A38F0D /* Pods-BunkBite-BunkBiteUITests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-BunkBite-BunkBiteUITests.release.xcconfig"; path = "Target Support Files/Pods-BunkBite-BunkBiteUITests/Pods-BunkBite-BunkBiteUITests.release.xcconfig"; sourceTree = "<group>"; };
+		B7AC5C4709C2B7CEB177485C /* Pods-BunkBite-BunkBiteTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-BunkBite-BunkBiteTests.debug.xcconfig"; path = "Target Support Files/Pods-BunkBite-BunkBiteTests/Pods-BunkBite-BunkBiteTests.debug.xcconfig"; sourceTree = "<group>"; };
+		BAB4144217CA1EFF7E603677 /* Pods-BunkBite-BunkBiteTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-BunkBite-BunkBiteTests.release.xcconfig"; path = "Target Support Files/Pods-BunkBite-BunkBiteTests/Pods-BunkBite-BunkBiteTests.release.xcconfig"; sourceTree = "<group>"; };
+		C60DB521007097E70925C17D /* Pods_BunkBite_BunkBiteUITests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_BunkBite_BunkBiteUITests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		DFD2339DD84CD109AD268DA3 /* Pods-BunkBite.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-BunkBite.debug.xcconfig"; path = "Target Support Files/Pods-BunkBite/Pods-BunkBite.debug.xcconfig"; sourceTree = "<group>"; };
+		E205EE7E0E603F3D7F0D7D70 /* Pods-BunkBiteTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-BunkBiteTests.debug.xcconfig"; path = "Target Support Files/Pods-BunkBiteTests/Pods-BunkBiteTests.debug.xcconfig"; sourceTree = "<group>"; };
+		EC5D3A03BF5CF5942C09DED4 /* Pods_BunkBite.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_BunkBite.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -74,15 +84,11 @@
 		};
 		63B2D7052EBC558500D6B594 /* BunkBiteTests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-			);
 			path = BunkBiteTests;
 			sourceTree = "<group>";
 		};
 		63B2D70F2EBC558500D6B594 /* BunkBiteUITests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-			);
 			path = BunkBiteUITests;
 			sourceTree = "<group>";
 		};
@@ -96,7 +102,7 @@
 				63CA39D22EBDA8D700BA14DC /* Shimmer in Frameworks */,
 				63CA39CF2EBDA8A100BA14DC /* ConfettiSwiftUI in Frameworks */,
 				639395B52EBCA17E00A70F09 /* PopupView in Frameworks */,
-				08627B1F2D89B7283CA054CC /* Pods_BunkBite.framework in Frameworks */,
+				0F203D135843B717D9506EDB /* Pods_BunkBite.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -104,6 +110,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A5E0E8A5419739B7AFB830DE /* Pods_BunkBiteTests.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -111,16 +118,19 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				7741F97A98FD77848B03A071 /* Pods_BunkBite_BunkBiteUITests.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		2A456B0BDC519510E385EA28 /* Frameworks */ = {
+		03011BB77153764EA6322B70 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				82AAF4FA92080D48814C9AD5 /* Pods_BunkBite.framework */,
+				EC5D3A03BF5CF5942C09DED4 /* Pods_BunkBite.framework */,
+				C60DB521007097E70925C17D /* Pods_BunkBite_BunkBiteUITests.framework */,
+				5F423CCBC0FFEE8B591DCF5D /* Pods_BunkBiteTests.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -128,8 +138,14 @@
 		516F5E9C226F2FEE59C7CE50 /* Pods */ = {
 			isa = PBXGroup;
 			children = (
-				0E060DFDE2BCD087DD33080D /* Pods-BunkBite.debug.xcconfig */,
-				CD5C4F9BC66027A1B4DEF478 /* Pods-BunkBite.release.xcconfig */,
+				DFD2339DD84CD109AD268DA3 /* Pods-BunkBite.debug.xcconfig */,
+				9DC0C0E3B2972A7EA03E5F25 /* Pods-BunkBite.release.xcconfig */,
+				3B6601629447871CBE15B808 /* Pods-BunkBite-BunkBiteUITests.debug.xcconfig */,
+				A92C07AC138F574EA4A38F0D /* Pods-BunkBite-BunkBiteUITests.release.xcconfig */,
+				E205EE7E0E603F3D7F0D7D70 /* Pods-BunkBiteTests.debug.xcconfig */,
+				4C7AB19D281E2047FCCCF5D4 /* Pods-BunkBiteTests.release.xcconfig */,
+				B7AC5C4709C2B7CEB177485C /* Pods-BunkBite-BunkBiteTests.debug.xcconfig */,
+				BAB4144217CA1EFF7E603677 /* Pods-BunkBite-BunkBiteTests.release.xcconfig */,
 			);
 			path = Pods;
 			sourceTree = "<group>";
@@ -157,7 +173,7 @@
 				63B2D70F2EBC558500D6B594 /* BunkBiteUITests */,
 				63B2D6F62EBC558200D6B594 /* Products */,
 				516F5E9C226F2FEE59C7CE50 /* Pods */,
-				2A456B0BDC519510E385EA28 /* Frameworks */,
+				03011BB77153764EA6322B70 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -178,11 +194,11 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 63B2D7162EBC558500D6B594 /* Build configuration list for PBXNativeTarget "BunkBite" */;
 			buildPhases = (
-				3E4BB87C39099CE6B86024BD /* [CP] Check Pods Manifest.lock */,
+				7B0A34DDC8DDEB2D92372D8E /* [CP] Check Pods Manifest.lock */,
 				63B2D6F12EBC558200D6B594 /* Sources */,
 				63B2D6F22EBC558200D6B594 /* Frameworks */,
 				63B2D6F32EBC558200D6B594 /* Resources */,
-				978D52A059690E6CFBB6A74E /* [CP] Embed Pods Frameworks */,
+				42E9E77D2F37A96C35776D5E /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -205,6 +221,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 63B2D7192EBC558500D6B594 /* Build configuration list for PBXNativeTarget "BunkBiteTests" */;
 			buildPhases = (
+				6FBE5CEF38DE83C5D3707EC0 /* [CP] Check Pods Manifest.lock */,
 				63B2D6FE2EBC558500D6B594 /* Sources */,
 				63B2D6FF2EBC558500D6B594 /* Frameworks */,
 				63B2D7002EBC558500D6B594 /* Resources */,
@@ -226,9 +243,11 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 63B2D71C2EBC558500D6B594 /* Build configuration list for PBXNativeTarget "BunkBiteUITests" */;
 			buildPhases = (
+				842E99276D72A410E6B815D7 /* [CP] Check Pods Manifest.lock */,
 				63B2D7082EBC558500D6B594 /* Sources */,
 				63B2D7092EBC558500D6B594 /* Frameworks */,
 				63B2D70A2EBC558500D6B594 /* Resources */,
+				91AA034C2C33E2A0C4737089 /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -324,7 +343,50 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
-		3E4BB87C39099CE6B86024BD /* [CP] Check Pods Manifest.lock */ = {
+		42E9E77D2F37A96C35776D5E /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-BunkBite/Pods-BunkBite-frameworks-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			inputPaths = (
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-BunkBite/Pods-BunkBite-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-BunkBite/Pods-BunkBite-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		6FBE5CEF38DE83C5D3707EC0 /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-BunkBiteTests-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+		7B0A34DDC8DDEB2D92372D8E /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -346,21 +408,47 @@
 			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
 			showEnvVarsInLog = 0;
 		};
-		978D52A059690E6CFBB6A74E /* [CP] Embed Pods Frameworks */ = {
+		842E99276D72A410E6B815D7 /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			inputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-BunkBite/Pods-BunkBite-frameworks-${CONFIGURATION}-input-files.xcfilelist",
 			);
-			name = "[CP] Embed Pods Frameworks";
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
 			outputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-BunkBite/Pods-BunkBite-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-BunkBite-BunkBiteUITests-checkManifestLockResult.txt",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-BunkBite/Pods-BunkBite-frameworks.sh\"\n";
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+		91AA034C2C33E2A0C4737089 /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-BunkBite-BunkBiteUITests/Pods-BunkBite-BunkBiteUITests-frameworks-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			inputPaths = (
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-BunkBite-BunkBiteUITests/Pods-BunkBite-BunkBiteUITests-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-BunkBite-BunkBiteUITests/Pods-BunkBite-BunkBiteUITests-frameworks.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
 /* End PBXShellScriptBuildPhase section */
@@ -441,7 +529,7 @@
 				DEVELOPMENT_TEAM = 3S9PPRUG6U;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
-				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GCC_C_LANGUAGE_STANDARD = gnu17;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_NO_COMMON_BLOCKS = YES;
@@ -505,7 +593,7 @@
 				DEVELOPMENT_TEAM = 3S9PPRUG6U;
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
-				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GCC_C_LANGUAGE_STANDARD = gnu17;
 				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
@@ -526,7 +614,7 @@
 		};
 		63B2D7172EBC558500D6B594 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 0E060DFDE2BCD087DD33080D /* Pods-BunkBite.debug.xcconfig */;
+			baseConfigurationReference = DFD2339DD84CD109AD268DA3 /* Pods-BunkBite.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -563,7 +651,7 @@
 		};
 		63B2D7182EBC558500D6B594 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = CD5C4F9BC66027A1B4DEF478 /* Pods-BunkBite.release.xcconfig */;
+			baseConfigurationReference = 9DC0C0E3B2972A7EA03E5F25 /* Pods-BunkBite.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -600,6 +688,7 @@
 		};
 		63B2D71A2EBC558500D6B594 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = E205EE7E0E603F3D7F0D7D70 /* Pods-BunkBiteTests.debug.xcconfig */;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
@@ -622,6 +711,7 @@
 		};
 		63B2D71B2EBC558500D6B594 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 4C7AB19D281E2047FCCCF5D4 /* Pods-BunkBiteTests.release.xcconfig */;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
@@ -644,6 +734,7 @@
 		};
 		63B2D71D2EBC558500D6B594 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 3B6601629447871CBE15B808 /* Pods-BunkBite-BunkBiteUITests.debug.xcconfig */;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
@@ -664,6 +755,7 @@
 		};
 		63B2D71E2EBC558500D6B594 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = A92C07AC138F574EA4A38F0D /* Pods-BunkBite-BunkBiteUITests.release.xcconfig */;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;

@@ -82,7 +82,7 @@ struct UserMenuView: View {
         NavigationStack {
             Group {
                 if authViewModel.isAuthenticated {
-                    if let canteen = canteenViewModel.selectedCanteen {
+                    if canteenViewModel.selectedCanteen != nil {
                         menuContent
                     } else {
                         canteenSelectionPrompt
@@ -91,7 +91,7 @@ struct UserMenuView: View {
                     loginPrompt
                 }
             }
-            .onChange(of: canteenViewModel.selectedCanteen) { newCanteen in
+            .onChange(of: canteenViewModel.selectedCanteen) { _, newCanteen in
                 if let canteen = newCanteen, let token = authViewModel.authToken {
                     // Cancel any existing loading task
                     menuLoadingTask?.cancel()
