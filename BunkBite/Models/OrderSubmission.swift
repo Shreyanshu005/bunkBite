@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import UIKit
 
 // MARK: - Complete Order Submission Model
 // This captures ALL details needed to create an order on backend after payment
@@ -148,7 +149,7 @@ class OrderSubmissionHelper {
                 quantity: cartItem.quantity,
                 unitPrice: cartItem.menuItem.price,
                 totalPrice: cartItem.totalPrice,
-                category: cartItem.menuItem.category,
+                category: nil,  // Add category if MenuItem has it
                 customizations: nil  // Add if you have customizations
             )
         }

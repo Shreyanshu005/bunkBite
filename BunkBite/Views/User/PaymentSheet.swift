@@ -439,7 +439,10 @@ struct PaymentSheet: View {
         ]
 
         // Open Razorpay checkout
-        razorpay?.open(options, displayController: UIApplication.shared.windows.first?.rootViewController)
+        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+           let rootViewController = windowScene.windows.first?.rootViewController {
+            razorpay?.open(options, displayController: rootViewController)
+        }
     }
 
     private func handlePaymentSuccess(paymentId: String, orderId: String) {
