@@ -9,7 +9,12 @@ import SwiftUI
 
 struct Constants {
     // API
-    static let baseURL = "http://13.204.203.159"
+    static let baseURL = "https://api.bunkbite.me"
+
+    // Razorpay Configuration
+    // Get your key from: https://dashboard.razorpay.com/app/keys
+    // Use TEST key for development, LIVE key for production
+    static let razorpayKey = "rzp_test_RgMWemF69VDJHw"  // Replace with actual key
 
     // Colors
     static let primaryColor = Color(hex: "#f62f56")

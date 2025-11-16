@@ -92,10 +92,10 @@ struct OwnerCanteensView: View {
                 }
             } else {
                 ForEach(canteenViewModel.canteens) { canteen in
-                    CanteenCard(canteen: canteen) {
+                    OwnerCanteenCard(canteen: canteen, onTap: {
                         canteenViewModel.selectedCanteen = canteen
                         showInventory = true
-                    }
+                    })
                 }
             }
         }
@@ -112,7 +112,7 @@ struct OwnerCanteensView: View {
     }
 }
 
-struct CanteenCard: View {
+struct OwnerCanteenCard: View {
     let canteen: Canteen
     let onTap: () -> Void
 

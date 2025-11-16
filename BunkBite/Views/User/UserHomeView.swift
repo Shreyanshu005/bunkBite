@@ -20,11 +20,11 @@ struct UserHomeView: View {
                     // Header
                     VStack(alignment: .leading, spacing: 8) {
                         Text("Hello, \(viewModel.currentUser?.name ?? "Guest")!")
-                            .font(.system(size: 28, weight: .bold))
+                            .font(.urbanist(size: 28, weight: .bold))
                             .foregroundColor(Constants.textColor)
 
                         Text("What would you like to eat today?")
-                            .font(.system(size: 16))
+                            .font(.urbanist(size: 16, weight: .regular))
                             .foregroundColor(Constants.darkGray)
                     }
                     .padding(.horizontal, 24)
@@ -49,18 +49,18 @@ struct UserHomeView: View {
                                 Image(systemName: "flame.fill")
                                     .foregroundColor(.white)
                                 Text("TODAY'S SPECIAL")
-                                    .font(.system(size: 12, weight: .bold))
+                                    .font(.urbanist(size: 12, weight: .bold))
                                     .foregroundColor(.white)
 
                                 Spacer()
                             }
 
                             Text("Fresh & Delicious")
-                                .font(.system(size: 24, weight: .bold))
+                                .font(.urbanist(size: 24, weight: .bold))
                                 .foregroundColor(.white)
 
                             Text("Order now and get it fresh from the kitchen")
-                                .font(.system(size: 14))
+                                .font(.urbanist(size: 14, weight: .regular))
                                 .foregroundColor(.white.opacity(0.9))
 
                             Spacer()
@@ -68,7 +68,7 @@ struct UserHomeView: View {
                             HStack {
                                 Button(action: {}) {
                                     Text("Order Now")
-                                        .font(.system(size: 14, weight: .semibold))
+                                        .font(.urbanist(size: 14, weight: .semibold))
                                         .foregroundColor(Constants.primaryColor)
                                         .padding(.horizontal, 20)
                                         .padding(.vertical, 10)
@@ -87,7 +87,7 @@ struct UserHomeView: View {
                     // Quick Actions
                     VStack(alignment: .leading, spacing: 16) {
                         Text("Quick Actions")
-                            .font(.system(size: 20, weight: .bold))
+                            .font(.urbanist(size: 20, weight: .bold))
                             .foregroundColor(Constants.textColor)
                             .padding(.horizontal, 24)
 
@@ -107,7 +107,7 @@ struct UserHomeView: View {
                     // Categories
                     VStack(alignment: .leading, spacing: 16) {
                         Text("Categories")
-                            .font(.system(size: 20, weight: .bold))
+                            .font(.urbanist(size: 20, weight: .bold))
                             .foregroundColor(Constants.textColor)
                             .padding(.horizontal, 24)
 
@@ -164,7 +164,7 @@ struct QuickActionCard: View {
                     )
 
                 Text(title)
-                    .font(.system(size: 14, weight: .medium))
+                    .font(.urbanist(size: 14, weight: .medium))
                     .foregroundColor(Constants.textColor)
             }
             .frame(width: 100)
@@ -200,12 +200,13 @@ struct CategoryCard: View {
                     )
 
                 Text(title)
-                    .font(.system(size: 16, weight: .semibold))
+                    .font(.urbanist(size: 16, weight: .semibold))
                     .foregroundColor(Constants.textColor)
             }
             .frame(width: 140, height: 120)
-            .background(Constants.lightGray)
+            .background(Color.white)
             .cornerRadius(16)
+            .shadow(color: .black.opacity(0.05), radius: 8, x: 0, y: 2)
         }
         .scaleEffect(isPressed ? 0.95 : 1.0)
     }

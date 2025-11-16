@@ -10,11 +10,27 @@ import SwiftUI
 @main
 struct BunkBiteApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
+    @State private var showLaunchScreen = true
 
     var body: some Scene {
         WindowGroup {
-            RootView()
-                .preferredColorScheme(.light)
+            ZStack {
+                RootView()
+                    .preferredColorScheme(.light)
+
+                if showLaunchScreen {
+                    LaunchScreenView()
+                        .transition(.opacity)
+                        .zIndex(1)
+                }
+            }
+            .onAppear {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+                    withAnimation(.easeOut(duration: 0.5)) {
+                        showLaunchScreen = false
+                    }
+                }
+            }
         }
     }
 }

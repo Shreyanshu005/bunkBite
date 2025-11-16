@@ -85,6 +85,7 @@ class AuthViewModel: ObservableObject {
         // Clear UserDefaults
         UserDefaults.standard.removeObject(forKey: "authToken")
         UserDefaults.standard.removeObject(forKey: "userData")
+        UserDefaults.standard.removeObject(forKey: "selectedCanteen")
 
         // Notify RootView about logout
         NotificationCenter.default.post(name: NSNotification.Name("UserDidLogout"), object: nil)

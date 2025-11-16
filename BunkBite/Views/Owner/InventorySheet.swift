@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import PopupView
 
 struct InventorySheet: View {
     let canteen: Canteen
@@ -176,47 +177,48 @@ struct InventoryItemRow: View {
     let onEdit: () -> Void
 
     var body: some View {
-        Button(action: onEdit) {
-            HStack(spacing: 12) {
-                // Item image
-                RoundedRectangle(cornerRadius: 8)
-                    .fill(.ultraThinMaterial)
-                    .frame(width: 60, height: 60)
-                    .overlay(
-                        Image(systemName: "fork.knife")
-                            .foregroundStyle(.secondary)
-                    )
+        HStack(spacing: 12) {
+            // Item image
+            RoundedRectangle(cornerRadius: 8)
+                .fill(.ultraThinMaterial)
+                .frame(width: 60, height: 60)
+                .overlay(
+                    Image(systemName: "fork.knife")
+                        .foregroundStyle(.secondary)
+                )
 
-                // Item details
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(item.name)
-                        .font(.headline)
-                        .foregroundStyle(.primary)
+            // Item details
+            VStack(alignment: .leading, spacing: 4) {
+                Text(item.name)
+                    .font(.headline)
+                    .foregroundStyle(.black)
 
-                    Text("₹\(Int(item.price))")
-                        .font(.subheadline)
-                        .fontWeight(.semibold)
-                        .foregroundStyle(Constants.primaryColor)
+                Text("₹\(Int(item.price))")
+                    .font(.subheadline)
+                    .fontWeight(.semibold)
+                    .foregroundStyle(Constants.primaryColor)
 
-                    HStack {
-                        if item.availableQuantity > 0 {
-                            Text("\(item.availableQuantity) available")
-                                .font(.caption)
-                                .foregroundStyle(.green)
-                        } else {
-                            Text("Out of stock")
-                                .font(.caption)
-                                .foregroundStyle(.red)
-                        }
+                HStack {
+                    if item.availableQuantity > 0 {
+                        Text("\(item.availableQuantity) available")
+                            .font(.caption)
+                            .foregroundStyle(.green)
+                    } else {
+                        Text("Out of stock")
+                            .font(.caption)
+                            .foregroundStyle(.red)
                     }
                 }
-
-                Spacer()
-
-                Image(systemName: "chevron.right")
-                    .foregroundStyle(.secondary)
-                    .font(.caption)
             }
+
+            Spacer()
+
+            Button(action: onEdit) {
+                Image(systemName: "square.and.pencil")
+                    .foregroundStyle(Constants.primaryColor)
+                    .font(.title3)
+            }
+            .buttonStyle(.plain)
         }
         .padding(.vertical, 4)
     }

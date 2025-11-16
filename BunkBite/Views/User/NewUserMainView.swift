@@ -38,7 +38,7 @@ struct NewUserMainView: View {
                 }
 
             // Profile Tab
-            NewUserProfileView(authViewModel: authViewModel, showLoginSheet: $showLoginSheet)
+            UserProfileView(viewModel: authViewModel, showLoginSheet: $showLoginSheet)
                 .tabItem {
                     Label("Profile", systemImage: "person")
                 }

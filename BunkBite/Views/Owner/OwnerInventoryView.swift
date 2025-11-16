@@ -75,11 +75,11 @@ struct OwnerInventoryView: View {
                 // Categories
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: 12) {
-                        CategoryFilterChip(title: "All", isSelected: true)
-                        CategoryFilterChip(title: "Beverages", isSelected: false)
-                        CategoryFilterChip(title: "Meals", isSelected: false)
-                        CategoryFilterChip(title: "Snacks", isSelected: false)
-                        CategoryFilterChip(title: "Healthy", isSelected: false)
+                        FilterChip(title: "All", isSelected: true, action: {})
+                        FilterChip(title: "Beverages", isSelected: false, action: {})
+                        FilterChip(title: "Meals", isSelected: false, action: {})
+                        FilterChip(title: "Snacks", isSelected: false, action: {})
+                        FilterChip(title: "Healthy", isSelected: false, action: {})
                     }
                     .padding(.horizontal, 24)
                 }
@@ -154,33 +154,6 @@ struct StatsCard: View {
     }
 }
 
-struct CategoryFilterChip: View {
-    let title: String
-    let isSelected: Bool
-    @State private var isPressed = false
-
-    var body: some View {
-        Button(action: {
-            withAnimation(Constants.quickBounce) {
-                isPressed = true
-            }
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                withAnimation(Constants.quickBounce) {
-                    isPressed = false
-                }
-            }
-        }) {
-            Text(title)
-                .font(.system(size: 14, weight: isSelected ? .semibold : .regular))
-                .foregroundColor(isSelected ? .white : Constants.textColor)
-                .padding(.horizontal, 20)
-                .padding(.vertical, 10)
-                .background(isSelected ? Constants.primaryColor : Constants.lightGray)
-                .cornerRadius(20)
-        }
-        .scaleEffect(isPressed ? 0.9 : 1.0)
-    }
-}
 
 struct InventoryItemCard: View {
     let name: String

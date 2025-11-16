@@ -9,6 +9,7 @@ import SwiftUI
 
 struct UserProfileView: View {
     @ObservedObject var viewModel: AuthViewModel
+    @Binding var showLoginSheet: Bool
     @State private var showContent = false
     @State private var showLogoutAlert = false
 
@@ -16,79 +17,10 @@ struct UserProfileView: View {
         ZStack {
             Constants.backgroundColor.ignoresSafeArea()
 
-            ScrollView {
-                VStack(spacing: 24) {
-                    // Profile Header
-                    VStack(spacing: 16) {
-                        Circle()
-                            .fill(Constants.primaryColor.opacity(0.1))
-                            .frame(width: 100, height: 100)
-                            .overlay(
-                                Text(String(viewModel.currentUser?.name.prefix(1) ?? "U"))
-                                    .font(.system(size: 40, weight: .bold))
-                                    .foregroundColor(Constants.primaryColor)
-                            )
-                            .scaleEffect(showContent ? 1 : 0.5)
-                            .opacity(showContent ? 1 : 0)
-
-                        VStack(spacing: 4) {
-                            Text(viewModel.currentUser?.name ?? "User")
-                                .font(.system(size: 24, weight: .bold))
-                                .foregroundColor(Constants.textColor)
-
-                            Text(viewModel.currentUser?.email ?? "")
-                                .font(.system(size: 14))
-                                .foregroundColor(Constants.darkGray)
-                        }
-                        .offset(y: showContent ? 0 : 20)
-                        .opacity(showContent ? 1 : 0)
-                    }
-                    .padding(.top, 40)
-                    .padding(.bottom, 20)
-
-                    // Profile Options
-                    VStack(spacing: 16) {
-                        ProfileOptionCard(icon: "person.fill", title: "Edit Profile", subtitle: "Update your details")
-                        ProfileOptionCard(icon: "bell.fill", title: "Notifications", subtitle: "Manage notifications")
-                        ProfileOptionCard(icon: "creditcard.fill", title: "Payment Methods", subtitle: "Manage payment options")
-                        ProfileOptionCard(icon: "mappin.circle.fill", title: "Saved Addresses", subtitle: "Manage delivery addresses")
-                        ProfileOptionCard(icon: "heart.fill", title: "Favorites", subtitle: "Your favorite items")
-                        ProfileOptionCard(icon: "questionmark.circle.fill", title: "Help & Support", subtitle: "Get help with your orders")
-                        ProfileOptionCard(icon: "doc.text.fill", title: "Terms & Privacy", subtitle: "Legal information")
-                    }
-                    .padding(.horizontal, 24)
-                    .offset(y: showContent ? 0 : 30)
-                    .opacity(showContent ? 1 : 0)
-
-                    // Logout Button
-                    Button(action: {
-                        showLogoutAlert = true
-                    }) {
-                        HStack {
-                            Image(systemName: "rectangle.portrait.and.arrow.right")
-                                .font(.system(size: 20))
-                            Text("Logout")
-                                .font(.system(size: 16, weight: .semibold))
-                        }
-                        .foregroundColor(Constants.primaryColor)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 16)
-                        .background(Constants.primaryColor.opacity(0.1))
-                        .cornerRadius(16)
-                    }
-                    .padding(.horizontal, 24)
-                    .padding(.top, 8)
-                    .offset(y: showContent ? 0 : 30)
-                    .opacity(showContent ? 1 : 0)
-
-                    Text("Version 1.0.0")
-                        .font(.system(size: 12))
-                        .foregroundColor(Constants.darkGray)
-                        .padding(.top, 16)
-                        .opacity(showContent ? 1 : 0)
-
-                    Spacer(minLength: 100)
-                }
+            if viewModel.isAuthenticated {
+                profileContent
+            } else {
+                loginPrompt
             }
         }
         .alert("Logout", isPresented: $showLogoutAlert) {
@@ -107,56 +39,185 @@ struct UserProfileView: View {
             }
         }
     }
-}
 
-struct ProfileOptionCard: View {
-    let icon: String
-    let title: String
-    let subtitle: String
-    @State private var isPressed = false
+    private var loginPrompt: some View {
+        VStack(spacing: 0) {
+            Spacer()
 
-    var body: some View {
-        Button(action: {
-            withAnimation(Constants.quickBounce) {
-                isPressed = true
-            }
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                withAnimation(Constants.quickBounce) {
-                    isPressed = false
+            VStack(spacing: 32) {
+                // Icon with animation
+                ZStack {
+                    Circle()
+                        .fill(Constants.primaryColor.opacity(0.1))
+                        .frame(width: 120, height: 120)
+                        .scaleEffect(showContent ? 1 : 0.8)
+
+                    Image(systemName: "person.circle")
+                        .font(.urbanist(size: 50, weight: .light))
+                        .foregroundStyle(Constants.primaryColor)
+                        .scaleEffect(showContent ? 1 : 0.5)
                 }
+
+                // Message
+                VStack(spacing: 12) {
+                    Text("Profile")
+                        .font(.urbanist(size: 28, weight: .bold))
+                        .foregroundStyle(.black)
+
+                    Text("Login to access your profile")
+                        .font(.urbanist(size: 16, weight: .regular))
+                        .foregroundStyle(.gray)
+                }
+                .opacity(showContent ? 1 : 0)
+                .offset(y: showContent ? 0 : 20)
+
+                // CTA Button
+                Button {
+                    showLoginSheet = true
+                } label: {
+                    Text("Login")
+                        .font(.urbanist(size: 17, weight: .semibold))
+                        .foregroundStyle(.white)
+                        .frame(width: 200)
+                        .padding(.vertical, 16)
+                        .background(Constants.primaryColor)
+                        .cornerRadius(12)
+                }
+                .padding(.top, 8)
+                .opacity(showContent ? 1 : 0)
+                .scaleEffect(showContent ? 1 : 0.9)
             }
-        }) {
-            HStack(spacing: 16) {
-                Circle()
-                    .fill(Constants.lightGray)
-                    .frame(width: 48, height: 48)
-                    .overlay(
-                        Image(systemName: icon)
-                            .font(.system(size: 20))
-                            .foregroundColor(Constants.primaryColor)
+            .padding(.horizontal, 40)
+
+            Spacer()
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(Constants.backgroundColor)
+    }
+
+    private var profileContent: some View {
+        ScrollView {
+            VStack(spacing: 32) {
+                // Profile Header
+                VStack(spacing: 20) {
+                    // Avatar
+                    Circle()
+                        .fill(Constants.primaryColor.opacity(0.1))
+                        .frame(width: 100, height: 100)
+                        .overlay(
+                            Text(String(viewModel.currentUser?.name.prefix(1) ?? "U"))
+                                .font(.urbanist(size: 40, weight: .bold))
+                                .foregroundColor(Constants.primaryColor)
+                        )
+                        .scaleEffect(showContent ? 1 : 0.5)
+                        .opacity(showContent ? 1 : 0)
+
+                    // User Info
+                    VStack(spacing: 8) {
+                        Text(viewModel.currentUser?.name ?? "User")
+                            .font(.urbanist(size: 28, weight: .bold))
+                            .foregroundColor(.black)
+
+                        Text(viewModel.currentUser?.email ?? "")
+                            .font(.urbanist(size: 15, weight: .regular))
+                            .foregroundColor(.gray)
+                    }
+                    .offset(y: showContent ? 0 : 20)
+                    .opacity(showContent ? 1 : 0)
+                }
+                .padding(.top, 60)
+
+                // User Details Card
+                VStack(spacing: 0) {
+                    ProfileDetailRow(
+                        icon: "person.fill",
+                        label: "Name",
+                        value: viewModel.currentUser?.name ?? "N/A"
                     )
 
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(title)
-                        .font(.system(size: 16, weight: .semibold))
-                        .foregroundColor(Constants.textColor)
+                    Divider()
+                        .padding(.leading, 56)
 
-                    Text(subtitle)
-                        .font(.system(size: 13))
-                        .foregroundColor(Constants.darkGray)
+                    ProfileDetailRow(
+                        icon: "envelope.fill",
+                        label: "Email",
+                        value: viewModel.currentUser?.email ?? "N/A"
+                    )
+
+                    Divider()
+                        .padding(.leading, 56)
+
+                    ProfileDetailRow(
+                        icon: "person.badge.shield.checkmark.fill",
+                        label: "Role",
+                        value: viewModel.currentUser?.role.capitalized ?? "N/A"
+                    )
                 }
+                .background(Color.white)
+                .cornerRadius(16)
+                .shadow(color: .black.opacity(0.05), radius: 10, x: 0, y: 2)
+                .padding(.horizontal, 24)
+                .offset(y: showContent ? 0 : 30)
+                .opacity(showContent ? 1 : 0)
 
-                Spacer()
+                // Logout Button
+                Button(action: {
+                    showLogoutAlert = true
+                }) {
+                    HStack(spacing: 12) {
+                        Image(systemName: "rectangle.portrait.and.arrow.right")
+                            .font(.system(size: 20))
+                        Text("Logout")
+                            .font(.urbanist(size: 17, weight: .semibold))
+                    }
+                    .foregroundColor(.white)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 16)
+                    .background(Constants.primaryColor)
+                    .cornerRadius(16)
+                }
+                .padding(.horizontal, 24)
+                .padding(.top, 16)
+                .offset(y: showContent ? 0 : 30)
+                .opacity(showContent ? 1 : 0)
 
-                Image(systemName: "chevron.right")
-                    .font(.system(size: 14, weight: .semibold))
-                    .foregroundColor(Constants.darkGray)
+                Spacer(minLength: 60)
             }
-            .padding(16)
-            .background(Color.white)
-            .cornerRadius(12)
-            .shadow(color: Color.black.opacity(0.04), radius: 8, x: 0, y: 2)
         }
-        .scaleEffect(isPressed ? 0.97 : 1.0)
+    }
+}
+
+struct ProfileDetailRow: View {
+    let icon: String
+    let label: String
+    let value: String
+
+    var body: some View {
+        HStack(spacing: 16) {
+            // Icon
+            Circle()
+                .fill(Constants.primaryColor.opacity(0.1))
+                .frame(width: 40, height: 40)
+                .overlay(
+                    Image(systemName: icon)
+                        .font(.system(size: 18))
+                        .foregroundColor(Constants.primaryColor)
+                )
+
+            // Label & Value
+            VStack(alignment: .leading, spacing: 4) {
+                Text(label)
+                    .font(.urbanist(size: 13, weight: .medium))
+                    .foregroundColor(.gray)
+
+                Text(value)
+                    .font(.urbanist(size: 16, weight: .semibold))
+                    .foregroundColor(.black)
+            }
+
+            Spacer()
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 16)
     }
 }

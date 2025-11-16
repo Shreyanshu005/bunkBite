@@ -6,6 +6,20 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		08627B1F2D89B7283CA054CC /* Pods_BunkBite.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 82AAF4FA92080D48814C9AD5 /* Pods_BunkBite.framework */; };
+		639395B52EBCA17E00A70F09 /* PopupView in Frameworks */ = {isa = PBXBuildFile; productRef = 639395B42EBCA17E00A70F09 /* PopupView */; };
+		63A1C9DA2EBCAB4100DB1141 /* Urbanist-Light.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 63A1C9D52EBCAB4100DB1141 /* Urbanist-Light.ttf */; };
+		63A1C9DB2EBCAB4100DB1141 /* Urbanist-Thin.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 63A1C9D92EBCAB4100DB1141 /* Urbanist-Thin.ttf */; };
+		63A1C9DC2EBCAB4100DB1141 /* Urbanist-Medium.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 63A1C9D62EBCAB4100DB1141 /* Urbanist-Medium.ttf */; };
+		63A1C9DD2EBCAB4100DB1141 /* Urbanist-Bold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 63A1C9D42EBCAB4100DB1141 /* Urbanist-Bold.ttf */; };
+		63A1C9DE2EBCAB4100DB1141 /* Urbanist-SemiBold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 63A1C9D82EBCAB4100DB1141 /* Urbanist-SemiBold.ttf */; };
+		63A1C9DF2EBCAB4100DB1141 /* Urbanist-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 63A1C9D72EBCAB4100DB1141 /* Urbanist-Regular.ttf */; };
+		63A1C9E02EBCAB4100DB1141 /* Urbanist-Black.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 63A1C9D32EBCAB4100DB1141 /* Urbanist-Black.ttf */; };
+		63CA39CF2EBDA8A100BA14DC /* ConfettiSwiftUI in Frameworks */ = {isa = PBXBuildFile; productRef = 63CA39CE2EBDA8A100BA14DC /* ConfettiSwiftUI */; };
+		63CA39D22EBDA8D700BA14DC /* Shimmer in Frameworks */ = {isa = PBXBuildFile; productRef = 63CA39D12EBDA8D700BA14DC /* Shimmer */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		63B2D7032EBC558500D6B594 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -24,9 +38,19 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		0E060DFDE2BCD087DD33080D /* Pods-BunkBite.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-BunkBite.debug.xcconfig"; path = "Target Support Files/Pods-BunkBite/Pods-BunkBite.debug.xcconfig"; sourceTree = "<group>"; };
+		63A1C9D32EBCAB4100DB1141 /* Urbanist-Black.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Urbanist-Black.ttf"; sourceTree = "<group>"; };
+		63A1C9D42EBCAB4100DB1141 /* Urbanist-Bold.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Urbanist-Bold.ttf"; sourceTree = "<group>"; };
+		63A1C9D52EBCAB4100DB1141 /* Urbanist-Light.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Urbanist-Light.ttf"; sourceTree = "<group>"; };
+		63A1C9D62EBCAB4100DB1141 /* Urbanist-Medium.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Urbanist-Medium.ttf"; sourceTree = "<group>"; };
+		63A1C9D72EBCAB4100DB1141 /* Urbanist-Regular.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Urbanist-Regular.ttf"; sourceTree = "<group>"; };
+		63A1C9D82EBCAB4100DB1141 /* Urbanist-SemiBold.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Urbanist-SemiBold.ttf"; sourceTree = "<group>"; };
+		63A1C9D92EBCAB4100DB1141 /* Urbanist-Thin.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Urbanist-Thin.ttf"; sourceTree = "<group>"; };
 		63B2D6F52EBC558200D6B594 /* BunkBite.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BunkBite.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		63B2D7022EBC558500D6B594 /* BunkBiteTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = BunkBiteTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		63B2D70C2EBC558500D6B594 /* BunkBiteUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = BunkBiteUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		82AAF4FA92080D48814C9AD5 /* Pods_BunkBite.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_BunkBite.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		CD5C4F9BC66027A1B4DEF478 /* Pods-BunkBite.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-BunkBite.release.xcconfig"; path = "Target Support Files/Pods-BunkBite/Pods-BunkBite.release.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -50,11 +74,15 @@
 		};
 		63B2D7052EBC558500D6B594 /* BunkBiteTests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+			);
 			path = BunkBiteTests;
 			sourceTree = "<group>";
 		};
 		63B2D70F2EBC558500D6B594 /* BunkBiteUITests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+			);
 			path = BunkBiteUITests;
 			sourceTree = "<group>";
 		};
@@ -65,6 +93,10 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				63CA39D22EBDA8D700BA14DC /* Shimmer in Frameworks */,
+				63CA39CF2EBDA8A100BA14DC /* ConfettiSwiftUI in Frameworks */,
+				639395B52EBCA17E00A70F09 /* PopupView in Frameworks */,
+				08627B1F2D89B7283CA054CC /* Pods_BunkBite.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -85,13 +117,47 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		2A456B0BDC519510E385EA28 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				82AAF4FA92080D48814C9AD5 /* Pods_BunkBite.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		516F5E9C226F2FEE59C7CE50 /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				0E060DFDE2BCD087DD33080D /* Pods-BunkBite.debug.xcconfig */,
+				CD5C4F9BC66027A1B4DEF478 /* Pods-BunkBite.release.xcconfig */,
+			);
+			path = Pods;
+			sourceTree = "<group>";
+		};
+		63A1C9D22EBCAADB00DB1141 /* fonts */ = {
+			isa = PBXGroup;
+			children = (
+				63A1C9D32EBCAB4100DB1141 /* Urbanist-Black.ttf */,
+				63A1C9D42EBCAB4100DB1141 /* Urbanist-Bold.ttf */,
+				63A1C9D52EBCAB4100DB1141 /* Urbanist-Light.ttf */,
+				63A1C9D62EBCAB4100DB1141 /* Urbanist-Medium.ttf */,
+				63A1C9D72EBCAB4100DB1141 /* Urbanist-Regular.ttf */,
+				63A1C9D82EBCAB4100DB1141 /* Urbanist-SemiBold.ttf */,
+				63A1C9D92EBCAB4100DB1141 /* Urbanist-Thin.ttf */,
+			);
+			path = fonts;
+			sourceTree = "<group>";
+		};
 		63B2D6EC2EBC558200D6B594 = {
 			isa = PBXGroup;
 			children = (
+				63A1C9D22EBCAADB00DB1141 /* fonts */,
 				63B2D6F72EBC558200D6B594 /* BunkBite */,
 				63B2D7052EBC558500D6B594 /* BunkBiteTests */,
 				63B2D70F2EBC558500D6B594 /* BunkBiteUITests */,
 				63B2D6F62EBC558200D6B594 /* Products */,
+				516F5E9C226F2FEE59C7CE50 /* Pods */,
+				2A456B0BDC519510E385EA28 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -112,9 +178,11 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 63B2D7162EBC558500D6B594 /* Build configuration list for PBXNativeTarget "BunkBite" */;
 			buildPhases = (
+				3E4BB87C39099CE6B86024BD /* [CP] Check Pods Manifest.lock */,
 				63B2D6F12EBC558200D6B594 /* Sources */,
 				63B2D6F22EBC558200D6B594 /* Frameworks */,
 				63B2D6F32EBC558200D6B594 /* Resources */,
+				978D52A059690E6CFBB6A74E /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -125,6 +193,9 @@
 			);
 			name = BunkBite;
 			packageProductDependencies = (
+				639395B42EBCA17E00A70F09 /* PopupView */,
+				63CA39CE2EBDA8A100BA14DC /* ConfettiSwiftUI */,
+				63CA39D12EBDA8D700BA14DC /* Shimmer */,
 			);
 			productName = BunkBite;
 			productReference = 63B2D6F52EBC558200D6B594 /* BunkBite.app */;
@@ -147,8 +218,6 @@
 				63B2D7052EBC558500D6B594 /* BunkBiteTests */,
 			);
 			name = BunkBiteTests;
-			packageProductDependencies = (
-			);
 			productName = BunkBiteTests;
 			productReference = 63B2D7022EBC558500D6B594 /* BunkBiteTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
@@ -170,8 +239,6 @@
 				63B2D70F2EBC558500D6B594 /* BunkBiteUITests */,
 			);
 			name = BunkBiteUITests;
-			packageProductDependencies = (
-			);
 			productName = BunkBiteUITests;
 			productReference = 63B2D70C2EBC558500D6B594 /* BunkBiteUITests.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
@@ -208,6 +275,11 @@
 			);
 			mainGroup = 63B2D6EC2EBC558200D6B594;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				639395B32EBCA17E00A70F09 /* XCRemoteSwiftPackageReference "PopupView" */,
+				63CA39CD2EBDA8A100BA14DC /* XCRemoteSwiftPackageReference "ConfettiSwiftUI" */,
+				63CA39D02EBDA8D700BA14DC /* XCRemoteSwiftPackageReference "SwiftUI-Shimmer" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 63B2D6F62EBC558200D6B594 /* Products */;
 			projectDirPath = "";
@@ -225,6 +297,13 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				63A1C9DA2EBCAB4100DB1141 /* Urbanist-Light.ttf in Resources */,
+				63A1C9DB2EBCAB4100DB1141 /* Urbanist-Thin.ttf in Resources */,
+				63A1C9DC2EBCAB4100DB1141 /* Urbanist-Medium.ttf in Resources */,
+				63A1C9DD2EBCAB4100DB1141 /* Urbanist-Bold.ttf in Resources */,
+				63A1C9DE2EBCAB4100DB1141 /* Urbanist-SemiBold.ttf in Resources */,
+				63A1C9DF2EBCAB4100DB1141 /* Urbanist-Regular.ttf in Resources */,
+				63A1C9E02EBCAB4100DB1141 /* Urbanist-Black.ttf in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -243,6 +322,48 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		3E4BB87C39099CE6B86024BD /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-BunkBite-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+		978D52A059690E6CFBB6A74E /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-BunkBite/Pods-BunkBite-frameworks-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-BunkBite/Pods-BunkBite-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-BunkBite/Pods-BunkBite-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		63B2D6F12EBC558200D6B594 /* Sources */ = {
@@ -405,67 +526,75 @@
 		};
 		63B2D7172EBC558500D6B594 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 0E060DFDE2BCD087DD33080D /* Pods-BunkBite.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = 3S9PPRUG6U;
+				DEVELOPMENT_TEAM = 3BJDK999HQ;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = BunkBite/Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
-				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = canteen.BunkBite;
+				PRODUCT_BUNDLE_IDENTIFIER = com.shreyanshu.canteenapp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Debug;
 		};
 		63B2D7182EBC558500D6B594 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = CD5C4F9BC66027A1B4DEF478 /* Pods-BunkBite.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = 3S9PPRUG6U;
+				DEVELOPMENT_TEAM = 3BJDK999HQ;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = BunkBite/Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
-				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = canteen.BunkBite;
+				PRODUCT_BUNDLE_IDENTIFIER = com.shreyanshu.canteenapp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Release;
 		};
@@ -593,6 +722,51 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		639395B32EBCA17E00A70F09 /* XCRemoteSwiftPackageReference "PopupView" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/exyte/PopupView";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 4.1.15;
+			};
+		};
+		63CA39CD2EBDA8A100BA14DC /* XCRemoteSwiftPackageReference "ConfettiSwiftUI" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/simibac/ConfettiSwiftUI";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.0.3;
+			};
+		};
+		63CA39D02EBDA8D700BA14DC /* XCRemoteSwiftPackageReference "SwiftUI-Shimmer" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/markiv/SwiftUI-Shimmer";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.5.1;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		639395B42EBCA17E00A70F09 /* PopupView */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 639395B32EBCA17E00A70F09 /* XCRemoteSwiftPackageReference "PopupView" */;
+			productName = PopupView;
+		};
+		63CA39CE2EBDA8A100BA14DC /* ConfettiSwiftUI */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 63CA39CD2EBDA8A100BA14DC /* XCRemoteSwiftPackageReference "ConfettiSwiftUI" */;
+			productName = ConfettiSwiftUI;
+		};
+		63CA39D12EBDA8D700BA14DC /* Shimmer */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 63CA39D02EBDA8D700BA14DC /* XCRemoteSwiftPackageReference "SwiftUI-Shimmer" */;
+			productName = Shimmer;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 63B2D6ED2EBC558200D6B594 /* Project object */;
 }
