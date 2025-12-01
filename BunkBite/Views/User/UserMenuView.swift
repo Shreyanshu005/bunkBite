@@ -81,70 +81,102 @@ struct UserMenuView: View {
     var body: some View {
         NavigationStack {
             Group {
-                if authViewModel.isAuthenticated {
-                    if canteenViewModel.selectedCanteen != nil {
-                        menuContent
-                    } else {
-                        canteenSelectionPrompt
-                    }
+                // GUEST ACCESS: Allow menu browsing without authentication
+                if canteenViewModel.selectedCanteen != nil {
+                    menuContent
                 } else {
-                    loginPrompt
+                    canteenSelectionPrompt
                 }
             }
             .onChange(of: canteenViewModel.selectedCanteen) { _, newCanteen in
-                if let canteen = newCanteen, let token = authViewModel.authToken {
+                if let canteen = newCanteen {
                     // Cancel any existing loading task
                     menuLoadingTask?.cancel()
-                    
+
                     // Start a new loading task
                     menuLoadingTask = Task {
+                        // Guest mode: fetch menu with mock token or public endpoint
+                        let token = authViewModel.authToken ?? "guest_token"
                         await menuViewModel.fetchMenu(canteenId: canteen.id, token: token)
                     }
                 }
             }
             .onAppear {
                 // Load menu if a canteen is already selected
-                if let canteen = canteenViewModel.selectedCanteen, 
-                   let token = authViewModel.authToken,
+                if let canteen = canteenViewModel.selectedCanteen,
                    menuViewModel.menuItems.isEmpty {
                     menuLoadingTask = Task {
+                        let token = authViewModel.authToken ?? "guest_token"
                         await menuViewModel.fetchMenu(canteenId: canteen.id, token: token)
                     }
                 }
             }
             .navigationTitle("Menu")
             .toolbar {
-                if authViewModel.isAuthenticated && canteenViewModel.selectedCanteen != nil {
+                // Show cart and login buttons
+                if canteenViewModel.selectedCanteen != nil {
+                    ToolbarItem(placement: .topBarLeading) {
+                        if !authViewModel.isAuthenticated {
+                            Button {
+                                showLoginSheet = true
+                            } label: {
+                                HStack(spacing: 4) {
+                                    Image(systemName: "person.circle")
+                                    Text("Sign In")
+                                        .font(.urbanist(size: 15, weight: .medium))
+                                }
+                                .foregroundStyle(Constants.primaryColor)
+                                .padding(.horizontal, 12)
+                                .padding(.vertical, 6)
+                                .background(Constants.primaryColor.opacity(0.1))
+                                .cornerRadius(20)
+                            }
+                        }
+                    }
+
                     ToolbarItem(placement: .topBarTrailing) {
                         Button {
-                            showCart = true
+                            // Prompt login if not authenticated
+                            if authViewModel.isAuthenticated {
+                                showCart = true
+                            } else {
+                                showLoginSheet = true
+                            }
                         } label: {
-                            Image(systemName: cart.totalItems > 0 ? "cart.fill" : "cart")
-                                .font(.title2)
-                                .foregroundStyle(Constants.primaryColor)
-                                .padding(8)
-                                .rotationEffect(.degrees(cartShake))
-                                .onChange(of: cart.totalItems) { oldValue, newValue in
-                                    if newValue > oldValue {
-                                        // Shake animation
-                                        withAnimation(.spring(response: 0.3, dampingFraction: 0.3)) {
-                                            cartShake = 10
-                                        }
-                                        withAnimation(.spring(response: 0.3, dampingFraction: 0.3).delay(0.1)) {
-                                            cartShake = -10
-                                        }
-                                        withAnimation(.spring(response: 0.3, dampingFraction: 0.3).delay(0.2)) {
-                                            cartShake = 0
-                                        }
+                            HStack(spacing: 6) {
+                                Image(systemName: cart.totalItems > 0 ? "cart.fill" : "cart")
+                                    .font(.title3)
+                                if cart.totalItems > 0 {
+                                    Text("\(cart.totalItems)")
+                                        .font(.urbanist(size: 12, weight: .bold))
+                                        .foregroundStyle(.white)
+                                        .frame(minWidth: 18, minHeight: 18)
+                                        .background(Constants.primaryColor)
+                                        .clipShape(Circle())
+                                }
+                            }
+                            .foregroundStyle(Constants.primaryColor)
+                            .padding(8)
+                            .rotationEffect(.degrees(cartShake))
+                            .onChange(of: cart.totalItems) { oldValue, newValue in
+                                if newValue > oldValue {
+                                    // Shake animation
+                                    withAnimation(.spring(response: 0.3, dampingFraction: 0.3)) {
+                                        cartShake = 10
+                                    }
+                                    withAnimation(.spring(response: 0.3, dampingFraction: 0.3).delay(0.1)) {
+                                        cartShake = -10
+                                    }
+                                    withAnimation(.spring(response: 0.3, dampingFraction: 0.3).delay(0.2)) {
+                                        cartShake = 0
                                     }
                                 }
+                            }
                         }
                     }
                 }
             }
-            .if(authViewModel.isAuthenticated) { view in
-                view.searchable(text: $searchText, prompt: "Search items")
-            }
+            .searchable(text: $searchText, prompt: "Search items")
             .sheet(isPresented: $showCart) {
                 CartSheet(cart: cart, canteen: canteenViewModel.selectedCanteen)
             }
@@ -212,16 +244,108 @@ struct UserMenuView: View {
     }
 
     private var canteenSelectionPrompt: some View {
-        ContentUnavailableView {
-            Label("No Canteen Selected", systemImage: "building.2")
-        } description: {
-            Text("Please select a canteen to view its menu")
-        } actions: {
-            Button("Select Canteen") {
-                showCanteenSelector = true
+        VStack(spacing: 0) {
+            Spacer()
+
+            VStack(spacing: 40) {
+                // Animated Icon
+                ZStack {
+                    Circle()
+                        .fill(Constants.primaryColor.opacity(0.1))
+                        .frame(width: 140, height: 140)
+                        .scaleEffect(isAnimating ? 1 : 0.8)
+
+                    Circle()
+                        .fill(Constants.primaryColor.opacity(0.05))
+                        .frame(width: 110, height: 110)
+                        .scaleEffect(isAnimating ? 1 : 0.85)
+
+                    Image(systemName: "building.2.fill")
+                        .font(.system(size: 60))
+                        .foregroundStyle(
+                            LinearGradient(
+                                colors: [Constants.primaryColor, Constants.primaryColor.opacity(0.7)],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            )
+                        )
+                        .scaleEffect(isAnimating ? 1 : 0.5)
+                }
+
+                // Message
+                VStack(spacing: 16) {
+                    Text("Welcome to BunkBite!")
+                        .font(.urbanist(size: 32, weight: .bold))
+                        .foregroundStyle(.black)
+                        .multilineTextAlignment(.center)
+
+                    Text("Select a canteen to browse\ndelicious menu items")
+                        .font(.urbanist(size: 17, weight: .regular))
+                        .foregroundStyle(.gray)
+                        .multilineTextAlignment(.center)
+                        .lineSpacing(4)
+                }
+                .opacity(isAnimating ? 1 : 0)
+                .offset(y: isAnimating ? 0 : 20)
+
+                // Enhanced Select Canteen Button
+                Button {
+                    showCanteenSelector = true
+                } label: {
+                    HStack(spacing: 12) {
+                        Image(systemName: "building.2.circle.fill")
+                            .font(.system(size: 22))
+
+                        Text("Browse Canteens")
+                            .font(.urbanist(size: 18, weight: .semibold))
+
+                        Image(systemName: "arrow.right")
+                            .font(.system(size: 16, weight: .semibold))
+                    }
+                    .foregroundStyle(.white)
+                    .frame(maxWidth: 280)
+                    .padding(.vertical, 18)
+                    .background(
+                        LinearGradient(
+                            colors: [Constants.primaryColor, Constants.primaryColor.opacity(0.8)],
+                            startPoint: .leading,
+                            endPoint: .trailing
+                        )
+                    )
+                    .cornerRadius(16)
+                    .shadow(color: Constants.primaryColor.opacity(0.4), radius: 12, x: 0, y: 6)
+                }
+                .scaleEffect(isAnimating ? 1 : 0.9)
+                .opacity(isAnimating ? 1 : 0)
+
+                // Guest info badge
+                // if !authViewModel.isAuthenticated {
+                //     HStack(spacing: 8) {
+                //         Image(systemName: "info.circle.fill")
+                //             .font(.system(size: 14))
+                //             .foregroundStyle(Constants.primaryColor)
+
+                //         Text("No login required to browse")
+                //             .font(.urbanist(size: 14, weight: .medium))
+                //             .foregroundStyle(.gray)
+                //     }
+                //     .padding(.horizontal, 16)
+                //     .padding(.vertical, 10)
+                //     .background(Constants.primaryColor.opacity(0.05))
+                //     .cornerRadius(20)
+                //     .opacity(isAnimating ? 1 : 0)
+                // }
             }
-            .buttonStyle(.borderedProminent)
-            .tint(Constants.primaryColor)
+            .padding(.horizontal, 40)
+
+            Spacer()
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(Constants.backgroundColor)
+        .onAppear {
+            withAnimation(.spring(response: 0.6, dampingFraction: 0.7)) {
+                isAnimating = true
+            }
         }
     }
 
@@ -304,14 +428,14 @@ struct UserMenuView: View {
             }
         }
         .refreshable {
-            if let canteenId = canteenViewModel.selectedCanteen?.id,
-               let token = authViewModel.authToken {
+            if let canteenId = canteenViewModel.selectedCanteen?.id {
+                let token = authViewModel.authToken ?? "guest_token"
                 await menuViewModel.fetchMenu(canteenId: canteenId, token: token)
             }
         }
         .task {
-            if let canteenId = canteenViewModel.selectedCanteen?.id,
-               let token = authViewModel.authToken {
+            if let canteenId = canteenViewModel.selectedCanteen?.id {
+                let token = authViewModel.authToken ?? "guest_token"
                 await menuViewModel.fetchMenu(canteenId: canteenId, token: token)
             }
         }
@@ -321,6 +445,7 @@ struct UserMenuView: View {
 struct MenuItemRow: View {
     let item: MenuItem
     @ObservedObject var cart: Cart
+    @State private var showLoginPrompt = false
 
     var body: some View {
         HStack(alignment: .top, spacing: 12) {

@@ -8,7 +8,7 @@
 import SwiftUI
 import PopupView
 import ConfettiSwiftUI
-import Razorpay
+import SafariServices
 
 struct PaymentDetails {
     let transactionId: String
@@ -49,10 +49,7 @@ struct PaymentSheet: View {
     @State private var isAnimating = false
     @State private var showErrorAlert = false
     @State private var errorMessage = ""
-    @State private var razorpay: RazorpayCheckout?
     @State private var currentOrderId: String = ""
-    @State private var currentRazorpayKey: String = ""
-    @State private var razorpayDelegate: RazorpayDelegate?
 
     var body: some View {
         ZStack {
@@ -89,7 +86,7 @@ struct PaymentSheet: View {
                                 .font(.urbanist(size: 28, weight: .bold))
                                 .foregroundStyle(.black)
 
-                            Text("Secure payment via Razorpay")
+                            Text("Secure payment via Cashfree")
                                 .font(.urbanist(size: 15, weight: .regular))
                                 .foregroundStyle(.gray)
                         }
@@ -129,7 +126,6 @@ struct PaymentSheet: View {
                             .padding(.horizontal, 24)
 
                         VStack(spacing: 12) {
-                            // UPI Payment Option
                             PaymentMethodCard(
                                 icon: "indianrupeesign.circle.fill",
                                 title: "UPI",
@@ -137,7 +133,6 @@ struct PaymentSheet: View {
                                 color: .green
                             )
 
-                            // Card Payment Option
                             PaymentMethodCard(
                                 icon: "creditcard.fill",
                                 title: "Cards",
@@ -145,7 +140,6 @@ struct PaymentSheet: View {
                                 color: .blue
                             )
 
-                            // Netbanking Option
                             PaymentMethodCard(
                                 icon: "building.columns.fill",
                                 title: "Netbanking",
@@ -153,7 +147,6 @@ struct PaymentSheet: View {
                                 color: .orange
                             )
 
-                            // Wallet Option
                             PaymentMethodCard(
                                 icon: "wallet.pass.fill",
                                 title: "Wallets",
@@ -209,7 +202,7 @@ struct PaymentSheet: View {
                                 .foregroundStyle(Constants.primaryColor)
                                 .frame(width: 24)
 
-                            Text("Secured by Razorpay")
+                            Text("Secured by Cashfree")
                                 .font(.urbanist(size: 15, weight: .regular))
                                 .foregroundStyle(.gray)
 
@@ -336,212 +329,212 @@ struct PaymentSheet: View {
     // MARK: - Payment Functions
 
     private func initiatePayment() {
+        print("\n" + String(repeating: "=", count: 60))
+        print("🔵 PAYMENT BUTTON CLICKED - initiatePayment() called")
+        print(String(repeating: "=", count: 60))
+
         guard let canteen = canteen else {
+            print("❌ ERROR: No canteen information available")
             handlePaymentFailure(error: "Canteen information not available")
             return
         }
 
         isProcessingPayment = true
+        print("✅ isProcessingPayment set to true")
 
-        // TEMPORARY: Direct Razorpay payment without backend
-        // When backend is ready, uncomment the backend order creation code below
+        let amountInRupees = cart.totalAmount
 
-        // Generate a temporary order ID
-        let tempOrderId = "order_\(UUID().uuidString.prefix(14))"
-        let amountInPaise = Int(cart.totalAmount * 100)
-
-        print("\n🚀 INITIATING PAYMENT (No Backend Mode)")
-        print("Temporary Order ID: \(tempOrderId)")
-        print("Amount: ₹\(cart.totalAmount) (\(amountInPaise) paise)")
+        print("\n🚀 INITIATING PAYMENT (Cashfree Web Checkout)")
+        print("Amount: ₹\(amountInRupees)")
         print("Canteen: \(canteen.name)")
-        print("Items: \(cart.items.count)\n")
+        print("Items: \(cart.items.count)")
+        print("Cashfree App ID: \(Constants.cashfreeAppId.prefix(20))...")
+        print("Environment: \(Constants.cashfreeEnvironment.rawValue)\n")
 
-        currentOrderId = tempOrderId
-        currentRazorpayKey = Constants.razorpayKey
-        openRazorpayCheckout(
-            orderId: tempOrderId,
-            amount: amountInPaise,
-            key: currentRazorpayKey
-        )
-
-        /* UNCOMMENT THIS WHEN BACKEND IS READY:
-
+        // Create order and get payment link from Cashfree
         Task {
             do {
-                // Create order on backend
-                let orderResponse = try await RazorpayService.shared.createOrder(
-                    amount: cart.totalAmount,
-                    canteenId: canteen.id,
-                    items: cart.items,
-                    token: UserDefaults.standard.string(forKey: "authToken") ?? ""
+                let orderId = "order_\(UUID().uuidString.prefix(12))"
+
+                print("⚠️  Creating order with Cashfree API")
+                print("📝 TODO: Move this to backend /api/v1/payments/create-order endpoint")
+
+                // Call Cashfree API to create order and get payment link
+                let paymentLink = try await createCashfreeOrderAndGetLink(
+                    orderId: orderId,
+                    amount: amountInRupees
                 )
 
-                // Store order details
+                print("✅ Received payment link from Cashfree:")
+                print("   Order ID: \(orderId)")
+                print("   Payment Link: \(paymentLink)")
+                print("")
+
                 await MainActor.run {
-                    currentOrderId = orderResponse.orderId
-                    currentRazorpayKey = orderResponse.key ?? Constants.razorpayKey
-                    openRazorpayCheckout(
-                        orderId: orderResponse.orderId,
-                        amount: orderResponse.amount,
-                        key: currentRazorpayKey
+                    currentOrderId = orderId
+                    openWebCheckout(
+                        paymentLink: paymentLink,
+                        orderId: orderId,
+                        amount: amountInRupees
                     )
                 }
-            } catch let error as RazorpayError {
-                await MainActor.run {
-                    handlePaymentFailure(error: error.localizedDescription)
-                }
             } catch {
+                print("❌ Failed to create order: \(error.localizedDescription)")
                 await MainActor.run {
                     handlePaymentFailure(error: "Failed to create order: \(error.localizedDescription)")
                 }
             }
         }
-        */
     }
 
-    private func openRazorpayCheckout(orderId: String, amount: Int, key: String) {
-        print("\n" + String(repeating: "=", count: 60))
-        print("🔔 OPENING RAZORPAY CHECKOUT - TEST MODE")
-        print(String(repeating: "=", count: 60))
-        print("📦 Order ID: \(orderId)")
-        print("💰 Amount: ₹\(Double(amount) / 100) (\(amount) paise)")
-        print("🔑 Using Test Key: \(key.prefix(20))...")
-        print("🏪 Canteen: \(canteen?.name ?? "BunkBite")")
-        print("📱 Mode: TEST (Use test cards for payment)")
-        print(String(repeating: "=", count: 60) + "\n")
+    // TEMPORARY: Direct Cashfree API call for testing
+    // TODO: Move this to backend
+    private func createCashfreeOrderAndGetLink(orderId: String, amount: Double) async throws -> String {
+        let url = URL(string: "https://sandbox.cashfree.com/pg/orders")!
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue("application/json", forHTTPHeaderField: "Accept")
+        request.setValue(Constants.cashfreeAppId, forHTTPHeaderField: "x-client-id")
+        request.setValue(Constants.cashfreeSecretKey, forHTTPHeaderField: "x-client-secret")
+        request.setValue("2023-08-01", forHTTPHeaderField: "x-api-version")
 
-        // Create delegate
-        let delegate = RazorpayDelegate(
-            cart: cart,
-            canteen: canteen,
-            currentOrderId: orderId,
-            onSuccess: { [self] paymentId, orderId in
-                self.handlePaymentSuccess(paymentId: paymentId, orderId: orderId)
+        print("\n🔍 DEBUG: Cashfree API Request Details")
+        print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+        print("Endpoint: \(url.absoluteString)")
+        print("Method: POST")
+        print("App ID: \(Constants.cashfreeAppId)")
+        print("Secret Key (first 20 chars): \(Constants.cashfreeSecretKey.prefix(20))...")
+        print("API Version: 2023-08-01")
+        print("Environment: \(Constants.cashfreeEnvironment.rawValue)")
+        print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n")
+
+        let orderData: [String: Any] = [
+            "order_id": orderId,
+            "order_amount": amount,
+            "order_currency": "INR",
+            "customer_details": [
+                "customer_id": "test_user_\(Int.random(in: 1000...9999))",
+                "customer_phone": "9999999999",
+                "customer_email": "test@bunkbite.com"
+            ],
+            "order_meta": [
+                "return_url": "https://test.cashfree.com/pgappsdemos/return.php?order_id=\(orderId)"
+            ]
+        ]
+
+        let jsonData = try JSONSerialization.data(withJSONObject: orderData)
+
+        // Print the actual JSON being sent
+        if let jsonString = String(data: jsonData, encoding: .utf8) {
+            print("📤 Request Body:\n\(jsonString)\n")
+        }
+
+        request.httpBody = jsonData
+
+        let (data, response) = try await URLSession.shared.data(for: request)
+
+        if let httpResponse = response as? HTTPURLResponse {
+            print("Cashfree API Response Status: \(httpResponse.statusCode)")
+
+            if httpResponse.statusCode != 200 {
+                let errorMsg = String(data: data, encoding: .utf8) ?? "Unknown error"
+                print("Cashfree API Error: \(errorMsg)")
+                throw NSError(domain: "CashfreeError", code: httpResponse.statusCode,
+                            userInfo: [NSLocalizedDescriptionKey: errorMsg])
+            }
+        }
+
+        if let json = try JSONSerialization.jsonObject(with: data) as? [String: Any] {
+            print("Full API Response: \(json)")
+
+            // Try to get payment_link if it exists
+            if let paymentLink = json["payment_link"] as? String {
+                return paymentLink
+            }
+
+            // If payment_link doesn't exist, construct it from payment_session_id
+            if let paymentSessionId = json["payment_session_id"] as? String {
+                // Construct the Cashfree hosted checkout URL
+                let baseUrl = Constants.cashfreeEnvironment == .sandbox
+                    ? "https://sandbox.cashfree.com/pg/view/pay"
+                    : "https://payments.cashfree.com/pg/view/pay"
+                return "\(baseUrl)?payment_session_id=\(paymentSessionId)"
+            }
+        }
+
+        throw NSError(domain: "CashfreeError", code: -1,
+                    userInfo: [NSLocalizedDescriptionKey: "Invalid response from Cashfree - missing payment_link or payment_session_id"])
+    }
+
+    private func openWebCheckout(paymentLink: String, orderId: String, amount: Double) {
+        print("\n💳 TEST PAYMENT OPTIONS:")
+        print("- Test Card: 4111 1111 1111 1111")
+        print("- CVV: 123")
+        print("- Expiry: Any future date (e.g., 12/25)")
+        print("- Test UPI: testsuccess@gocash")
+        print("")
+
+        // Get the topmost view controller
+        guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+              let window = windowScene.windows.first,
+              let rootViewController = window.rootViewController else {
+            handlePaymentFailure(error: "Unable to open payment window")
+            return
+        }
+
+        var topController = rootViewController
+        while let presentedViewController = topController.presentedViewController {
+            topController = presentedViewController
+        }
+
+        // Open payment link in SFSafariViewController
+        CashfreeWebCheckoutManager.shared.openPaymentLink(
+            paymentLink: paymentLink,
+            orderId: orderId,
+            amount: amount,
+            from: topController,
+            onSuccess: { [self] response in
+                self.handlePaymentSuccess(response: response)
             },
             onFailure: { [self] error in
                 self.handlePaymentFailure(error: error)
             }
         )
-        razorpayDelegate = delegate
-
-        // Initialize Razorpay
-        razorpay = RazorpayCheckout.initWithKey(key, andDelegateWithData: delegate)
-
-        // Configure payment options for TEST MODE
-        // Note: In test mode without backend, we omit order_id
-        // The payment will still work and we'll capture the payment_id
-        let options: [String: Any] = [
-            "amount": amount,
-            "currency": "INR",
-            "name": canteen?.name ?? "BunkBite",
-            "description": "Order Payment - \(cart.items.count) items",
-            "prefill": [
-                "contact": "9876543210",  // Test contact
-                "email": "test@bunkbite.com"  // Test email
-            ],
-            "theme": [
-                "color": "#f62f56"
-            ],
-            "notes": [
-                "local_order_id": orderId,  // Our internal order ID
-                "canteen_id": canteen?.id ?? "",
-                "canteen_name": canteen?.name ?? "",
-                "items_count": String(cart.items.count),
-                "test_mode": "true"
-            ]
-        ]
-
-        print("💳 TEST PAYMENT OPTIONS:")
-        print("- Test Card: 4111 1111 1111 1111")
-        print("- CVV: Any 3 digits")
-        print("- Expiry: Any future date")
-        print("- Test UPI: success@razorpay")
-        print("")
-
-        // Open Razorpay checkout - find the topmost view controller
-        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
-           let window = windowScene.windows.first,
-           let rootViewController = window.rootViewController {
-
-            // Find the topmost presented view controller
-            var topController = rootViewController
-            while let presentedViewController = topController.presentedViewController {
-                topController = presentedViewController
-            }
-
-            print("✅ Launching Razorpay UI from: \(type(of: topController))\n")
-            razorpay?.open(options, displayController: topController)
-        } else {
-            print("❌ Error: Could not find root view controller")
-            handlePaymentFailure(error: "Unable to open payment window")
-        }
     }
 
-    private func handlePaymentSuccess(paymentId: String, orderId: String) {
-        // TEMPORARY: Skip backend verification (no backend yet)
-        // All payment data has been captured and saved locally
-        // When backend is ready, uncomment the verification code below
-
+    private func handlePaymentSuccess(response: CashfreePaymentResponse) {
         isProcessingPayment = false
         paymentDetails = PaymentDetails(
-            transactionId: paymentId,
+            transactionId: response.paymentId ?? response.orderId,
             amount: cart.totalAmount,
             timestamp: Date(),
             status: .success,
-            paymentMethod: "Razorpay",
+            paymentMethod: "Cashfree",
             canteenName: canteen?.name ?? "BunkBite",
             itemCount: cart.items.count
         )
 
-        print("\n✅ Payment Successful (Saved Locally)")
-        print("📋 Order ID: \(orderId)")
-        print("💳 Payment ID: \(paymentId)")
+        print("\n✅ Payment Successful")
+        print("📋 Order ID: \(response.orderId)")
+        print("💳 Payment ID: \(response.paymentId ?? "N/A")")
         print("💾 Order data saved - ready to send to backend\n")
 
         showSuccessPopup = true
-
-        /* UNCOMMENT THIS WHEN BACKEND IS READY:
-
-        // Verify payment on backend
-        Task {
-            do {
-                let _ = try await RazorpayService.shared.verifyPayment(
-                    orderId: orderId,
-                    paymentId: paymentId,
-                    signature: "",  // Razorpay SDK provides this in response
-                    token: UserDefaults.standard.string(forKey: "authToken") ?? ""
-                )
-
-                await MainActor.run {
-                    isProcessingPayment = false
-                    paymentDetails = PaymentDetails(
-                        transactionId: paymentId,
-                        amount: cart.totalAmount,
-                        timestamp: Date(),
-                        status: .success,
-                        paymentMethod: "Razorpay",
-                        canteenName: canteen?.name ?? "BunkBite",
-                        itemCount: cart.items.count
-                    )
-
-                    print("✅ Payment Successful & Verified")
-                    print("📋 Order ID: \(orderId)")
-                    print("💳 Payment ID: \(paymentId)")
-
-                    showSuccessPopup = true
-                }
-            } catch {
-                await MainActor.run {
-                    handlePaymentFailure(error: "Payment verification failed: \(error.localizedDescription)")
-                }
-            }
-        }
-        */
     }
 
     private func handlePaymentFailure(error: String) {
         isProcessingPayment = false
         print("❌ Payment Failed: \(error)")
+
+        // More detailed error message for debugging
+        let detailedError = """
+        Payment Error:
+        \(error)
+
+        Check console for more details.
+        """
+
         errorMessage = error
         showErrorAlert = true
     }
@@ -703,4 +696,3 @@ struct PaymentSuccessPopup: View {
         }
     }
 }
-

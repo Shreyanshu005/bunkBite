@@ -105,6 +105,41 @@ struct CanteenSelectorSheet: View {
                                     .font(.urbanist(size: 20, weight: .semibold))
                                     .foregroundStyle(.gray)
                             }
+                        } else if let errorMessage = canteenViewModel.errorMessage {
+                            VStack(spacing: 24) {
+                                Image(systemName: "exclamationmark.triangle")
+                                    .font(.system(size: 50))
+                                    .foregroundStyle(.orange.opacity(0.7))
+                                    .padding(.top, 60)
+
+                                Text("Failed to load canteens")
+                                    .font(.urbanist(size: 20, weight: .semibold))
+                                    .foregroundStyle(.black)
+
+                                Text(errorMessage)
+                                    .font(.urbanist(size: 15, weight: .regular))
+                                    .foregroundStyle(.gray)
+                                    .multilineTextAlignment(.center)
+
+                                Button {
+                                    Task {
+                                        let token = authViewModel.authToken ?? "guest_token"
+                                        await canteenViewModel.fetchAllCanteens(token: token)
+                                    }
+                                } label: {
+                                    HStack(spacing: 8) {
+                                        Image(systemName: "arrow.clockwise")
+                                        Text("Retry")
+                                    }
+                                    .font(.urbanist(size: 16, weight: .semibold))
+                                    .foregroundStyle(.white)
+                                    .padding(.horizontal, 24)
+                                    .padding(.vertical, 12)
+                                    .background(Constants.primaryColor)
+                                    .cornerRadius(12)
+                                }
+                            }
+                            .padding(.horizontal, 24)
                         } else {
                             ForEach(filteredCanteens) { canteen in
                                 Button {
@@ -152,9 +187,9 @@ struct CanteenSelectorSheet: View {
             }
         }
         .task {
-            if let token = authViewModel.authToken {
-                await canteenViewModel.fetchAllCanteens(token: token)
-            }
+            // GUEST ACCESS: Fetch canteens with guest token if not authenticated
+            let token = authViewModel.authToken ?? "guest_token"
+            await canteenViewModel.fetchAllCanteens(token: token)
         }
     }
 }

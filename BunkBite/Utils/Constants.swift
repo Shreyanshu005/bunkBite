@@ -7,14 +7,22 @@
 
 import SwiftUI
 
+// Cashfree Environment enum
+enum CashfreeEnvironment: String {
+    case sandbox = "SANDBOX"
+    case production = "PRODUCTION"
+}
+
 struct Constants {
     // API
     static let baseURL = "https://api.bunkbite.me"
 
-    // Razorpay Configuration
-    // Get your key from: https://dashboard.razorpay.com/app/keys
-    // Use TEST key for development, LIVE key for production
-    static let razorpayKey = "rzp_test_RgMWemF69VDJHw"  // Replace with actual key
+    // Cashfree Configuration
+    // Get your keys from: https://merchant.cashfree.com/merchants/login
+    // Use TEST environment for development, PRODUCTION for live
+    static let cashfreeAppId = "TEST1071483728c8caaaea9712f6c11573841701"
+    static let cashfreeSecretKey = "cfsk_ma_test_1ebc1d93322e969fd16bb27961a8a193_5d39f41e"
+    static let cashfreeEnvironment: CashfreeEnvironment = .sandbox // Use .production for live
 
     // Colors
     static let primaryColor = Color(hex: "#f62f56")

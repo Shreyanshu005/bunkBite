@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import SafariServices
 
 @main
 struct BunkBiteApp: App {
@@ -53,6 +54,36 @@ class AppDelegate: NSObject, UIApplicationDelegate {
         }
         return configuration
     }
+
+    // Handle deep link URLs for payment callback
+    func application(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey : Any] = [:]) -> Bool {
+        print("\n🔗 Deep link received in AppDelegate: \(url.absoluteString)")
+        handlePaymentDeepLink(url: url)
+        return true
+    }
+
+    private func handlePaymentDeepLink(url: URL) {
+        // Check if this is a payment status deep link
+        if url.scheme == "myapp" && url.host == "payment-status" {
+            print("✅ Payment callback detected")
+            CashfreeWebCheckoutManager.shared.handlePaymentCallback(url: url)
+
+            // Dismiss Safari VC if it's still open
+            if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+               let window = windowScene.windows.first,
+               let rootViewController = window.rootViewController {
+
+                var topController = rootViewController
+                while let presentedViewController = topController.presentedViewController {
+                    topController = presentedViewController
+                }
+
+                if topController is SFSafariViewController {
+                    topController.dismiss(animated: true)
+                }
+            }
+        }
+    }
 }
 
 class SceneDelegate: NSObject, UIWindowSceneDelegate {
@@ -60,6 +91,42 @@ class SceneDelegate: NSObject, UIWindowSceneDelegate {
         if let windowScene = scene as? UIWindowScene {
             windowScene.windows.forEach { window in
                 window.overrideUserInterfaceStyle = .light
+            }
+        }
+
+        // Handle deep link if app was opened via URL
+        if let urlContext = connectionOptions.urlContexts.first {
+            handleDeepLink(url: urlContext.url, scene: scene)
+        }
+    }
+
+    func scene(_ scene: UIScene, openURLContexts URLContexts: Set<UIOpenURLContext>) {
+        // Handle deep links when app is already running
+        if let urlContext = URLContexts.first {
+            handleDeepLink(url: urlContext.url, scene: scene)
+        }
+    }
+
+    private func handleDeepLink(url: URL, scene: UIScene) {
+        print("\n🔗 Deep link received in SceneDelegate: \(url.absoluteString)")
+
+        if url.scheme == "myapp" && url.host == "payment-status" {
+            print("✅ Payment callback detected")
+            CashfreeWebCheckoutManager.shared.handlePaymentCallback(url: url)
+
+            // Dismiss Safari VC if it's still open
+            if let windowScene = scene as? UIWindowScene,
+               let window = windowScene.windows.first,
+               let rootViewController = window.rootViewController {
+
+                var topController = rootViewController
+                while let presentedViewController = topController.presentedViewController {
+                    topController = presentedViewController
+                }
+
+                if topController is SFSafariViewController {
+                    topController.dismiss(animated: true)
+                }
             }
         }
     }

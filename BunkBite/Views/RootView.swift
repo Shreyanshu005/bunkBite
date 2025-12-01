@@ -16,10 +16,11 @@ struct RootView: View {
             if isCheckingAuth {
                 ProgressView()
             } else {
-                // Check role: "admin" = owner, anything else = user
+                // Check role: "admin" = owner, "user" = authenticated user, nil = guest
                 if userRole == "admin" {
                     NewOwnerMainView()
                 } else {
+                    // Always show user view (supports both authenticated and guest mode)
                     NewUserMainView()
                 }
             }
@@ -54,7 +55,7 @@ struct RootView: View {
             print("✅ User role detected: \(user.role)")
         } else {
             userRole = nil
-            print("❌ No user data found")
+            print("ℹ️ No user data found - continuing as guest")
         }
         isCheckingAuth = false
     }

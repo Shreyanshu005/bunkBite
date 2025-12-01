@@ -6,7 +6,6 @@
 //
 
 import SwiftUI
-import Razorpay
 
 struct CartSheet: View {
     @ObservedObject var cart: Cart
@@ -19,8 +18,6 @@ struct CartSheet: View {
     @State private var showSuccessPopup = false
     @State private var showErrorAlert = false
     @State private var errorMessage = ""
-    @State private var razorpay: RazorpayCheckout?
-    @State private var razorpayDelegate: RazorpayDelegate?
     @State private var showLoadingSheet = false
     @State private var showSuccessSheet = false
     @State private var showFailureSheet = false
@@ -165,7 +162,7 @@ struct CartSheet: View {
 
                         // Proceed to Payment Button
                         Button {
-                            initiateRazorpayPayment()
+                            showPaymentSheet = true
                         } label: {
                             HStack(spacing: 12) {
                                 if isProcessingPayment {
@@ -235,13 +232,13 @@ struct CartSheet: View {
                 Spacer()
             }
 
-            // Loading overlay (instead of sheet to avoid presentation conflicts)
+            // Loading overlay
             if showLoadingSheet {
                 Color.black.opacity(0.4)
                     .ignoresSafeArea()
                     .transition(.opacity)
 
-                RazorpayLoadingOverlay()
+                CashfreeLoadingOverlay()
                     .transition(.scale.combined(with: .opacity))
             }
         }
@@ -265,154 +262,18 @@ struct CartSheet: View {
         .sheet(isPresented: $showFailureSheet) {
             PaymentFailureSheet(errorMessage: errorMessage) {
                 // Retry
-                initiateRazorpayPayment()
+                showPaymentSheet = true
             } onDismiss: {
                 showFailureSheet = false
             }
             .presentationDetents([.large])
             .presentationDragIndicator(.visible)
         }
-    }
-
-    // MARK: - Razorpay Payment Functions
-
-    private func initiateRazorpayPayment() {
-        guard let canteen = canteen else {
-            errorMessage = "Canteen information not available"
-            showErrorAlert = true
-            return
-        }
-
-        isProcessingPayment = true
-
-        // Generate a temporary order ID
-        let tempOrderId = "order_\(UUID().uuidString.prefix(14))"
-        let amountInPaise = Int(cart.totalAmount * 100)
-
-        print("\n🚀 INITIATING PAYMENT (Direct to Razorpay)")
-        print("Order ID: \(tempOrderId)")
-        print("Amount: ₹\(cart.totalAmount) (\(amountInPaise) paise)")
-        print("Canteen: \(canteen.name)")
-        print("Items: \(cart.items.count)\n")
-
-        // Show loading overlay
-        withAnimation(.easeInOut(duration: 0.2)) {
-            showLoadingSheet = true
-        }
-
-        // Wait 0.8s for loading animation, then open Razorpay
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
-            withAnimation(.easeInOut(duration: 0.2)) {
-                self.showLoadingSheet = false
-            }
-
-            // Small delay after loading sheet dismisses
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                self.openRazorpayCheckout(orderId: tempOrderId, amount: amountInPaise, key: Constants.razorpayKey)
-            }
+        .sheet(isPresented: $showPaymentSheet) {
+            PaymentSheet(cart: cart, canteen: canteen)
         }
     }
 
-    private func openRazorpayCheckout(orderId: String, amount: Int, key: String) {
-        print("\n" + String(repeating: "=", count: 60))
-        print("🔔 OPENING RAZORPAY CHECKOUT - TEST MODE")
-        print(String(repeating: "=", count: 60))
-        print("📦 Order ID: \(orderId)")
-        print("💰 Amount: ₹\(Double(amount) / 100) (\(amount) paise)")
-        print("🔑 Using Test Key: \(key.prefix(20))...")
-        print("🏪 Canteen: \(canteen?.name ?? "BunkBite")")
-        print("📱 Mode: TEST (Use test cards for payment)")
-        print(String(repeating: "=", count: 60) + "\n")
-
-        // Create delegate
-        let delegate = RazorpayDelegate(
-            cart: cart,
-            canteen: canteen,
-            currentOrderId: orderId,
-            onSuccess: { [self] paymentId, orderId in
-                self.handlePaymentSuccess(paymentId: paymentId, orderId: orderId)
-            },
-            onFailure: { [self] error in
-                self.handlePaymentFailure(error: error)
-            }
-        )
-        razorpayDelegate = delegate
-
-        // Initialize Razorpay
-        razorpay = RazorpayCheckout.initWithKey(key, andDelegateWithData: delegate)
-
-        // Configure payment options for TEST MODE
-        let options: [String: Any] = [
-            "amount": amount,
-            "currency": "INR",
-            "name": canteen?.name ?? "BunkBite",
-            "description": "Order Payment - \(cart.items.count) items",
-            "prefill": [
-                "contact": "9876543210",
-                "email": "test@bunkbite.com"
-            ],
-            "theme": [
-                "color": "#f62f56"
-            ],
-            "notes": [
-                "local_order_id": orderId,
-                "canteen_id": canteen?.id ?? "",
-                "canteen_name": canteen?.name ?? "",
-                "items_count": String(cart.items.count),
-                "test_mode": "true"
-            ]
-        ]
-
-        print("💳 TEST PAYMENT OPTIONS:")
-        print("- Test Card: 4111 1111 1111 1111")
-        print("- CVV: Any 3 digits")
-        print("- Expiry: Any future date")
-        print("- Test UPI: success@razorpay")
-        print("")
-
-        // Open Razorpay checkout - find the topmost view controller
-        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
-           let window = windowScene.windows.first,
-           let rootViewController = window.rootViewController {
-
-            // Find the topmost presented view controller
-            var topController = rootViewController
-            while let presentedViewController = topController.presentedViewController {
-                topController = presentedViewController
-            }
-
-            print("✅ Launching Razorpay UI from: \(type(of: topController))\n")
-            razorpay?.open(options, displayController: topController)
-        } else {
-            print("❌ Error: Could not find root view controller")
-            handlePaymentFailure(error: "Unable to open payment window")
-        }
-    }
-
-    private func handlePaymentSuccess(paymentId: String, orderId: String) {
-        isProcessingPayment = false
-
-        print("\n✅ Payment Successful!")
-        print("📋 Order ID: \(orderId)")
-        print("💳 Payment ID: \(paymentId)")
-        print("💾 Order data saved - ready to send to backend\n")
-
-        // Store payment ID and show success sheet
-        paymentSuccessId = paymentId
-        showSuccessSheet = true
-
-        // Clear cart after a small delay to allow success sheet to show
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-            cart.clear()
-        }
-    }
-
-    private func handlePaymentFailure(error: String) {
-        isProcessingPayment = false
-        print("❌ Payment Failed: \(error)")
-        errorMessage = error
-        showFailureSheet = true
-    }
 }
 
 struct CartItemCard: View {
@@ -503,8 +364,8 @@ struct CartItemCard: View {
 }
 
 
-// MARK: - Razorpay Loading Overlay
-struct RazorpayLoadingOverlay: View {
+// MARK: - Cashfree Loading Overlay
+struct CashfreeLoadingOverlay: View {
     @State private var isAnimating = false
 
     var body: some View {
@@ -596,7 +457,7 @@ struct PaymentSuccessSheet: View {
                         .foregroundStyle(.gray)
                         .opacity(isAnimating ? 1 : 0)
 
-                    // Payment ID (optional - can be hidden)
+                    // Payment ID
                     Text("Payment ID: \(paymentId.prefix(20))...")
                         .font(.urbanist(size: 12, weight: .regular))
                         .foregroundStyle(.gray.opacity(0.7))
@@ -709,7 +570,7 @@ struct PaymentFailureSheet: View {
                         .font(.urbanist(size: 12, weight: .regular))
                         .foregroundStyle(.gray.opacity(0.8))
 
-                    Text("• Test UPI: success@razorpay")
+                    Text("• Test UPI: testsuccess@gocash")
                         .font(.urbanist(size: 12, weight: .regular))
                         .foregroundStyle(.gray.opacity(0.8))
                 }
@@ -775,4 +636,3 @@ struct PaymentFailureSheet: View {
         }
     }
 }
-

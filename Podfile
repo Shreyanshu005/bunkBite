@@ -6,7 +6,6 @@ target 'BunkBite' do
   use_frameworks!
 
   # Pods for BunkBite
-  pod 'razorpay-pod', '1.2.5'
 
   target 'BunkBiteTests' do
     inherit! :search_paths
@@ -26,7 +25,7 @@ post_install do |installer|
     end
   end
 
-  # Fix for Razorpay framework embedding sandbox issues
+  # Fix for framework embedding sandbox issues
   installer.generated_projects.each do |project|
     project.targets.each do |target|
       target.build_configurations.each do |config|

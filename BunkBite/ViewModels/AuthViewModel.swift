@@ -31,6 +31,16 @@ class AuthViewModel: ObservableObject {
         isLoading = true
         errorMessage = nil
 
+        // APPLE REVIEW TEST CREDENTIALS EXCEPTION
+        // Skip API call for test@apple.com
+        if email.lowercased() == "test@apple.com" {
+            print("✅ Apple Review test email detected - skipping OTP send")
+            isOTPSent = true
+            isLoading = false
+            return
+        }
+
+        // Regular OTP send flow
         do {
             let response = try await apiService.sendOTP(email: email)
             if response.success {
@@ -52,6 +62,34 @@ class AuthViewModel: ObservableObject {
         isLoading = true
         errorMessage = nil
 
+        // APPLE REVIEW TEST CREDENTIALS EXCEPTION
+        // For App Store review purposes only
+        if email.lowercased() == "test@apple.com" && otp == "000000" {
+            // Create a test user for Apple Review
+            let testUser = User(
+                id: "apple_review_test_user",
+                email: "test@apple.com",
+                name: "Apple Reviewer",
+                role: "user"
+            )
+            let testToken = "apple_review_test_token_\(UUID().uuidString)"
+
+            currentUser = testUser
+            authToken = testToken
+            isAuthenticated = true
+
+            // Save to UserDefaults
+            saveAuthData(user: testUser, token: testToken)
+
+            // Notify RootView about login
+            NotificationCenter.default.post(name: NSNotification.Name("UserDidLogin"), object: nil)
+
+            print("✅ Apple Review test user logged in")
+            isLoading = false
+            return
+        }
+
+        // Regular OTP verification flow
         do {
             let response = try await apiService.verifyOTP(email: email, otp: otp)
             if response.success, let user = response.user, let token = response.token {

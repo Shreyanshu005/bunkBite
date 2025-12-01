@@ -15,9 +15,13 @@ class APIService {
         var request = URLRequest(url: url)
         request.httpMethod = method
         request.setValue(contentType, forHTTPHeaderField: "Content-Type")
-        if let token = token {
+
+        // Only add auth header if token is provided and not the guest token
+        if let token = token, token != "guest_token" {
             request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
         }
+        // If guest_token, skip auth header (public endpoint)
+
         return request
     }
 
@@ -45,9 +49,31 @@ class APIService {
         let url = URL(string: "\(Constants.baseURL)/api/v1/canteens")!
         let request = createRequest(url: url, method: "GET", token: token)
 
-        let (data, _) = try await URLSession.shared.data(for: request)
-        let response = try JSONDecoder().decode(CanteenResponse.self, from: data)
-        return response.canteens ?? []
+        print("\n🌐 FETCHING CANTEENS")
+        print("URL: \(url.absoluteString)")
+        print("Token: \(token.prefix(20))...")
+        print("Headers: \(request.allHTTPHeaderFields ?? [:])")
+
+        do {
+            let (data, response) = try await URLSession.shared.data(for: request)
+
+            // Log response
+            if let httpResponse = response as? HTTPURLResponse {
+                print("Response Status: \(httpResponse.statusCode)")
+            }
+
+            let responseString = String(data: data, encoding: .utf8) ?? ""
+            print("Response Data: \(responseString)")
+
+            let decodedResponse = try JSONDecoder().decode(CanteenResponse.self, from: data)
+            let canteens = decodedResponse.canteens ?? []
+            print("✅ Successfully fetched \(canteens.count) canteens\n")
+            return canteens
+        } catch {
+            print("❌ Error fetching canteens: \(error.localizedDescription)")
+            print("Error details: \(error)\n")
+            throw error
+        }
     }
 
     func getCanteenById(id: String, token: String) async throws -> Canteen {
@@ -357,6 +383,38 @@ class APIService {
         let url = URL(string: "\(Constants.baseURL)/api/v1/menu/canteen/\(canteenId)/item/\(itemId)")!
         let request = createRequest(url: url, method: "DELETE", token: token)
         _ = try await URLSession.shared.data(for: request)
+    }
+
+    // MARK: - Payment APIs (Cashfree)
+    func createCashfreeOrder(amount: Double, canteenId: String, items: [[String: Any]], token: String) async throws -> CashfreeOrderResponse {
+        let url = URL(string: "\(Constants.baseURL)/api/v1/payments/create-order")!
+        var request = createRequest(url: url, method: "POST", token: token)
+
+        let orderData: [String: Any] = [
+            "amount": amount,
+            "canteenId": canteenId,
+            "items": items
+        ]
+
+        request.httpBody = try JSONSerialization.data(withJSONObject: orderData)
+
+        print("\n🚀 CREATING CASHFREE ORDER")
+        print("URL: \(url.absoluteString)")
+        print("Amount: ₹\(amount)")
+        print("Canteen ID: \(canteenId)")
+        print("Items: \(items.count)")
+
+        let (data, response) = try await URLSession.shared.data(for: request)
+
+        if let httpResponse = response as? HTTPURLResponse {
+            print("Response Status: \(httpResponse.statusCode)")
+        }
+
+        let responseString = String(data: data, encoding: .utf8) ?? ""
+        print("Response: \(responseString)\n")
+
+        let orderResponse = try JSONDecoder().decode(CashfreeOrderResponse.self, from: data)
+        return orderResponse
     }
 }
 
