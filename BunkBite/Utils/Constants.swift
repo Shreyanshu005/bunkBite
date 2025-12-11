@@ -15,7 +15,7 @@ enum CashfreeEnvironment: String {
 
 struct Constants {
     // API
-    static let baseURL = "https://api.bunkbite.me"
+    static let baseURL = "http://13.126.198.86:5001"
 
     // Cashfree Configuration
     // Get your keys from: https://merchant.cashfree.com/merchants/login

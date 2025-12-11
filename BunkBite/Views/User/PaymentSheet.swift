@@ -390,81 +390,107 @@ struct PaymentSheet: View {
     // TEMPORARY: Direct Cashfree API call for testing
     // TODO: Move this to backend
     private func createCashfreeOrderAndGetLink(orderId: String, amount: Double) async throws -> String {
-        let url = URL(string: "https://sandbox.cashfree.com/pg/orders")!
+        // Use the correct endpoint based on environment
+        let baseUrl = Constants.cashfreeEnvironment == .sandbox 
+            ? "https://sandbox.cashfree.com/pg/orders" 
+            : "https://api.cashfree.com/pg/orders"
+        
+        let url = URL(string: baseUrl)!
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
+        
+        // Set the correct headers (note the different header format)
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.setValue("application/json", forHTTPHeaderField: "Accept")
         request.setValue(Constants.cashfreeAppId, forHTTPHeaderField: "x-client-id")
         request.setValue(Constants.cashfreeSecretKey, forHTTPHeaderField: "x-client-secret")
-        request.setValue("2023-08-01", forHTTPHeaderField: "x-api-version")
-
-        print("\n🔍 DEBUG: Cashfree API Request Details")
-        print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
-        print("Endpoint: \(url.absoluteString)")
-        print("Method: POST")
-        print("App ID: \(Constants.cashfreeAppId)")
-        print("Secret Key (first 20 chars): \(Constants.cashfreeSecretKey.prefix(20))...")
-        print("API Version: 2023-08-01")
-        print("Environment: \(Constants.cashfreeEnvironment.rawValue)")
-        print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n")
-
+        request.setValue("2022-09-01", forHTTPHeaderField: "x-api-version")
+        
+        // Prepare the request body with all required fields
         let orderData: [String: Any] = [
             "order_id": orderId,
             "order_amount": amount,
             "order_currency": "INR",
             "customer_details": [
-                "customer_id": "test_user_\(Int.random(in: 1000...9999))",
+                "customer_id": "customer_\(UUID().uuidString.prefix(8))",
                 "customer_phone": "9999999999",
-                "customer_email": "test@bunkbite.com"
+                "customer_email": "test@example.com"
             ],
+            // Add order_meta with return_url (required for some integrations)
             "order_meta": [
-                "return_url": "https://test.cashfree.com/pgappsdemos/return.php?order_id=\(orderId)"
+                "return_url": "https://test.cashfree.com/pgappsdemos/return.php?order_id=\(orderId)",
+                "notify_url": "https://test.cashfree.com/pgappsdemos/notify.php"
             ]
         ]
-
-        let jsonData = try JSONSerialization.data(withJSONObject: orderData)
-
-        // Print the actual JSON being sent
-        if let jsonString = String(data: jsonData, encoding: .utf8) {
-            print("📤 Request Body:\n\(jsonString)\n")
+        
+        // Debug print
+        print("\n🔍 Sending to Cashfree:")
+        print("URL: \(baseUrl)")
+        print("Headers: \(request.allHTTPHeaderFields ?? [:])")
+        if let jsonData = try? JSONSerialization.data(withJSONObject: orderData, options: .prettyPrinted),
+           let jsonString = String(data: jsonData, encoding: .utf8) {
+            print("Body:\n\(jsonString)")
         }
-
-        request.httpBody = jsonData
-
-        let (data, response) = try await URLSession.shared.data(for: request)
-
-        if let httpResponse = response as? HTTPURLResponse {
-            print("Cashfree API Response Status: \(httpResponse.statusCode)")
-
-            if httpResponse.statusCode != 200 {
-                let errorMsg = String(data: data, encoding: .utf8) ?? "Unknown error"
-                print("Cashfree API Error: \(errorMsg)")
-                throw NSError(domain: "CashfreeError", code: httpResponse.statusCode,
-                            userInfo: [NSLocalizedDescriptionKey: errorMsg])
+        
+        do {
+            // Set the request body with proper JSON encoding
+            request.httpBody = try JSONSerialization.data(withJSONObject: orderData)
+            
+            // Make the request with a timeout
+            let config = URLSessionConfiguration.default
+            config.timeoutIntervalForRequest = 30
+            config.timeoutIntervalForResource = 60
+            let session = URLSession(configuration: config)
+            
+            let (data, response) = try await session.data(for: request)
+            
+            // Handle the response
+            if let httpResponse = response as? HTTPURLResponse {
+                print("\n🔍 Response Status: \(httpResponse.statusCode)")
+                if let responseString = String(data: data, encoding: .utf8) {
+                    print("Response: \(responseString)")
+                }
+                
+                if httpResponse.statusCode == 401 {
+                    throw NSError(domain: "CashfreeError", code: 401,
+                                userInfo: [NSLocalizedDescriptionKey: "Authentication failed. Please check your API keys."])
+                } else if httpResponse.statusCode != 200 {
+                    let errorMsg = String(data: data, encoding: .utf8) ?? "Unknown error"
+                    throw NSError(domain: "CashfreeError", code: httpResponse.statusCode,
+                                userInfo: [NSLocalizedDescriptionKey: "API Error: \(errorMsg)"])
+                }
             }
+            
+            // Parse the response
+            if let json = try JSONSerialization.jsonObject(with: data) as? [String: Any] {
+                print("\n🔍 Parsed Response: \(json)")
+                
+                // Check for error in response
+                if let errorMessage = json["message"] as? String {
+                    throw NSError(domain: "CashfreeError", code: -1,
+                                userInfo: [NSLocalizedDescriptionKey: errorMessage])
+                }
+                
+                // Try to get payment_link first
+                if let paymentLink = json["payment_link"] as? String {
+                    return paymentLink
+                }
+                
+                // If payment_link doesn't exist, try to construct it from payment_session_id
+                if let paymentSessionId = json["payment_session_id"] as? String {
+                    let checkoutUrl = Constants.cashfreeEnvironment == .sandbox
+                        ? "https://sandbox.cashfree.com/pg/checkout/"
+                        : "https://payments.cashfree.com/pg/checkout/"
+                    return "\(checkoutUrl)\(paymentSessionId)"
+                }
+            }
+            
+            throw NSError(domain: "CashfreeError", code: -1,
+                        userInfo: [NSLocalizedDescriptionKey: "Invalid response format from Cashfree"])
+            
+        } catch let error as NSError {
+            print("❌ Error creating order: \(error.localizedDescription)")
+            throw error
         }
-
-        if let json = try JSONSerialization.jsonObject(with: data) as? [String: Any] {
-            print("Full API Response: \(json)")
-
-            // Try to get payment_link if it exists
-            if let paymentLink = json["payment_link"] as? String {
-                return paymentLink
-            }
-
-            // If payment_link doesn't exist, construct it from payment_session_id
-            if let paymentSessionId = json["payment_session_id"] as? String {
-                // Construct the Cashfree hosted checkout URL
-                let baseUrl = Constants.cashfreeEnvironment == .sandbox
-                    ? "https://sandbox.cashfree.com/pg/view/pay"
-                    : "https://payments.cashfree.com/pg/view/pay"
-                return "\(baseUrl)?payment_session_id=\(paymentSessionId)"
-            }
-        }
-
-        throw NSError(domain: "CashfreeError", code: -1,
-                    userInfo: [NSLocalizedDescriptionKey: "Invalid response from Cashfree - missing payment_link or payment_session_id"])
     }
 
     private func openWebCheckout(paymentLink: String, orderId: String, amount: Double) {
@@ -474,33 +500,57 @@ struct PaymentSheet: View {
         print("- Expiry: Any future date (e.g., 12/25)")
         print("- Test UPI: testsuccess@gocash")
         print("")
-
-        // Get the topmost view controller
-        guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
-              let window = windowScene.windows.first,
-              let rootViewController = window.rootViewController else {
-            handlePaymentFailure(error: "Unable to open payment window")
+        
+        // Ensure the URL is properly encoded
+        guard var urlComponents = URLComponents(string: paymentLink) else {
+            handlePaymentFailure(error: "Invalid payment link")
             return
         }
-
-        var topController = rootViewController
-        while let presentedViewController = topController.presentedViewController {
-            topController = presentedViewController
+        
+        // Add order_id to the URL if not already present
+        var queryItems = urlComponents.queryItems ?? []
+        if !queryItems.contains(where: { $0.name == "order_id" }) {
+            queryItems.append(URLQueryItem(name: "order_id", value: orderId))
+            urlComponents.queryItems = queryItems
         }
+        
+        guard let finalUrl = urlComponents.url else {
+            handlePaymentFailure(error: "Failed to create payment URL")
+            return
+        }
+        
+        print("🔗 Opening payment URL: \(finalUrl.absoluteString)")
 
-        // Open payment link in SFSafariViewController
-        CashfreeWebCheckoutManager.shared.openPaymentLink(
-            paymentLink: paymentLink,
-            orderId: orderId,
-            amount: amount,
-            from: topController,
-            onSuccess: { [self] response in
-                self.handlePaymentSuccess(response: response)
-            },
-            onFailure: { [self] error in
-                self.handlePaymentFailure(error: error)
+        // Get the topmost view controller and present via CashfreeWebCheckoutManager
+        DispatchQueue.main.async {
+            guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+                  let window = windowScene.windows.first,
+                  let rootViewController = window.rootViewController else {
+                self.handlePaymentFailure(error: "Unable to open payment window")
+                return
             }
-        )
+            
+            var topController = rootViewController
+            while let presentedViewController = topController.presentedViewController {
+                topController = presentedViewController
+            }
+            
+            // Set up the CashfreeWebCheckoutManager
+            CashfreeWebCheckoutManager.shared.openPaymentLink(
+                paymentLink: finalUrl.absoluteString,
+                orderId: orderId,
+                amount: amount,
+                from: topController,
+                onSuccess: { response in
+                    DispatchQueue.main.async {
+                        self.handlePaymentSuccess(response: response)
+                    }
+                },
+                onFailure: { error in
+                    self.handlePaymentFailure(error: error)
+                }
+            )
+        }
     }
 
     private func handlePaymentSuccess(response: CashfreePaymentResponse) {
