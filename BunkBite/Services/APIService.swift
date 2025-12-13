@@ -397,9 +397,24 @@ class APIService {
         let url = URL(string: "\(Constants.baseURL)/api/v1/orders/\(id)")!
         let request = createRequest(url: url, method: "GET", token: token)
 
-        let (data, _) = try await URLSession.shared.data(for: request)
+        print("\n🔍 FETCHING ORDER DETAILS")
+        print("URL: \(url.absoluteString)")
+        
+        let (data, response) = try await URLSession.shared.data(for: request)
+        
+        if let httpResponse = response as? HTTPURLResponse {
+            print("Response Status: \(httpResponse.statusCode)")
+        }
+        
+        if let responseString = String(data: data, encoding: .utf8) {
+            print("Response Data: \(responseString)")
+        }
+
         let apiResponse = try JSONDecoder().decode(APIResponse<Order>.self, from: data)
-        guard let order = apiResponse.data else { throw APIError.invalidResponse }
+        guard let order = apiResponse.data else {
+            print("❌ invalidResponse: data is nil. Message: \(apiResponse.message ?? "None")")
+            throw APIError.invalidResponse
+        }
         return order
     }
 
@@ -609,6 +624,45 @@ class APIService {
         let apiResponse = try JSONDecoder().decode(APIResponse<EarningsData>.self, from: data)
         guard let earnings = apiResponse.data else { throw APIError.invalidResponse }
         return earnings
+    }
+    
+    // MARK: - Canteen Management
+    
+    func updateCanteen(canteenId: String, data: [String: Any], token: String) async throws -> Canteen {
+        let url = URL(string: "\(Constants.baseURL)/api/v1/canteens?id=\(canteenId)")!
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        
+        request.httpBody = try JSONSerialization.data(withJSONObject: data)
+        
+        let (responseData, response) = try await URLSession.shared.data(for: request)
+        
+        guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
+            throw APIError.invalidResponse
+        }
+        
+        let apiResponse = try JSONDecoder().decode(APIResponse<Canteen>.self, from: responseData)
+        guard let canteen = apiResponse.data else { throw APIError.invalidResponse }
+        return canteen
+    }
+    
+    func toggleCanteenStatus(canteenId: String, token: String) async throws -> Canteen {
+        let url = URL(string: "\(Constants.baseURL)/api/v1/canteens/\(canteenId)/status")!
+        var request = URLRequest(url: url)
+        request.httpMethod = "PATCH"
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        
+        let (responseData, response) = try await URLSession.shared.data(for: request)
+        
+        guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
+            throw APIError.invalidResponse
+        }
+        
+        let apiResponse = try JSONDecoder().decode(APIResponse<Canteen>.self, from: responseData)
+        guard let canteen = apiResponse.data else { throw APIError.invalidResponse }
+        return canteen
     }
 }
 

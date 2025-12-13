@@ -18,7 +18,7 @@ struct RootView: View {
             } else {
                 // Check role: "admin" = owner, "user" = authenticated user, nil = guest
                 if userRole?.lowercased() == "admin" {
-                    NewOwnerMainView()
+                    OwnerMainView()
                 } else {
                     // Always show user view (supports both authenticated and guest mode)
                     NewUserMainView()

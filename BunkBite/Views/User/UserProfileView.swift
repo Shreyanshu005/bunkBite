@@ -143,15 +143,6 @@ struct UserProfileView: View {
                         label: "Email",
                         value: viewModel.currentUser?.email ?? "N/A"
                     )
-
-                    Divider()
-                        .padding(.leading, 56)
-
-                    ProfileDetailRow(
-                        icon: "person.badge.shield.checkmark.fill",
-                        label: "Role",
-                        value: viewModel.currentUser?.role.capitalized ?? "N/A"
-                    )
                 }
                 .background(Color.white)
                 .cornerRadius(16)

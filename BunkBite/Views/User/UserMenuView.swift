@@ -78,95 +78,64 @@ struct UserMenuView: View {
         return items
     }
 
+    @State private var showReadOnlyMenu = false
+
     var body: some View {
         NavigationStack {
             Group {
                 // GUEST ACCESS: Allow menu browsing without authentication
                 if canteenViewModel.selectedCanteen != nil {
-                    menuContent
+                     mainContent
                 } else {
                     canteenSelectionPrompt
                 }
             }
             .onChange(of: canteenViewModel.selectedCanteen) { _, newCanteen in
                 if let canteen = newCanteen {
-                    // Cancel any existing loading task
                     menuLoadingTask?.cancel()
-
-                    // Start a new loading task
-                    menuLoadingTask = Task {
-                        await menuViewModel.fetchMenu(canteenId: canteen.id)
-                    }
+                    menuLoadingTask = Task { await menuViewModel.fetchMenu(canteenId: canteen.id) }
                 }
             }
             .onAppear {
-                // Load menu if a canteen is already selected
-                if let canteen = canteenViewModel.selectedCanteen,
-                   menuViewModel.menuItems.isEmpty {
-                    menuLoadingTask = Task {
-                        await menuViewModel.fetchMenu(canteenId: canteen.id)
-                    }
+                if let canteen = canteenViewModel.selectedCanteen, menuViewModel.menuItems.isEmpty {
+                    menuLoadingTask = Task { await menuViewModel.fetchMenu(canteenId: canteen.id) }
                 }
             }
             .navigationTitle("Menu")
             .toolbar {
-                // Show cart and login buttons
+                // Keep toolbar logic same ...
                 if canteenViewModel.selectedCanteen != nil {
                     ToolbarItem(placement: .topBarLeading) {
                         if !authViewModel.isAuthenticated {
-                            Button {
-                                showLoginSheet = true
-                            } label: {
+                            Button { showLoginSheet = true } label: {
                                 HStack(spacing: 4) {
                                     Image(systemName: "person.circle")
-                                    Text("Sign In")
-                                        .font(.urbanist(size: 15, weight: .medium))
+                                    Text("Sign In").font(.urbanist(size: 15, weight: .medium))
                                 }
                                 .foregroundStyle(Constants.primaryColor)
-                                .padding(.horizontal, 12)
-                                .padding(.vertical, 6)
-                                .background(Constants.primaryColor.opacity(0.1))
-                                .cornerRadius(20)
+                                .padding(.horizontal, 12).padding(.vertical, 6)
+                                .background(Constants.primaryColor.opacity(0.1)).cornerRadius(20)
                             }
                         }
                     }
-
                     ToolbarItem(placement: .topBarTrailing) {
                         Button {
-                            // Prompt login if not authenticated
-                            if authViewModel.isAuthenticated {
-                                showCart = true
-                            } else {
-                                showLoginSheet = true
-                            }
+                            if authViewModel.isAuthenticated { showCart = true } else { showLoginSheet = true }
                         } label: {
                             HStack(spacing: 6) {
-                                Image(systemName: cart.totalItems > 0 ? "cart.fill" : "cart")
-                                    .font(.title3)
+                                Image(systemName: cart.totalItems > 0 ? "cart.fill" : "cart").font(.title3)
                                 if cart.totalItems > 0 {
-                                    Text("\(cart.totalItems)")
-                                        .font(.urbanist(size: 12, weight: .bold))
-                                        .foregroundStyle(.white)
-                                        .frame(minWidth: 18, minHeight: 18)
-                                        .background(Constants.primaryColor)
-                                        .clipShape(Circle())
+                                    Text("\(cart.totalItems)").font(.urbanist(size: 12, weight: .bold)).foregroundStyle(.white)
+                                        .frame(minWidth: 18, minHeight: 18).background(Constants.primaryColor).clipShape(Circle())
                                 }
                             }
-                            .foregroundStyle(Constants.primaryColor)
-                            .padding(8)
+                            .foregroundStyle(Constants.primaryColor).padding(8)
                             .rotationEffect(.degrees(cartShake))
                             .onChange(of: cart.totalItems) { oldValue, newValue in
                                 if newValue > oldValue {
-                                    // Shake animation
-                                    withAnimation(.spring(response: 0.3, dampingFraction: 0.3)) {
-                                        cartShake = 10
-                                    }
-                                    withAnimation(.spring(response: 0.3, dampingFraction: 0.3).delay(0.1)) {
-                                        cartShake = -10
-                                    }
-                                    withAnimation(.spring(response: 0.3, dampingFraction: 0.3).delay(0.2)) {
-                                        cartShake = 0
-                                    }
+                                    withAnimation(.spring(response: 0.3, dampingFraction: 0.3)) { cartShake = 10 }
+                                    withAnimation(.spring(response: 0.3, dampingFraction: 0.3).delay(0.1)) { cartShake = -10 }
+                                    withAnimation(.spring(response: 0.3, dampingFraction: 0.3).delay(0.2)) { cartShake = 0 }
                                 }
                             }
                         }
@@ -177,9 +146,74 @@ struct UserMenuView: View {
             .sheet(isPresented: $showCart) {
                 CartSheet(cart: cart, authViewModel: authViewModel, canteen: canteenViewModel.selectedCanteen)
             }
+            .sheet(isPresented: $showReadOnlyMenu) {
+                ReadOnlyMenuSheet(
+                    canteenViewModel: canteenViewModel,
+                    menuViewModel: menuViewModel,
+                    cart: cart,
+                    authViewModel: authViewModel,
+                    categories: categories,
+                    filteredItems: filteredItems
+                )
+            }
         }
     }
 
+    private var mainContent: some View {
+        VStack(spacing: 0) {
+            
+            if let canteen = canteenViewModel.selectedCanteen {
+                let (isOpen, statusMessage) = canteen.isAcceptingOrders
+                
+                if !isOpen {
+                    // CLOSED STATE
+                    ScrollView {
+                         VStack(spacing: 20) {
+                             CanteenHeaderView(canteen: canteen, showCanteenSelector: $showCanteenSelector)
+                                 .padding(.horizontal)
+                                 .padding(.top, 16)
+                             
+                             Spacer(minLength: 40)
+                             
+                             HangingBannerView(message: "SORRY WE'RE CLOSED", subMessage: statusMessage)
+                             
+                             Button {
+                                 showReadOnlyMenu = true
+                             } label: {
+                                 Text("View Menu")
+                                     .font(.urbanist(size: 18, weight: .semibold))
+                                     .foregroundStyle(.white)
+                                     .frame(width: 200, height: 50)
+                                     .background(Constants.primaryColor)
+                                     .cornerRadius(25)
+                                     .shadow(color: Constants.primaryColor.opacity(0.3), radius: 10, x: 0, y: 5)
+                             }
+                             .padding(.top, 20)
+                         }
+                    }
+                    .refreshable {
+                        await canteenViewModel.refreshSelectedCanteen()
+                    }
+                } else {
+                    // OPEN STATE - Show Normal Menu List
+                    MenuListView(
+                        canteenViewModel: canteenViewModel,
+                        menuViewModel: menuViewModel,
+                        cart: cart,
+                        authViewModel: authViewModel,
+                        showLoginSheet: $showLoginSheet,
+                        showCanteenSelector: $showCanteenSelector,
+                        selectedCategory: $selectedCategory,
+                        categories: categories,
+                        filteredItems: filteredItems,
+                        isReadOnly: false // Interactive
+                    )
+                }
+            }
+        }
+        .background(Constants.backgroundColor)
+    }
+    
     private var loginPrompt: some View {
         VStack(spacing: 0) {
             Spacer()
@@ -345,93 +379,114 @@ struct UserMenuView: View {
             }
         }
     }
+}
 
-    private var menuContent: some View {
+// Extracted Menu List for Reusability
+struct MenuListView: View {
+    @ObservedObject var canteenViewModel: CanteenViewModel
+    @ObservedObject var menuViewModel: MenuViewModel
+    @ObservedObject var cart: Cart
+    @ObservedObject var authViewModel: AuthViewModel
+    @Binding var showLoginSheet: Bool
+    @Binding var showCanteenSelector: Bool
+    @Binding var selectedCategory: String?
+    let categories: [String]
+    let filteredItems: [MenuItem]
+    let isReadOnly: Bool
+    
+    var body: some View {
         List {
-            // Canteen Header
+            // 1. Canteen Selection Header (First Item)
             Section {
-                HStack {
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text(canteenViewModel.selectedCanteen?.name ?? "")
-                            .font(.urbanist(size: 22, weight: .bold))
-
-                        Label(canteenViewModel.selectedCanteen?.place ?? "", systemImage: "mappin.circle")
-                            .font(.urbanist(size: 14, weight: .regular))
-                            .foregroundStyle(.secondary)
-                    }
-
-                    Spacer()
-
-                    Button("Change") {
-                        showCanteenSelector = true
-                    }
-                    .buttonStyle(.bordered)
-                    .tint(Constants.primaryColor)
-                }
-                .padding(.vertical, 8)
+                 // Only show header if not read-only (or show simplified)
+                 if !isReadOnly {
+                     CanteenHeaderView(canteen: canteenViewModel.selectedCanteen, showCanteenSelector: $showCanteenSelector)
+                 }
             }
-            .listRowBackground(
-                RoundedRectangle(cornerRadius: 12)
-                    .fill(.ultraThinMaterial)
-            )
+            .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
+            .listRowBackground(Color.clear)
+            .listRowSeparator(.hidden)
 
             // Category Filter Chips
             if !categories.isEmpty {
                 Section {
                     ScrollView(.horizontal, showsIndicators: false) {
                         HStack(spacing: 12) {
-                            // All filter
-                            MenuFilterChip(
-                                title: "All",
-                                isSelected: selectedCategory == nil,
-                                action: {
-                                    withAnimation {
-                                        selectedCategory = nil
-                                    }
-                                }
-                            )
-
-                            // Category filters
+                            MenuFilterChip(title: "All", isSelected: selectedCategory == nil, action: { withAnimation { selectedCategory = nil } })
                             ForEach(categories, id: \.self) { category in
-                                MenuFilterChip(
-                                    title: category,
-                                    isSelected: selectedCategory == category,
-                                    action: {
-                                        withAnimation {
-                                            selectedCategory = category
-                                        }
-                                    }
-                                )
+                                MenuFilterChip(title: category, isSelected: selectedCategory == category, action: { withAnimation { selectedCategory = category } })
                             }
                         }
                         .padding(.horizontal, 4)
                     }
                 }
-                .listRowInsets(EdgeInsets(top: 8, leading: 0, bottom: 8, trailing: 0))
+                .listRowInsets(EdgeInsets(top: 8, leading: 20, bottom: 8, trailing: 0))
                 .listRowBackground(Color.clear)
+                .listRowSeparator(.hidden)
             }
-
+            
             // Menu Items
             if menuViewModel.isLoading {
-                ForEach(0..<6, id: \.self) { _ in
-                    ShimmerMenuItemRow()
-                }
+                ForEach(0..<6, id: \.self) { _ in ShimmerMenuItemRow() }
             } else if filteredItems.isEmpty {
                 ContentUnavailableView("No items available", systemImage: "tray")
+                    .listRowSeparator(.hidden)
+                    .listRowBackground(Color.clear)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .padding(.top, 40)
             } else {
                 ForEach(filteredItems) { item in
-                    MenuItemRow(item: item, cart: cart, authViewModel: authViewModel, showLoginSheet: $showLoginSheet)
+                    MenuItemRow(item: item, cart: cart, authViewModel: authViewModel, showLoginSheet: $showLoginSheet, isReadOnly: isReadOnly)
                 }
             }
         }
+        .listStyle(.plain) // Use plain list style to avoid extra padding
+        .scrollContentBackground(.hidden)
+        .background(Constants.backgroundColor)
         .refreshable {
             if let canteenId = canteenViewModel.selectedCanteen?.id {
-                await menuViewModel.fetchMenu(canteenId: canteenId)
+                // Run in parallel for better performance
+                await withTaskGroup(of: Void.self) { group in
+                    group.addTask { await menuViewModel.fetchMenu(canteenId: canteenId) }
+                    group.addTask { await canteenViewModel.refreshSelectedCanteen() }
+                }
             }
         }
-        .task {
-            if let canteenId = canteenViewModel.selectedCanteen?.id {
-                await menuViewModel.fetchMenu(canteenId: canteenId)
+    }
+}
+
+// Read Only Sheet Wrapper
+struct ReadOnlyMenuSheet: View {
+    @ObservedObject var canteenViewModel: CanteenViewModel
+    @ObservedObject var menuViewModel: MenuViewModel
+    @ObservedObject var cart: Cart
+    @ObservedObject var authViewModel: AuthViewModel
+    let categories: [String]
+    let filteredItems: [MenuItem]
+    @State private var selectedCategory: String? = nil
+    
+    @Environment(\.dismiss) var dismiss
+    
+    var body: some View {
+        NavigationStack {
+            MenuListView(
+                canteenViewModel: canteenViewModel,
+                menuViewModel: menuViewModel,
+                cart: cart,
+                authViewModel: authViewModel,
+                showLoginSheet: .constant(false),
+                showCanteenSelector: .constant(false),
+                selectedCategory: $selectedCategory,
+                categories: categories,
+                filteredItems: filteredItems,
+                isReadOnly: true
+            )
+            .navigationTitle("Menu (View Only)")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button("Done") { dismiss() }
+                }
             }
         }
     }
@@ -442,53 +497,40 @@ struct MenuItemRow: View {
     @ObservedObject var cart: Cart
     @ObservedObject var authViewModel: AuthViewModel
     @Binding var showLoginSheet: Bool
-    @State private var showLoginPrompt = false
-
+    var isReadOnly: Bool = false // Add flag
+    
     var body: some View {
         HStack(alignment: .top, spacing: 12) {
             // Item image placeholder with glass effect
             RoundedRectangle(cornerRadius: 12)
                 .fill(.ultraThinMaterial)
                 .frame(width: 80, height: 80)
-                .overlay(
-                    Image(systemName: "fork.knife")
-                        .font(.title)
-                        .foregroundStyle(.secondary)
-                )
+                .overlay(Image(systemName: "fork.knife").font(.title).foregroundStyle(.secondary))
 
             // Item details
             VStack(alignment: .leading, spacing: 6) {
-                Text(item.name)
-                    .font(.urbanist(size: 17, weight: .semibold))
-
-                Text("₹\(Int(item.price))")
-                    .font(.urbanist(size: 20, weight: .bold))
-                    .foregroundStyle(Constants.primaryColor)
-
+                Text(item.name).font(.urbanist(size: 17, weight: .semibold))
+                Text("₹\(Int(item.price))").font(.urbanist(size: 20, weight: .bold)).foregroundStyle(Constants.primaryColor)
                 if item.availableQuantity > 0 {
                     Text("\(item.availableQuantity) available")
                         .font(.urbanist(size: 12, weight: .regular))
                         .foregroundStyle(.secondary)
                 } else {
-                    Text("Out of stock")
-                        .font(.urbanist(size: 12, weight: .regular))
-                        .foregroundStyle(.red)
+                    Text("Out of stock").font(.urbanist(size: 12, weight: .regular)).foregroundStyle(.red)
                 }
             }
 
             Spacer()
 
-            // Add to cart button
-            if item.availableQuantity > 0 {
+            // Hide buttons if read only
+            if !isReadOnly && item.availableQuantity > 0 {
+                // Add to cart button
                 if cart.getQuantity(for: item) > 0 {
                     HStack(spacing: 12) {
                         Button {
-                            let currentQuantity = cart.getQuantity(for: item)
-                            if currentQuantity > 1 {
-                                cart.updateQuantity(for: item, quantity: currentQuantity - 1)
-                            } else {
-                                cart.removeItem(item)
-                            }
+                           let currentQuantity = cart.getQuantity(for: item)
+                           if currentQuantity > 1 { cart.updateQuantity(for: item, quantity: currentQuantity - 1) } 
+                           else { cart.removeItem(item) }
                         } label: {
                             Image(systemName: cart.getQuantity(for: item) == 1 ? "trash.fill" : "minus.circle.fill")
                                 .font(.title3)
@@ -502,33 +544,19 @@ struct MenuItemRow: View {
                             .frame(minWidth: 30)
 
                         Button {
-                            if authViewModel.isAuthenticated {
-                                cart.addItem(item)
-                            } else {
-                                showLoginSheet = true
-                            }
+                            if authViewModel.isAuthenticated { cart.addItem(item) } else { showLoginSheet = true }
                         } label: {
-                            Image(systemName: "plus.circle.fill")
-                                .font(.title3)
-                                .foregroundStyle(Constants.primaryColor)
+                            Image(systemName: "plus.circle.fill").font(.title3).foregroundStyle(Constants.primaryColor)
                         }
                         .buttonStyle(.plain)
                     }
                 } else {
                     Button {
-                        if authViewModel.isAuthenticated {
-                            cart.addItem(item)
-                        } else {
-                            showLoginSheet = true
-                        }
+                        if authViewModel.isAuthenticated { cart.addItem(item) } else { showLoginSheet = true }
                     } label: {
-                        Text("Add")
-                            .font(.urbanist(size: 15, weight: .semibold))
-                            .padding(.horizontal, 20)
-                            .padding(.vertical, 8)
-                            .background(Constants.primaryColor)
-                            .foregroundStyle(.white)
-                            .clipShape(Capsule())
+                        Text("Add").font(.urbanist(size: 15, weight: .semibold))
+                            .padding(.horizontal, 20).padding(.vertical, 8)
+                            .background(Constants.primaryColor).foregroundStyle(.white).clipShape(Capsule())
                     }
                 }
             }
@@ -581,5 +609,36 @@ extension View {
         } else {
             self
         }
+    }
+}
+
+struct CanteenHeaderView: View {
+    let canteen: Canteen?
+    @Binding var showCanteenSelector: Bool
+    
+    var body: some View {
+        HStack {
+            VStack(alignment: .leading, spacing: 4) {
+                Text(canteen?.name ?? "")
+                    .font(.urbanist(size: 22, weight: .bold))
+                    .foregroundStyle(.black)
+                
+                Label(canteen?.place ?? "", systemImage: "mappin.circle")
+                    .font(.urbanist(size: 14, weight: .regular))
+                    .foregroundStyle(.secondary)
+            }
+            
+            Spacer()
+            
+            Button("Change") {
+                showCanteenSelector = true
+            }
+            .buttonStyle(.bordered)
+            .tint(Constants.primaryColor)
+        }
+        .padding(16)
+        .background(Color.white)
+        .cornerRadius(16)
+        .shadow(color: .black.opacity(0.05), radius: 8, x: 0, y: 4)
     }
 }

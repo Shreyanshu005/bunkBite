@@ -144,4 +144,19 @@ class CanteenViewModel: ObservableObject {
             return false
         }
     }
+
+    func refreshSelectedCanteen() async {
+        guard let currentId = selectedCanteen?.id else { return }
+        // Don't set global isLoading to avoid full screen spinner on pull-to-refresh
+        do {
+            // Using getAllCanteens (public) to ensure we get status even without token
+            let allCanteens = try await apiService.getAllCanteens()
+            if let updated = allCanteens.first(where: { $0.id == currentId }) {
+                selectedCanteen = updated
+                print("✅ Refreshed selected canteen status: \(updated.isAcceptingOrders.0 ? "Open" : "Closed")")
+            }
+        } catch {
+            print("❌ Failed to refresh selected canteen: \(error.localizedDescription)")
+        }
+    }
 }

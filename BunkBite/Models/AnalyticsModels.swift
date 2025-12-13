@@ -26,11 +26,26 @@ enum AnalyticsPeriod: String, CaseIterable {
 // MARK: - API Response Models
 
 struct AnalyticsSummary: Codable {
+    let summary: SummaryMetrics
+    let ordersByStatus: OrderStatusBreakdown
+    let topItems: [TopItem]
+    
+    enum CodingKeys: String, CodingKey {
+        case summary
+        case ordersByStatus
+        case topItems = "topSellingItems"
+    }
+    
+    // Flattened properties for easier access in View
+    var totalEarnings: Double { summary.totalEarnings }
+    var totalOrders: Int { summary.totalOrders }
+    var averageOrderValue: Double { summary.averageOrderValue }
+}
+
+struct SummaryMetrics: Codable {
     let totalEarnings: Double
     let totalOrders: Int
     let averageOrderValue: Double
-    let ordersByStatus: OrderStatusBreakdown
-    let topItems: [TopItem]
 }
 
 struct OrderStatusBreakdown: Codable {
@@ -51,16 +66,43 @@ struct TopItem: Codable, Identifiable {
         case id = "_id"
         case name, quantity, revenue
     }
+    
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        name = try container.decode(String.self, forKey: .name)
+        quantity = try container.decode(Int.self, forKey: .quantity)
+        revenue = try container.decode(Double.self, forKey: .revenue)
+        
+        // Handle missing _id by generating a UUID or using name
+        if let decodedId = try? container.decode(String.self, forKey: .id) {
+            id = decodedId
+        } else {
+            id = UUID().uuidString
+        }
+    }
 }
 
 struct EarningsData: Codable {
-    let dailyEarnings: [DailyEarning]
-    let totalEarnings: Double
+    let breakdown: [DailyEarning]
+    let total: EarningsTotal
+    
+    // Flatten for ViewModel compatibility
+    var dailyEarnings: [DailyEarning] { breakdown }
+    var totalEarnings: Double { total.earnings }
+}
+
+struct EarningsTotal: Codable {
+    let earnings: Double
+    let orders: Int
 }
 
 struct DailyEarning: Codable, Identifiable {
     let date: String // Format: YYYY-MM-DD
-    let amount: Double
+    let earnings: Double
+    let orders: Int
+    
+    // Maintain compatibility with ViewModel which might expect 'amount'
+    var amount: Double { earnings }
     
     var id: String { date }
     

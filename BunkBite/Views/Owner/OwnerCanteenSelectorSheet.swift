@@ -85,17 +85,28 @@ struct OwnerCanteenSelectorSheet: View {
                                     .font(.title2)
                             }
                         }
-                            .padding(.vertical, 12)
-                            .padding(.horizontal, 4)
+                        .padding(.vertical, 12)
+                        .padding(.horizontal, 4)
+                    }
+                    .listRowBackground(
+                        RoundedRectangle(cornerRadius: 12)
+                            .fill(.white)
+                            .shadow(color: .black.opacity(0.08), radius: 4, x: 0, y: 2)
+                    )
+                    .listRowSeparator(.hidden)
+                    .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
+                    .padding(.vertical, 4)
+                    .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+                        Button(role: .destructive) {
+                            if let token = authViewModel.authToken {
+                                Task {
+                                    await canteenViewModel.deleteCanteen(id: canteen.id, token: token)
+                                }
+                            }
+                        } label: {
+                            Label("Delete", systemImage: "trash")
                         }
-                        .listRowBackground(
-                            RoundedRectangle(cornerRadius: 12)
-                                .fill(.white)
-                                .shadow(color: .black.opacity(0.08), radius: 4, x: 0, y: 2)
-                        )
-                        .listRowSeparator(.hidden)
-                        .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
-                        .padding(.vertical, 4)
+                    }
                 }
             }
             .listStyle(.plain)

@@ -255,6 +255,9 @@ struct CartSheet: View {
                 )
             }
         }
+        .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("OrderCompleted"))) { _ in
+            dismiss()
+        }
     }
 
 }

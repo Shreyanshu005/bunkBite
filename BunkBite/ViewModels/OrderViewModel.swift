@@ -82,6 +82,16 @@ class OrderViewModel: ObservableObject {
         
         isLoading = false
     }
+
+    func fetchOrder(orderId: String, token: String) async -> Order? {
+        do {
+            let order = try await apiService.getOrderById(id: orderId, token: token)
+            return order
+        } catch {
+            print("❌ Fetch order error: \(error)")
+            return nil
+        }
+    }
     
     // MARK: - Payment
     func initiatePayment(orderId: String, token: String) async -> RazorpayPaymentInitiation? {

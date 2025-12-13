@@ -14,6 +14,31 @@ struct LoginSheet: View {
     @State private var isAnimating = false
 
     var body: some View {
+        if showOTPSheet {
+            OTPSheet(authViewModel: authViewModel, onSuccess: {
+                showOTPSheet = false
+                dismiss() // This dismisses the LoginSheet
+            })
+            // Add a back button to return to email entry if needed
+            .overlay(alignment: .topLeading) {
+                Button {
+                    showOTPSheet = false
+                } label: {
+                    HStack(spacing: 4) {
+                        Image(systemName: "chevron.left")
+                        Text("Back")
+                    }
+                    .font(.urbanist(size: 16, weight: .semibold))
+                    .foregroundStyle(.gray)
+                    .padding()
+                }
+            }
+        } else {
+            loginContent
+        }
+    }
+    
+    var loginContent: some View {
         ZStack {
             // Gradient Background
             LinearGradient(
@@ -112,7 +137,9 @@ struct LoginSheet: View {
                         Task {
                             await authViewModel.sendOTP()
                             if authViewModel.isOTPSent {
-                                showOTPSheet = true
+                                withAnimation {
+                                    showOTPSheet = true
+                                }
                             }
                         }
                     } label: {
@@ -175,12 +202,6 @@ struct LoginSheet: View {
             withAnimation(.spring(response: 0.6, dampingFraction: 0.7)) {
                 isAnimating = true
             }
-        }
-        .sheet(isPresented: $showOTPSheet) {
-            OTPSheet(authViewModel: authViewModel, onSuccess: {
-                showOTPSheet = false
-                dismiss()
-            })
         }
     }
 }

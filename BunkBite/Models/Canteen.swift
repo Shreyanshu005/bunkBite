@@ -28,10 +28,18 @@ struct Canteen: Codable, Identifiable, Hashable {
     let menu: [MenuItem]?
     let createdAt: String?
     let updatedAt: String?
+    
+    // New Fields
+    let image: String?
+    let category: String?
+    let isOpen: Bool
+    let openingTime: String?
+    let closingTime: String?
 
     enum CodingKeys: String, CodingKey {
         case id = "_id"
         case name, place, ownerId, owner, menu, createdAt, updatedAt
+        case image, category, isOpen, openingTime, closingTime
     }
     
     // Custom init for decoding flexibility
@@ -44,43 +52,96 @@ struct Canteen: Codable, Identifiable, Hashable {
         createdAt = try? container.decode(String.self, forKey: .createdAt)
         updatedAt = try? container.decode(String.self, forKey: .updatedAt)
         
-        // Backend can return ownerId as either:
-        // 1. An object with _id, email, role (GET /canteens)
-        // 2. A plain string (POST /canteens response)
-        
-        if let ownerObj = try? container.decode(CanteenOwner.self, forKey: .ownerId) {
-            // Case 1: ownerId is an object
+        // Handle owner/ownerId
+        if let ownerObj = try? container.decode(CanteenOwner.self, forKey: .owner) {
             owner = ownerObj
             ownerId = ownerObj.id
-        } else if let ownerIdString = try? container.decode(String.self, forKey: .ownerId) {
-            // Case 2: ownerId is a string
+        } else if let ownerIdString = try? container.decode(String.self, forKey: .owner) {
             ownerId = ownerIdString
             owner = nil
-        } else if let ownerObj = try? container.decode(CanteenOwner.self, forKey: .owner) {
-            // Case 3: owner field exists as object
-            owner = ownerObj
-            ownerId = ownerObj.id
+        } else if let ownerIdString = try? container.decode(String.self, forKey: .ownerId) {
+            ownerId = ownerIdString
+            owner = nil
         } else {
-            // Fallback
-            ownerId = try container.decode(String.self, forKey: .ownerId)
+            // Fallback for safety, though API should provide one
+            ownerId = ""
             owner = nil
         }
+        
+        // Handle new fields with defaults
+        image = try? container.decode(String.self, forKey: .image)
+        category = try? container.decode(String.self, forKey: .category)
+        isOpen = try container.decodeIfPresent(Bool.self, forKey: .isOpen) ?? true
+        openingTime = try container.decodeIfPresent(String.self, forKey: .openingTime)
+        closingTime = try container.decodeIfPresent(String.self, forKey: .closingTime)
     }
     
-    // Manual init for creating instances
-    init(id: String, name: String, place: String, ownerId: String, owner: CanteenOwner? = nil, menu: [MenuItem]? = nil, createdAt: String? = nil, updatedAt: String? = nil) {
+    // Manual init
+    init(id: String, name: String, place: String, ownerId: String, owner: CanteenOwner? = nil, menu: [MenuItem]? = nil, isOpen: Bool = true, openingTime: String? = nil, closingTime: String? = nil) {
         self.id = id
         self.name = name
         self.place = place
         self.ownerId = ownerId
         self.owner = owner
         self.menu = menu
-        self.createdAt = createdAt
-        self.updatedAt = updatedAt
+        self.createdAt = nil
+        self.updatedAt = nil
+        self.image = nil
+        self.category = nil
+        self.isOpen = isOpen
+        self.openingTime = openingTime
+        self.closingTime = closingTime
+    }
+    
+    // Logic to check if canteen is currently accepting orders
+    var isAcceptingOrders: (Bool, String) {
+        // 1. Check Manual Switch
+        if !isOpen {
+            return (false, "Canteen is currently closed (Manually Closed)")
+        }
+        
+        // 2. Check Time Range
+        guard let openStr = openingTime, let closeStr = closingTime else {
+            // If times are not set, rely only on manual switch (which is open here)
+            return (true, "Open")
+        }
+        
+        // Simple time parsing without date (HH:mm)
+        let formatter = DateFormatter()
+        formatter.dateFormat = "HH:mm"
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        formatter.timeZone = TimeZone.current // Use device time zone
+        
+        let now = Date()
+        let calendar = Calendar.current
+        
+        // Extract hour and minute components
+        let currentComp = calendar.dateComponents([.hour, .minute], from: now)
+        let currentMinutes = (currentComp.hour ?? 0) * 60 + (currentComp.minute ?? 0)
+        
+        // Parse opening time
+        guard let openDate = formatter.date(from: openStr),
+              let closeDate = formatter.date(from: closeStr) else {
+            return (true, "Open")
+        }
+        
+        let openComp = calendar.dateComponents([.hour, .minute], from: openDate)
+        let closeComp = calendar.dateComponents([.hour, .minute], from: closeDate)
+        
+        let openMinutes = (openComp.hour ?? 0) * 60 + (openComp.minute ?? 0)
+        let closeMinutes = (closeComp.hour ?? 0) * 60 + (closeComp.minute ?? 0)
+        
+        // Check if current time is within range
+        // Handle overnight ranges (e.g. 22:00 to 02:00) not covered here for simplicity unless requested
+        // Assuming standard day hours
+        
+        if currentMinutes >= openMinutes && currentMinutes < closeMinutes {
+            return (true, "Open")
+        } else {
+            return (false, "Canteen is closed. Operating hours: \(openStr) - \(closeStr)")
+        }
     }
 }
-
-
 
 struct CreateCanteenRequest: Codable {
     let name: String
