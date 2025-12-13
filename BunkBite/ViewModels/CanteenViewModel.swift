@@ -130,16 +130,21 @@ class CanteenViewModel: ObservableObject {
         isLoading = true
         errorMessage = nil
 
+        print("🗑️ Attempting to delete canteen with ID: \(id)")
+        
         do {
             try await apiService.deleteCanteen(id: id, token: token)
             canteens.removeAll { $0.id == id }
             if selectedCanteen?.id == id {
                 selectedCanteen = nil
             }
+            print("✅ Successfully deleted canteen")
             isLoading = false
             return true
         } catch {
-            errorMessage = "Failed to delete canteen"
+            let errorMsg = "Failed to delete canteen: \(error.localizedDescription)"
+            errorMessage = errorMsg
+            print("❌ \(errorMsg)")
             isLoading = false
             return false
         }

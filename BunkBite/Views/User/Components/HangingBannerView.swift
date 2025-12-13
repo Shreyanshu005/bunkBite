@@ -20,11 +20,14 @@ class MotionManager: ObservableObject {
                 DispatchQueue.main.async {
                     // Calculate rotation based on gravity (accelerometer)
                     // We only care about rotation around the Z axis (roll) for the 2D hanging effect
-                    // data.gravity.x ranges from -1 to 1. -1 is tilted left, 1 is tilted right.
-                    // We map -1...1 to -45...45 degrees for a realistic swing range
+                    // Inverted sign to fix direction: transform gravity x to rotation z
+                    // Increased multiplier for better range
                     
-                    withAnimation(.spring(response: 0.2, dampingFraction: 0.5)) {
-                        self?.roll = data.gravity.x * 60 // Max 60 degrees tilt
+                    // Use a "heavy" spring animation for inertia
+                    // response: 1.5 (slow/heavy)
+                    // damping: 0.15 (lots of oscillation/bouncy)
+                    withAnimation(.spring(response: 1.5, dampingFraction: 0.15)) {
+                        self?.roll = -(data.gravity.x * 80) 
                     }
                 }
             }

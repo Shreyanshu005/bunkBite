@@ -14,6 +14,11 @@ struct OwnerCanteenSelectorSheet: View {
     @Environment(\.dismiss) var dismiss
     @State private var searchText = ""
     @State private var showCreateCanteen = false
+    @State private var canteenToDelete: Canteen?
+    @State private var showDeleteConfirmation = false
+    @State private var deleteConfirmationEmail = ""
+    @State private var isDeleting = false
+    @State private var deleteError: String?
 
     var filteredCanteens: [Canteen] {
         if searchText.isEmpty {
@@ -98,11 +103,8 @@ struct OwnerCanteenSelectorSheet: View {
                     .padding(.vertical, 4)
                     .swipeActions(edge: .trailing, allowsFullSwipe: false) {
                         Button(role: .destructive) {
-                            if let token = authViewModel.authToken {
-                                Task {
-                                    await canteenViewModel.deleteCanteen(id: canteen.id, token: token)
-                                }
-                            }
+                            canteenToDelete = canteen
+                            showDeleteConfirmation = true
                         } label: {
                             Label("Delete", systemImage: "trash")
                         }
@@ -139,6 +141,22 @@ struct OwnerCanteenSelectorSheet: View {
                     authViewModel: authViewModel
                 )
             }
+            .sheet(isPresented: $showDeleteConfirmation) {
+                DeleteCanteenConfirmationSheet(
+                    canteen: canteenToDelete,
+                    userEmail: authViewModel.currentUser?.email ?? "",
+                    confirmationEmail: $deleteConfirmationEmail,
+                    isDeleting: $isDeleting,
+                    errorMessage: $deleteError,
+                    onConfirm: {
+                        Task {
+                            await performDeletion()
+                        }
+                    }
+                )
+                .presentationDetents([.height(350)])
+                .presentationDragIndicator(.visible)
+            }
         }
         .presentationDetents([.large])
         .presentationDragIndicator(.visible)
@@ -146,6 +164,139 @@ struct OwnerCanteenSelectorSheet: View {
         .task {
             if let token = authViewModel.authToken {
                 await canteenViewModel.fetchMyCanteens(token: token)
+            }
+        }
+    }
+    
+    private func performDeletion() async {
+        guard let canteen = canteenToDelete,
+              let token = authViewModel.authToken,
+              let userEmail = authViewModel.currentUser?.email else {
+            deleteError = "Missing required information"
+            return
+        }
+        
+        // Verify email matches
+        guard deleteConfirmationEmail.lowercased() == userEmail.lowercased() else {
+            deleteError = "Email does not match your account email"
+            return
+        }
+        
+        isDeleting = true
+        deleteError = nil
+        
+        let success = await canteenViewModel.deleteCanteen(id: canteen.id, token: token)
+        
+        isDeleting = false
+        
+        if success {
+            showDeleteConfirmation = false
+            deleteConfirmationEmail = ""
+            canteenToDelete = nil
+        } else {
+            deleteError = "Failed to delete canteen. Please try again."
+        }
+    }
+}
+
+struct DeleteCanteenConfirmationSheet: View {
+    let canteen: Canteen?
+    let userEmail: String
+    @Binding var confirmationEmail: String
+    @Binding var isDeleting: Bool
+    @Binding var errorMessage: String?
+    let onConfirm: () -> Void
+    
+    @Environment(\.dismiss) var dismiss
+    @FocusState private var isEmailFieldFocused: Bool
+    
+    var body: some View {
+        NavigationStack {
+            VStack(spacing: 24) {
+                // Warning Icon
+                Image(systemName: "exclamationmark.triangle.fill")
+                    .font(.system(size: 60))
+                    .foregroundStyle(.red)
+                    .padding(.top, 20)
+                
+                // Warning Text
+                VStack(spacing: 8) {
+                    Text("Delete Canteen?")
+                        .font(.urbanist(size: 24, weight: .bold))
+                    
+                    if let canteen = canteen {
+                        Text("You are about to delete \"\(canteen.name)\"")
+                            .font(.urbanist(size: 16, weight: .regular))
+                            .foregroundStyle(.secondary)
+                            .multilineTextAlignment(.center)
+                    }
+                    
+                    Text("This action cannot be undone.")
+                        .font(.urbanist(size: 14, weight: .medium))
+                        .foregroundStyle(.red)
+                }
+                
+                // Email Verification
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Type your email to confirm:")
+                        .font(.urbanist(size: 14, weight: .medium))
+                        .foregroundStyle(.secondary)
+                    
+                    TextField("Email", text: $confirmationEmail)
+                        .textFieldStyle(.roundedBorder)
+                        .textInputAutocapitalization(.never)
+                        .autocorrectionDisabled()
+                        .keyboardType(.emailAddress)
+                        .focused($isEmailFieldFocused)
+                    
+                    Text("Your email: \(userEmail)")
+                        .font(.urbanist(size: 12, weight: .regular))
+                        .foregroundStyle(.secondary)
+                }
+                .padding(.horizontal)
+                
+                if let error = errorMessage {
+                    Text(error)
+                        .font(.urbanist(size: 14, weight: .medium))
+                        .foregroundStyle(.red)
+                        .padding(.horizontal)
+                }
+                
+                Spacer()
+                
+                // Action Buttons
+                HStack(spacing: 12) {
+                    Button("Cancel") {
+                        dismiss()
+                    }
+                    .buttonStyle(.bordered)
+                    .frame(maxWidth: .infinity)
+                    
+                    Button {
+                        onConfirm()
+                    } label: {
+                        if isDeleting {
+                            ProgressView()
+                                .progressViewStyle(.circular)
+                                .tint(.white)
+                        } else {
+                            Text("Delete")
+                        }
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .tint(.red)
+                    .frame(maxWidth: .infinity)
+                    .disabled(confirmationEmail.isEmpty || isDeleting)
+                }
+                .padding(.horizontal)
+                .padding(.bottom, 20)
+            }
+            .navigationBarTitleDisplayMode(.inline)
+            .onAppear {
+                // Focus the text field when sheet appears
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                    isEmailFieldFocused = true
+                }
             }
         }
     }
