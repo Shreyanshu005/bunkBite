@@ -123,8 +123,7 @@ struct CanteenSelectorSheet: View {
 
                                 Button {
                                     Task {
-                                        let token = authViewModel.authToken ?? "guest_token"
-                                        await canteenViewModel.fetchAllCanteens(token: token)
+                                        await canteenViewModel.fetchAllCanteens()
                                     }
                                 } label: {
                                     HStack(spacing: 8) {
@@ -187,9 +186,8 @@ struct CanteenSelectorSheet: View {
             }
         }
         .task {
-            // GUEST ACCESS: Fetch canteens with guest token if not authenticated
-            let token = authViewModel.authToken ?? "guest_token"
-            await canteenViewModel.fetchAllCanteens(token: token)
+            // GUEST ACCESS: Public endpoint, no authentication required
+            await canteenViewModel.fetchAllCanteens()
         }
     }
 }

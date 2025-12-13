@@ -10,7 +10,29 @@ import SwiftUI
 struct OwnerOrdersTab: View {
     let canteen: Canteen?
     @ObservedObject var authViewModel: AuthViewModel
+    @Binding var orderCompletedTrigger: Bool
     let onSelectCanteen: () -> Void
+    
+    @StateObject private var ordersViewModel = OwnerOrdersViewModel()
+    @State private var selectedFilter: OrderStatusFilter = .all
+    
+    enum OrderStatusFilter: String, CaseIterable {
+        case all = "All"
+        case pending = "Pending"
+        case preparing = "Preparing"
+        case ready = "Ready"
+        case completed = "Completed"
+        
+        var apiValue: String? {
+            switch self {
+            case .all: return nil
+            case .pending: return "pending"
+            case .preparing: return "preparing"
+            case .ready: return "ready"
+            case .completed: return "completed"
+            }
+        }
+    }
 
     var body: some View {
         NavigationStack {
@@ -41,27 +63,241 @@ struct OwnerOrdersTab: View {
     }
 
     private func ordersView(for selectedCanteen: Canteen) -> some View {
-        List {
-            Section {
-                VStack(alignment: .leading, spacing: 8) {
-                    Text(selectedCanteen.name)
-                        .font(.title3)
-                        .fontWeight(.bold)
-
-                    Label(selectedCanteen.place, systemImage: "mappin.circle")
-                        .font(.subheadline)
-                        .foregroundStyle(.secondary)
+        VStack(spacing: 0) {
+            // Status Filter Tabs
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 12) {
+                    ForEach(OrderStatusFilter.allCases, id: \.self) { filter in
+                        OwnerFilterChip(
+                            title: filter.rawValue,
+                            isSelected: selectedFilter == filter
+                        ) {
+                            selectedFilter = filter
+                            Task {
+                                await loadOrders(for: selectedCanteen)
+                            }
+                        }
+                    }
                 }
-                .padding(.vertical, 4)
+                .padding(.horizontal)
+                .padding(.vertical, 12)
             }
-            .listRowBackground(
-                RoundedRectangle(cornerRadius: 12)
-                    .fill(.ultraThinMaterial)
-            )
-
-            ContentUnavailableView("No orders yet", systemImage: "list.clipboard")
-                .listRowBackground(Color.clear)
+            .background(Color(.systemBackground))
+            
+            Divider()
+            
+            // Orders List
+            if ordersViewModel.isLoading {
+                ProgressView()
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+            } else if ordersViewModel.orders.isEmpty {
+                ContentUnavailableView(
+                    "No \(selectedFilter.rawValue) Orders",
+                    systemImage: "list.clipboard",
+                    description: Text("Orders will appear here when customers place them")
+                )
+            } else {
+                List {
+                    ForEach(ordersViewModel.orders) { order in
+                        OrdersTabCard(
+                            order: order,
+                            onStatusUpdate: { newStatus in
+                                await updateStatus(orderId: order.id, newStatus: newStatus)
+                            }
+                        )
+                        .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
+                        .listRowSeparator(.hidden)
+                        .listRowBackground(Color.clear)
+                    }
+                }
+                .listStyle(.plain)
+                .refreshable {
+                    await loadOrders(for: selectedCanteen)
+                }
+            }
         }
         .navigationTitle("Orders")
+        .task {
+            await loadOrders(for: selectedCanteen)
+        }
+        .onChange(of: orderCompletedTrigger) {
+            Task {
+                await loadOrders(for: selectedCanteen)
+            }
+        }
+    }
+    
+    private func loadOrders(for canteen: Canteen) async {
+        guard let token = authViewModel.authToken else { return }
+        await ordersViewModel.fetchOrders(
+            canteenId: canteen.id,
+            status: selectedFilter.apiValue,
+            token: token
+        )
+    }
+    
+    private func updateStatus(orderId: String, newStatus: String) async {
+        guard let token = authViewModel.authToken else { return }
+        let success = await ordersViewModel.updateOrderStatus(
+            orderId: orderId,
+            newStatus: newStatus,
+            token: token
+        )
+        
+        if success {
+            // Optionally show success feedback
+            print("✅ Order status updated successfully")
+        }
+    }
+}
+
+// MARK: - Owner Filter Chip
+private struct OwnerFilterChip: View {
+    let title: String
+    let isSelected: Bool
+    let action: () -> Void
+    
+    var body: some View {
+        Button(action: action) {
+            Text(title)
+                .font(.urbanist(size: 14, weight: .semibold))
+                .padding(.horizontal, 16)
+                .padding(.vertical, 8)
+                .background(isSelected ? Constants.primaryColor : Color(.systemGray6))
+                .foregroundStyle(isSelected ? .white : .primary)
+                .clipShape(Capsule())
+        }
+    }
+}
+
+// MARK: - Orders Tab Card
+private struct OrdersTabCard: View {
+    let order: Order
+    let onStatusUpdate: (String) async -> Void
+    
+    @State private var showStatusMenu = false
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            // Header
+            HStack {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("Order #\(order.orderId)")
+                        .font(.urbanist(size: 16, weight: .bold))
+                    
+                    Text(formatDate(order.createdAt))
+                        .font(.urbanist(size: 13, weight: .medium))
+                        .foregroundStyle(.secondary)
+                }
+                
+                Spacer()
+                
+                StatusBadge(status: order.status)
+            }
+            
+            Divider()
+            
+            // Items
+            VStack(alignment: .leading, spacing: 8) {
+                ForEach(order.items) { item in
+                    HStack {
+                        Text("\(item.quantity)x")
+                            .font(.urbanist(size: 14, weight: .semibold))
+                            .foregroundStyle(Constants.primaryColor)
+                            .frame(width: 30, alignment: .leading)
+                        
+                        Text(item.name)
+                            .font(.urbanist(size: 14, weight: .medium))
+                        
+                        Spacer()
+                        
+                        Text("₹\(Int(item.price) * item.quantity)")
+                            .font(.urbanist(size: 14, weight: .semibold))
+                    }
+                }
+            }
+            
+            Divider()
+            
+            // Footer
+            HStack {
+                Text("Total: ₹\(Int(order.totalAmount))")
+                    .font(.urbanist(size: 16, weight: .bold))
+                
+                Spacer()
+                
+                if order.status != .completed && order.status != .cancelled {
+                    if order.status == .pending {
+                        Button {
+                            Task {
+                                await onStatusUpdate("preparing")
+                            }
+                        } label: {
+                            HStack(spacing: 4) {
+                                Image(systemName: "arrow.right.circle.fill")
+                                Text("Start Preparing")
+                            }
+                            .font(.urbanist(size: 14, weight: .semibold))
+                            .padding(.horizontal, 12)
+                            .padding(.vertical, 6)
+                            .background(Constants.primaryColor)
+                            .foregroundStyle(.white)
+                            .clipShape(Capsule())
+                        }
+                    } else if order.status == .preparing {
+                        Button {
+                            Task {
+                                await onStatusUpdate("ready")
+                            }
+                        } label: {
+                            HStack(spacing: 4) {
+                                Image(systemName: "checkmark.circle.fill")
+                                Text("Mark Ready")
+                            }
+                            .font(.urbanist(size: 14, weight: .semibold))
+                            .padding(.horizontal, 12)
+                            .padding(.vertical, 6)
+                            .background(Constants.primaryColor)
+                            .foregroundStyle(.white)
+                            .clipShape(Capsule())
+                        }
+                    } else if order.status == .ready {
+                        Button {
+                            Task {
+                                await onStatusUpdate("completed")
+                            }
+                        } label: {
+                            HStack(spacing: 4) {
+                                Image(systemName: "checkmark.seal.fill")
+                                Text("Complete")
+                            }
+                            .font(.urbanist(size: 14, weight: .semibold))
+                            .padding(.horizontal, 12)
+                            .padding(.vertical, 6)
+                            .background(.green)
+                            .foregroundStyle(.white)
+                            .clipShape(Capsule())
+                        }
+                    }
+                }
+            }
+        }
+        .padding()
+        .background(Color(.systemBackground))
+        .clipShape(RoundedRectangle(cornerRadius: 12))
+        .shadow(color: .black.opacity(0.05), radius: 8, x: 0, y: 2)
+    }
+    
+    private func formatDate(_ dateString: String) -> String {
+        let inputFormatter = ISO8601DateFormatter()
+        inputFormatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        
+        if let date = inputFormatter.date(from: dateString) {
+            let formatter = DateFormatter()
+            formatter.dateStyle = .medium
+            formatter.timeStyle = .short
+            return formatter.string(from: date)
+        }
+        return dateString
     }
 }

@@ -78,34 +78,17 @@ struct OwnerProfileView2: View {
 
             Section {
                 NavigationLink {
-                    Text("Analytics")
+                    if let data = UserDefaults.standard.data(forKey: "selectedCanteen"),
+                       let canteen = try? JSONDecoder().decode(Canteen.self, from: data) {
+                        AnalyticsView(canteenId: canteen.id, token: authViewModel.authToken ?? "")
+                    } else {
+                        ContentUnavailableView("Select a Canteen", systemImage: "building.2")
+                    }
                 } label: {
                     Label("Analytics", systemImage: "chart.bar.fill")
                 }
-
-                NavigationLink {
-                    Text("Business Settings")
-                } label: {
-                    Label("Business Settings", systemImage: "gearshape.fill")
-                }
             } header: {
                 Text("Business")
-            }
-
-            Section {
-                NavigationLink {
-                    Text("Help & Support")
-                } label: {
-                    Label("Help & Support", systemImage: "questionmark.circle.fill")
-                }
-
-                NavigationLink {
-                    Text("Terms & Privacy")
-                } label: {
-                    Label("Terms & Privacy", systemImage: "doc.text.fill")
-                }
-            } header: {
-                Text("Support")
             }
 
             Section {

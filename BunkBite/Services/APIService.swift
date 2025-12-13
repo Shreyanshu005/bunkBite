@@ -26,13 +26,13 @@ class APIService {
     }
 
     // MARK: - Authentication
-    func sendOTP(email: String) async throws -> SendOTPResponse {
+    func sendOTP(email: String) async throws -> APIResponse<String> {
         let url = URL(string: "\(Constants.baseURL)/api/v1/auth/email/send-otp")!
         var request = createRequest(url: url, method: "POST")
         request.httpBody = try JSONEncoder().encode(["email": email])
 
         let (data, _) = try await URLSession.shared.data(for: request)
-        return try JSONDecoder().decode(SendOTPResponse.self, from: data)
+        return try JSONDecoder().decode(APIResponse<String>.self, from: data)
     }
 
     func verifyOTP(email: String, otp: String) async throws -> AuthResponse {
@@ -45,33 +45,32 @@ class APIService {
     }
 
     // MARK: - Canteen APIs
-    func getAllCanteens(token: String) async throws -> [Canteen] {
+    func getAllCanteens() async throws -> [Canteen] {
         let url = URL(string: "\(Constants.baseURL)/api/v1/canteens")!
-        let request = createRequest(url: url, method: "GET", token: token)
+        let request = createRequest(url: url, method: "GET")
 
-        print("\n🌐 FETCHING CANTEENS")
+        print("\n🌐 FETCHING ALL CANTEENS (Public Endpoint)")
         print("URL: \(url.absoluteString)")
-        print("Token: \(token.prefix(20))...")
         print("Headers: \(request.allHTTPHeaderFields ?? [:])")
 
+        let (data, response) = try await URLSession.shared.data(for: request)
+        
+        if let httpResponse = response as? HTTPURLResponse {
+            print("Response Status: \(httpResponse.statusCode)")
+        }
+        
+        let responseString = String(data: data, encoding: .utf8) ?? ""
+        print("Response Data: \(responseString)")
+        print("Response Data Length: \(data.count) bytes")
+        
         do {
-            let (data, response) = try await URLSession.shared.data(for: request)
-
-            // Log response
-            if let httpResponse = response as? HTTPURLResponse {
-                print("Response Status: \(httpResponse.statusCode)")
-            }
-
-            let responseString = String(data: data, encoding: .utf8) ?? ""
-            print("Response Data: \(responseString)")
-
-            let decodedResponse = try JSONDecoder().decode(CanteenResponse.self, from: data)
-            let canteens = decodedResponse.canteens ?? []
-            print("✅ Successfully fetched \(canteens.count) canteens\n")
+            let apiResponse = try JSONDecoder().decode(APIResponse<[Canteen]>.self, from: data)
+            let canteens = apiResponse.data ?? []
+            print("✅ Successfully decoded \(canteens.count) canteens\n")
             return canteens
         } catch {
-            print("❌ Error fetching canteens: \(error.localizedDescription)")
-            print("Error details: \(error)\n")
+            print("❌ Decoding Error: \(error)")
+            print("Error details: \(error.localizedDescription)\n")
             throw error
         }
     }
@@ -81,8 +80,8 @@ class APIService {
         let request = createRequest(url: url, method: "GET", token: token)
 
         let (data, _) = try await URLSession.shared.data(for: request)
-        let response = try JSONDecoder().decode(CanteenResponse.self, from: data)
-        guard let canteen = response.canteen else { throw APIError.invalidResponse }
+        let response = try JSONDecoder().decode(APIResponse<Canteen>.self, from: data)
+        guard let canteen = response.data else { throw APIError.invalidResponse }
         return canteen
     }
 
@@ -90,19 +89,55 @@ class APIService {
         let url = URL(string: "\(Constants.baseURL)/api/v1/canteens/my-canteens")!
         let request = createRequest(url: url, method: "GET", token: token)
 
-        let (data, _) = try await URLSession.shared.data(for: request)
-        let response = try JSONDecoder().decode(CanteenResponse.self, from: data)
-        return response.canteens ?? []
+        print("\n🏢 FETCHING OWNER CANTEENS")
+        print("URL: \(url.absoluteString)")
+        print("Token: \(token.prefix(20))...")
+
+        let (data, response) = try await URLSession.shared.data(for: request)
+        
+        if let httpResponse = response as? HTTPURLResponse {
+            print("Response Status: \(httpResponse.statusCode)")
+        }
+        
+        if let responseString = String(data: data, encoding: .utf8) {
+            print("Response Data: \(responseString)")
+        }
+
+        let apiResponse = try JSONDecoder().decode(APIResponse<[Canteen]>.self, from: data)
+        let canteens = apiResponse.data ?? []
+        print("✅ Fetched \(canteens.count) owner canteens\n")
+        return canteens
     }
 
     func createCanteen(name: String, place: String, ownerId: String, token: String) async throws -> Canteen {
         let url = URL(string: "\(Constants.baseURL)/api/v1/canteens")!
         var request = createRequest(url: url, method: "POST", token: token)
-        request.httpBody = try JSONEncoder().encode(CreateCanteenRequest(name: name, place: place, ownerId: ownerId))
+        let body = CreateCanteenRequest(name: name, place: place, ownerId: ownerId)
+        request.httpBody = try JSONEncoder().encode(body)
 
-        let (data, _) = try await URLSession.shared.data(for: request)
-        let response = try JSONDecoder().decode(CanteenResponse.self, from: data)
-        guard let canteen = response.canteen else { throw APIError.invalidResponse }
+        // Debug logging
+        print("🚀 Creating Canteen...")
+        print("URL: \(url.absoluteString)")
+        print("OwnerID: \(ownerId)")
+        if let bodyString = String(data: request.httpBody!, encoding: .utf8) {
+            print("Request Body: \(bodyString)")
+        }
+
+        let (data, response) = try await URLSession.shared.data(for: request)
+        
+        if let httpResponse = response as? HTTPURLResponse {
+            print("Response Status: \(httpResponse.statusCode)")
+        }
+        if let responseString = String(data: data, encoding: .utf8) {
+            print("Response Data: \(responseString)")
+        }
+
+        let apiResponse = try JSONDecoder().decode(APIResponse<Canteen>.self, from: data)
+        guard let canteen = apiResponse.data else {
+            print("❌ API Error Message: \(apiResponse.message ?? "Unknown")")
+            throw APIError.invalidResponse
+        }
+        print("✅ Canteen created: \(canteen.name)")
         return canteen
     }
 
@@ -112,84 +147,26 @@ class APIService {
         request.httpBody = try JSONEncoder().encode(CreateCanteenRequest(name: name, place: place, ownerId: ownerId))
 
         let (data, _) = try await URLSession.shared.data(for: request)
-        let response = try JSONDecoder().decode(CanteenResponse.self, from: data)
-        guard let canteen = response.canteen else { throw APIError.invalidResponse }
+        let response = try JSONDecoder().decode(APIResponse<Canteen>.self, from: data)
+        guard let canteen = response.data else { throw APIError.invalidResponse }
         return canteen
     }
 
     func deleteCanteen(id: String, token: String) async throws {
         let url = URL(string: "\(Constants.baseURL)/api/v1/canteens/\(id)")!
         let request = createRequest(url: url, method: "DELETE", token: token)
-        _ = try await URLSession.shared.data(for: request)
+        let (data, _) = try await URLSession.shared.data(for: request)
+        _ = try JSONDecoder().decode(APIResponse<EmptyData>.self, from: data)
     }
 
     // MARK: - Menu APIs
-    func getMenu(canteenId: String, token: String) async throws -> [MenuItem] {
+    func getMenu(canteenId: String) async throws -> [MenuItem] {
         let url = URL(string: "\(Constants.baseURL)/api/v1/menu/canteen/\(canteenId)")!
-        let request = createRequest(url: url, method: "GET", token: token)
+        let request = createRequest(url: url, method: "GET")
         
-        print("🌐 Fetching menu for canteen: \(canteenId)")
-        print("Request URL: \(url.absoluteString)")
-        
-        let (data, response) = try await URLSession.shared.data(for: request)
-        
-        // Print response status and headers
-        if let httpResponse = response as? HTTPURLResponse {
-            print("Response Status Code: \(httpResponse.statusCode)")
-            print("Response Headers: \(httpResponse.allHeaderFields)")
-        }
-        
-        // Print raw response data for debugging
-        let responseString = String(data: data, encoding: .utf8) ?? ""
-        print("Response Data: \(responseString)")
-        
-        do {
-            // First try to decode the response as a canteen with menu items
-            if let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
-               let canteenData = json["canteen"] as? [String: Any],
-               let menuItems = canteenData["menu"] as? [[String: Any]] {
-                print("✅ Found \(menuItems.count) menu items in canteen.menu")
-                return try menuItems.map { itemDict -> MenuItem in
-                    guard let id = itemDict["_id"] as? String,
-                          let name = itemDict["name"] as? String,
-                          let price = itemDict["price"] as? Double,
-                          let availableQuantity = itemDict["availableQuantity"] as? Int else {
-                        print("❌ Missing required fields in menu item: \(itemDict)")
-                        throw APIError.decodingError
-                    }
-                    let image = itemDict["image"] as? String
-                    return MenuItem(
-                        id: id,
-                        name: name,
-                        image: image,
-                        price: price,
-                        availableQuantity: availableQuantity,
-                        createdAt: nil,
-                        updatedAt: nil
-                    )
-                }
-            }
-            
-            // Fall back to the original format if the canteen.menu structure isn't found
-            let response = try JSONDecoder().decode(MenuResponse.self, from: data)
-            
-            if let items = response.items {
-                print("✅ Successfully decoded \(items.count) menu items from root items")
-                return items
-            } else if let message = response.message {
-                print("⚠️ API Message: \(message)")
-                
-                // If we get here, we couldn't find any items
-                print("No items found in the response")
-                return []
-            } else {
-                print("❌ Both items and message are nil in the response")
-                return []
-            }
-        } catch {
-            print("❌ Failed to decode response: \(error.localizedDescription)")
-            throw error
-        }
+        let (data, _) = try await URLSession.shared.data(for: request)
+        let response = try JSONDecoder().decode(APIResponse<[MenuItem]>.self, from: data)
+        return response.data ?? []
     }
 
     func getMenuItem(canteenId: String, itemId: String, token: String) async throws -> MenuItem {
@@ -197,8 +174,8 @@ class APIService {
         let request = createRequest(url: url, method: "GET", token: token)
 
         let (data, _) = try await URLSession.shared.data(for: request)
-        let response = try JSONDecoder().decode(MenuResponse.self, from: data)
-        guard let item = response.item else { throw APIError.invalidResponse }
+        let response = try JSONDecoder().decode(APIResponse<MenuItem>.self, from: data)
+        guard let item = response.data else { throw APIError.invalidResponse }
         return item
     }
 
@@ -206,7 +183,6 @@ class APIService {
         let url = URL(string: "\(Constants.baseURL)/api/v1/menu/canteen/\(canteenId)")!
         var request = createRequest(url: url, method: "POST", token: token, contentType: "application/x-www-form-urlencoded")
         
-        // Create form data with proper encoding
         var components = URLComponents()
         components.queryItems = [
             URLQueryItem(name: "name", value: name),
@@ -214,51 +190,12 @@ class APIService {
             URLQueryItem(name: "availableQuantity", value: String(availableQuantity))
         ]
         
-        // Get the query string and set it as the HTTP body
         if let queryString = components.percentEncodedQuery?.replacingOccurrences(of: "+", with: "%2B") {
             request.httpBody = queryString.data(using: .utf8)
-            
-            // Print the request for debugging
-            print("Request URL: \(url.absoluteString)")
-            print("Request Headers: \(request.allHTTPHeaderFields ?? [:])")
-            print("Request Body: \(String(data: request.httpBody ?? Data(), encoding: .utf8) ?? "")")
-            
-            let (data, response) = try await URLSession.shared.data(for: request)
-            
-            // Print the response for debugging
-            if let httpResponse = response as? HTTPURLResponse {
-                print("Response Status Code: \(httpResponse.statusCode)")
-                print("Response Headers: \(httpResponse.allHeaderFields)")
-            }
-            let responseString = String(data: data, encoding: .utf8) ?? ""
-            print("Response Data: \(responseString)")
-            
-            // Try to decode the response
-            do {
-                let response = try JSONDecoder().decode(MenuResponse.self, from: data)
-                if response.success, let item = response.item {
-                    return item
-                } else if let message = response.message {
-                    print("API Message: \(message)")
-                    // If the API returns success but no item, try to construct one from the response
-                    if response.success, let itemDict = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
-                       let menuItemDict = itemDict["menuItem"] as? [String: Any],
-                       let id = menuItemDict["_id"] as? String,
-                       let name = menuItemDict["name"] as? String,
-                       let price = menuItemDict["price"] as? Double,
-                       let availableQuantity = menuItemDict["availableQuantity"] as? Int {
-                        let image = menuItemDict["image"] as? String
-                        return MenuItem(id: id, name: name, image: image, price: price, availableQuantity: availableQuantity, createdAt: nil, updatedAt: nil)
-                    }
-                    // If we can't construct an item, throw the message as an error
-                    throw NSError(domain: "APIError", code: 0, userInfo: [NSLocalizedDescriptionKey: message])
-                } else {
-                    throw APIError.invalidResponse
-                }
-            } catch {
-                print("Decoding Error: \(error)")
-                throw error
-            }
+            let (data, _) = try await URLSession.shared.data(for: request)
+            let response = try JSONDecoder().decode(APIResponse<MenuItem>.self, from: data)
+            guard let item = response.data else { throw APIError.invalidResponse }
+            return item
         }
         
         throw APIError.invalidRequest
@@ -268,7 +205,6 @@ class APIService {
         let url = URL(string: "\(Constants.baseURL)/api/v1/menu/canteen/\(canteenId)/item/\(itemId)")!
         var request = createRequest(url: url, method: "PUT", token: token, contentType: "application/x-www-form-urlencoded")
         
-        // Create form data with proper encoding
         var components = URLComponents()
         components.queryItems = [
             URLQueryItem(name: "name", value: name),
@@ -276,54 +212,12 @@ class APIService {
             URLQueryItem(name: "availableQuantity", value: String(availableQuantity))
         ]
         
-        // Get the query string and set it as the HTTP body
         if let queryString = components.percentEncodedQuery?.replacingOccurrences(of: "+", with: "%2B") {
             request.httpBody = queryString.data(using: .utf8)
-            
-            // Print the request for debugging
-            print("🔄 Updating menu item:")
-            print("Request URL: \(url.absoluteString)")
-            print("Request Headers: \(request.allHTTPHeaderFields ?? [:])")
-            print("Request Body: \(String(data: request.httpBody ?? Data(), encoding: .utf8) ?? "")")
-            
-            let (data, response) = try await URLSession.shared.data(for: request)
-            
-            // Print the response for debugging
-            if let httpResponse = response as? HTTPURLResponse {
-                print("Response Status Code: \(httpResponse.statusCode)")
-                print("Response Headers: \(httpResponse.allHeaderFields)")
-            }
-            let responseString = String(data: data, encoding: .utf8) ?? ""
-            print("Response Data: \(responseString)")
-            
-            // Try to decode the response
-            do {
-                let response = try JSONDecoder().decode(MenuResponse.self, from: data)
-                
-                if response.success, let item = response.item {
-                    print("✅ Successfully updated menu item: \(item.name)")
-                    return item
-                } else if let message = response.message {
-                    print("⚠️ API Message: \(message)")
-                    // If the API returns success but no item, try to construct one from the response
-                    if response.success, let itemDict = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
-                       let menuItemDict = itemDict["menuItem"] as? [String: Any],
-                       let id = menuItemDict["_id"] as? String,
-                       let name = menuItemDict["name"] as? String,
-                       let price = menuItemDict["price"] as? Double,
-                       let availableQuantity = menuItemDict["availableQuantity"] as? Int {
-                        let image = menuItemDict["image"] as? String
-                        return MenuItem(id: id, name: name, image: image, price: price, availableQuantity: availableQuantity, createdAt: nil, updatedAt: nil)
-                    }
-                    // If we can't construct an item, throw the message as an error
-                    throw NSError(domain: "APIError", code: 0, userInfo: [NSLocalizedDescriptionKey: message])
-                } else {
-                    throw APIError.invalidResponse
-                }
-            } catch {
-                print("❌ Decoding Error: \(error)")
-                throw error
-            }
+            let (data, _) = try await URLSession.shared.data(for: request)
+            let response = try JSONDecoder().decode(APIResponse<MenuItem>.self, from: data)
+            guard let item = response.data else { throw APIError.invalidResponse }
+            return item
         }
         
         throw APIError.invalidRequest
@@ -333,47 +227,15 @@ class APIService {
         let url = URL(string: "\(Constants.baseURL)/api/v1/menu/canteen/\(canteenId)/item/\(itemId)/quantity")!
         var request = createRequest(url: url, method: "PATCH", token: token, contentType: "application/x-www-form-urlencoded")
         
-        // Create form data with proper encoding
         var components = URLComponents()
         components.queryItems = [
             URLQueryItem(name: "quantity", value: String(quantity))
         ]
         
-        // Get the query string and set it as the HTTP body
         if let queryString = components.percentEncodedQuery?.replacingOccurrences(of: "+", with: "%2B") {
             request.httpBody = queryString.data(using: .utf8)
-            
-            // Print the request for debugging
-            print("🔄 Updating menu item quantity:")
-            print("Request URL: \(url.absoluteString)")
-            print("Request Headers: \(request.allHTTPHeaderFields ?? [:])")
-            print("Request Body: \(String(data: request.httpBody ?? Data(), encoding: .utf8) ?? "")")
-            
-            let (data, response) = try await URLSession.shared.data(for: request)
-            
-            // Print the response for debugging
-            if let httpResponse = response as? HTTPURLResponse {
-                print("Response Status Code: \(httpResponse.statusCode)")
-                print("Response Headers: \(httpResponse.allHeaderFields)")
-                
-                // Check for error status codes
-                if !(200...299).contains(httpResponse.statusCode) {
-                    let responseString = String(data: data, encoding: .utf8) ?? ""
-                    print("❌ Error Response: \(responseString)")
-                    throw NSError(domain: "APIError", code: httpResponse.statusCode, userInfo: [NSLocalizedDescriptionKey: "Server returned status code \(httpResponse.statusCode)"])
-                }
-            }
-            
-            // Try to parse the response
-            do {
-                if let json = try JSONSerialization.jsonObject(with: data) as? [String: Any] {
-                    print("✅ Successfully updated quantity for item \(itemId) to \(quantity)")
-                    print("Response: \(json)")
-                }
-            } catch {
-                print("⚠️ Warning: Failed to parse response: \(error)")
-                // Don't throw here as the update might have been successful
-            }
+            let (data, _) = try await URLSession.shared.data(for: request)
+            _ = try JSONDecoder().decode(APIResponse<MenuItem>.self, from: data)
         } else {
             throw APIError.invalidRequest
         }
@@ -382,7 +244,228 @@ class APIService {
     func deleteMenuItem(canteenId: String, itemId: String, token: String) async throws {
         let url = URL(string: "\(Constants.baseURL)/api/v1/menu/canteen/\(canteenId)/item/\(itemId)")!
         let request = createRequest(url: url, method: "DELETE", token: token)
-        _ = try await URLSession.shared.data(for: request)
+        let (data, _) = try await URLSession.shared.data(for: request)
+        _ = try JSONDecoder().decode(APIResponse<EmptyData>.self, from: data)
+    }
+
+
+
+    // MARK: - Order APIs
+    
+    // Get orders for a specific canteen (Owner)
+    func getCanteenOrders(canteenId: String, status: String? = nil, token: String) async throws -> [Order] {
+        var urlString = "\(Constants.baseURL)/api/v1/orders/canteen/\(canteenId)"
+        if let status = status {
+            urlString += "?status=\(status)"
+        }
+        let url = URL(string: urlString)!
+        let request = createRequest(url: url, method: "GET", token: token)
+        
+        print("\n📋 FETCHING CANTEEN ORDERS")
+        print("Canteen ID: \(canteenId)")
+        if let status = status {
+            print("Status Filter: \(status)")
+        }
+        
+        let (data, response) = try await URLSession.shared.data(for: request)
+        
+        if let httpResponse = response as? HTTPURLResponse {
+            print("Response Status: \(httpResponse.statusCode)")
+        }
+        
+        // Log raw response for debugging
+        if let responseString = String(data: data, encoding: .utf8) {
+            print("📦 Raw Response:")
+            print(responseString)
+        }
+        
+        do {
+            let apiResponse = try JSONDecoder().decode(APIResponse<[Order]>.self, from: data)
+            let orders = apiResponse.data ?? []
+            print("✅ Fetched \(orders.count) orders\n")
+            return orders
+        } catch {
+            print("❌ Decoding Error: \(error)")
+            if let decodingError = error as? DecodingError {
+                switch decodingError {
+                case .keyNotFound(let key, let context):
+                    print("Missing key: \(key.stringValue)")
+                    print("Context: \(context.debugDescription)")
+                case .typeMismatch(let type, let context):
+                    print("Type mismatch for type: \(type)")
+                    print("Context: \(context.debugDescription)")
+                case .valueNotFound(let type, let context):
+                    print("Value not found for type: \(type)")
+                    print("Context: \(context.debugDescription)")
+                case .dataCorrupted(let context):
+                    print("Data corrupted: \(context.debugDescription)")
+                @unknown default:
+                    print("Unknown decoding error")
+                }
+            }
+            throw error
+        }
+    }
+    
+    // Update order status (Owner)
+    func updateOrderStatus(orderId: String, status: String, token: String) async throws -> Order {
+        let url = URL(string: "\(Constants.baseURL)/api/v1/orders/\(orderId)/status")!
+        var request = createRequest(url: url, method: "PATCH", token: token)
+        
+        let body = ["status": status]
+        request.httpBody = try JSONEncoder().encode(body)
+        
+        print("\n🔄 UPDATING ORDER STATUS")
+        print("Order ID: \(orderId)")
+        print("New Status: \(status)")
+        
+        let (data, response) = try await URLSession.shared.data(for: request)
+        
+        if let httpResponse = response as? HTTPURLResponse {
+            print("Response Status: \(httpResponse.statusCode)")
+        }
+        
+        let apiResponse = try JSONDecoder().decode(APIResponse<Order>.self, from: data)
+        guard let order = apiResponse.data else {
+            print("❌ Failed to update order status")
+            throw APIError.invalidResponse
+        }
+        
+        print("✅ Order status updated to: \(order.status)\n")
+        return order
+    }
+    
+    func createOrder(canteenId: String, items: [CreateOrderItem], token: String) async throws -> Order {
+        let url = URL(string: "\(Constants.baseURL)/api/v1/orders")!
+        var request = createRequest(url: url, method: "POST", token: token)
+        let body = CreateOrderRequest(canteenId: canteenId, items: items)
+        
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = .prettyPrinted
+        request.httpBody = try encoder.encode(body)
+
+        print("\n🛒 CREATING ORDER")
+        print("URL: \(url.absoluteString)")
+        print("Canteen ID: \(canteenId)")
+        print("Items Count: \(items.count)")
+        
+        // Print request body
+        if let requestBody = request.httpBody,
+           let requestString = String(data: requestBody, encoding: .utf8) {
+            print("Request Body:")
+            print(requestString)
+        }
+        
+        // Print items details
+        for (index, item) in items.enumerated() {
+            print("  Item \(index + 1): menuItemId=\(item.menuItemId), quantity=\(item.quantity)")
+        }
+
+        let (data, response) = try await URLSession.shared.data(for: request)
+        
+        if let httpResponse = response as? HTTPURLResponse {
+            print("Response Status: \(httpResponse.statusCode)")
+        }
+        if let responseString = String(data: data, encoding: .utf8) {
+            print("Response Data: \(responseString)")
+        }
+
+        let apiResponse = try JSONDecoder().decode(APIResponse<Order>.self, from: data)
+        guard let order = apiResponse.data else {
+            print("❌ API Error Message: \(apiResponse.message ?? "Unknown")")
+            print("❌ API Success: \(apiResponse.success)")
+            throw APIError.invalidResponse
+        }
+        print("✅ Order created: \(order.orderId)\n")
+        return order
+    }
+
+    func getMyOrders(status: String? = nil, token: String) async throws -> [Order] {
+        var urlString = "\(Constants.baseURL)/api/v1/orders"
+        if let status = status {
+            urlString += "?status=\(status)"
+        }
+        let url = URL(string: urlString)!
+        let request = createRequest(url: url, method: "GET", token: token)
+
+        let (data, _) = try await URLSession.shared.data(for: request)
+        let apiResponse = try JSONDecoder().decode(APIResponse<[Order]>.self, from: data)
+        return apiResponse.data ?? []
+    }
+
+    func getOrderById(id: String, token: String) async throws -> Order {
+        let url = URL(string: "\(Constants.baseURL)/api/v1/orders/\(id)")!
+        let request = createRequest(url: url, method: "GET", token: token)
+
+        let (data, _) = try await URLSession.shared.data(for: request)
+        let apiResponse = try JSONDecoder().decode(APIResponse<Order>.self, from: data)
+        guard let order = apiResponse.data else { throw APIError.invalidResponse }
+        return order
+    }
+
+    func initiatePayment(orderId: String, token: String) async throws -> RazorpayPaymentInitiation {
+        let url = URL(string: "\(Constants.baseURL)/api/v1/payments/initiate")!
+        var request = createRequest(url: url, method: "POST", token: token)
+        request.httpBody = try JSONEncoder().encode(["orderId": orderId])
+
+        print("\n💳 INITIATING RAZORPAY PAYMENT")
+        print("Order ID: \(orderId)")
+
+        let (data, response) = try await URLSession.shared.data(for: request)
+        
+        if let httpResponse = response as? HTTPURLResponse {
+            print("Response Status: \(httpResponse.statusCode)")
+        }
+        
+        if let responseString = String(data: data, encoding: .utf8) {
+            print("Response: \(responseString)")
+        }
+
+        let apiResponse = try JSONDecoder().decode(APIResponse<RazorpayPaymentInitiation>.self, from: data)
+        guard let paymentData = apiResponse.data else {
+            print("❌ Payment initiation failed")
+            throw APIError.invalidResponse
+        }
+        print("✅ Razorpay Order Created")
+        print("Razorpay Order ID: \(paymentData.razorpayOrderId)")
+        print("Amount: \(paymentData.amount)\n")
+        return paymentData
+    }
+
+    func verifyPayment(razorpayOrderId: String, razorpayPaymentId: String, razorpaySignature: String, token: String) async throws -> Order {
+        let url = URL(string: "\(Constants.baseURL)/api/v1/payments/verify")!
+        var request = createRequest(url: url, method: "POST", token: token)
+        
+        let verificationRequest = RazorpayVerificationRequest(
+            razorpayOrderId: razorpayOrderId,
+            razorpayPaymentId: razorpayPaymentId,
+            razorpaySignature: razorpaySignature
+        )
+        request.httpBody = try JSONEncoder().encode(verificationRequest)
+
+        print("\n✅ VERIFYING RAZORPAY PAYMENT (Standard Checkout)")
+        print("Order ID: \(razorpayOrderId)")
+        print("Payment ID: \(razorpayPaymentId)")
+        print("Signature: \(razorpaySignature.prefix(20))...")
+
+        let (data, response) = try await URLSession.shared.data(for: request)
+        
+        if let httpResponse = response as? HTTPURLResponse {
+            print("Response Status: \(httpResponse.statusCode)")
+        }
+        if let responseString = String(data: data, encoding: .utf8) {
+            print("Response Data: \(responseString)")
+        }
+
+        let apiResponse = try JSONDecoder().decode(APIResponse<Order>.self, from: data)
+        guard let order = apiResponse.data else {
+            print("❌ Payment verification failed")
+            throw APIError.invalidResponse
+        }
+        print("✅ Payment verified successfully")
+        print("Order Status: \(order.status)")
+        print("Payment Status: \(order.paymentStatus)\n")
+        return order
     }
 
     // MARK: - Payment APIs (Cashfree)
@@ -415,6 +498,117 @@ class APIService {
 
         let orderResponse = try JSONDecoder().decode(CashfreeOrderResponse.self, from: data)
         return orderResponse
+    }
+    
+    // MARK: - Scan-to-Pickup Endpoints
+    
+    func verifyQR(qrData: String, token: String) async throws -> Order {
+        let url = URL(string: "\(Constants.baseURL)/api/v1/orders/verify-qr")!
+        var request = createRequest(url: url, method: "POST", token: token)
+        
+        let body = ["qrData": qrData]
+        request.httpBody = try JSONEncoder().encode(body)
+        
+        print("\n🔍 VERIFYING QR CODE")
+        print("QR Data: \(qrData)")
+        print("Token: \(token.prefix(20))...")
+        
+        let (data, response) = try await URLSession.shared.data(for: request)
+        
+        if let httpResponse = response as? HTTPURLResponse {
+            print("Response Status: \(httpResponse.statusCode)")
+            
+            if httpResponse.statusCode != 200 {
+                if let errorString = String(data: data, encoding: .utf8) {
+                    print("❌ Error Response: \(errorString)")
+                }
+            }
+        }
+        
+        let apiResponse = try JSONDecoder().decode(APIResponse<Order>.self, from: data)
+        guard let order = apiResponse.data else {
+            print("❌ No order data in response")
+            throw APIError.invalidResponse
+        }
+        
+        print("✅ QR Verified: Order \(order.orderId)")
+        return order
+    }
+    
+    func completePickup(qrData: String, token: String) async throws -> Order {
+        let url = URL(string: "\(Constants.baseURL)/api/v1/orders/pickup")!
+        var request = createRequest(url: url, method: "POST", token: token)
+        
+        let body = ["qrData": qrData]
+        request.httpBody = try JSONEncoder().encode(body)
+        
+        print("\n✅ COMPLETING PICKUP")
+        
+        let (data, response) = try await URLSession.shared.data(for: request)
+        
+        if let httpResponse = response as? HTTPURLResponse {
+            print("Response Status: \(httpResponse.statusCode)")
+        }
+        
+        let apiResponse = try JSONDecoder().decode(APIResponse<Order>.self, from: data)
+        guard let order = apiResponse.data else {
+            // Need to create a new error case for errors from backend
+            throw APIError.invalidResponse 
+        }
+        
+        print("✅ Pickup Completed: Order \(order.orderId)")
+        return order
+    }
+    
+    // MARK: - Analytics APIs
+    
+    func getAnalytics(canteenId: String, period: String, token: String) async throws -> AnalyticsSummary {
+        let url = URL(string: "\(Constants.baseURL)/api/v1/analytics/canteen/\(canteenId)?period=\(period)")!
+        let request = createRequest(url: url, method: "GET", token: token)
+        
+        print("\n📊 FETCHING ANALYTICS (\(period))")
+        print("URL: \(url.absoluteString)")
+        
+        let (data, response) = try await URLSession.shared.data(for: request)
+        
+        if let httpResponse = response as? HTTPURLResponse {
+            print("Response Status: \(httpResponse.statusCode)")
+        }
+        
+        if let responseString = String(data: data, encoding: .utf8) {
+            print("Response Data: \(responseString)")
+        }
+        
+        let apiResponse = try JSONDecoder().decode(APIResponse<AnalyticsSummary>.self, from: data)
+        guard let summary = apiResponse.data else { throw APIError.invalidResponse }
+        return summary
+    }
+    
+    func getEarnings(canteenId: String, period: String, token: String) async throws -> EarningsData {
+        let url = URL(string: "\(Constants.baseURL)/api/v1/analytics/canteen/\(canteenId)/earnings?period=\(period)")!
+        let request = createRequest(url: url, method: "GET", token: token)
+        
+        print("\n💰 FETCHING EARNINGS (\(period))")
+        print("URL: \(url.absoluteString)")
+        
+        let (data, response) = try await URLSession.shared.data(for: request)
+        
+        if let httpResponse = response as? HTTPURLResponse {
+            print("Response Status: \(httpResponse.statusCode)")
+        }
+        
+        if let responseString = String(data: data, encoding: .utf8) {
+            // Check for HTML response (often indicates 404 page)
+            if responseString.trimmingCharacters(in: .whitespacesAndNewlines).hasPrefix("<!DOCTYPE html>") {
+                print("❌ Received HTML response (likely 404 Page Not Found)")
+            } else {
+                print("Response Data: \(responseString)")
+            }
+        }
+        
+        let apiResponse = try JSONDecoder().decode(APIResponse<EarningsData>.self, from: data)
+        guard let earnings = apiResponse.data else { throw APIError.invalidResponse }
+        return earnings
     }
 }
 

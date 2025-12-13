@@ -31,10 +31,11 @@ struct NewUserMainView: View {
                 Label("Menu", systemImage: "fork.knife")
             }
 
-            // Past Orders Tab
-            UserOrdersView(authViewModel: authViewModel, showLoginSheet: $showLoginSheet)
+            // My Orders Tab
+            MyOrdersView()
+                .environmentObject(authViewModel)
                 .tabItem {
-                    Label("Orders", systemImage: "clock")
+                    Label("Orders", systemImage: "bag")
                 }
 
             // Profile Tab

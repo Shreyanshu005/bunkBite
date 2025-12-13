@@ -578,13 +578,6 @@ struct PaymentSheet: View {
         print("❌ Payment Failed: \(error)")
 
         // More detailed error message for debugging
-        let detailedError = """
-        Payment Error:
-        \(error)
-
-        Check console for more details.
-        """
-
         errorMessage = error
         showErrorAlert = true
     }

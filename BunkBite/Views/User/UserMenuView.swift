@@ -95,9 +95,7 @@ struct UserMenuView: View {
 
                     // Start a new loading task
                     menuLoadingTask = Task {
-                        // Guest mode: fetch menu with mock token or public endpoint
-                        let token = authViewModel.authToken ?? "guest_token"
-                        await menuViewModel.fetchMenu(canteenId: canteen.id, token: token)
+                        await menuViewModel.fetchMenu(canteenId: canteen.id)
                     }
                 }
             }
@@ -106,8 +104,7 @@ struct UserMenuView: View {
                 if let canteen = canteenViewModel.selectedCanteen,
                    menuViewModel.menuItems.isEmpty {
                     menuLoadingTask = Task {
-                        let token = authViewModel.authToken ?? "guest_token"
-                        await menuViewModel.fetchMenu(canteenId: canteen.id, token: token)
+                        await menuViewModel.fetchMenu(canteenId: canteen.id)
                     }
                 }
             }
@@ -178,7 +175,7 @@ struct UserMenuView: View {
             }
             .searchable(text: $searchText, prompt: "Search items")
             .sheet(isPresented: $showCart) {
-                CartSheet(cart: cart, canteen: canteenViewModel.selectedCanteen)
+                CartSheet(cart: cart, authViewModel: authViewModel, canteen: canteenViewModel.selectedCanteen)
             }
         }
     }
@@ -423,20 +420,18 @@ struct UserMenuView: View {
                 ContentUnavailableView("No items available", systemImage: "tray")
             } else {
                 ForEach(filteredItems) { item in
-                    MenuItemRow(item: item, cart: cart)
+                    MenuItemRow(item: item, cart: cart, authViewModel: authViewModel, showLoginSheet: $showLoginSheet)
                 }
             }
         }
         .refreshable {
             if let canteenId = canteenViewModel.selectedCanteen?.id {
-                let token = authViewModel.authToken ?? "guest_token"
-                await menuViewModel.fetchMenu(canteenId: canteenId, token: token)
+                await menuViewModel.fetchMenu(canteenId: canteenId)
             }
         }
         .task {
             if let canteenId = canteenViewModel.selectedCanteen?.id {
-                let token = authViewModel.authToken ?? "guest_token"
-                await menuViewModel.fetchMenu(canteenId: canteenId, token: token)
+                await menuViewModel.fetchMenu(canteenId: canteenId)
             }
         }
     }
@@ -445,6 +440,8 @@ struct UserMenuView: View {
 struct MenuItemRow: View {
     let item: MenuItem
     @ObservedObject var cart: Cart
+    @ObservedObject var authViewModel: AuthViewModel
+    @Binding var showLoginSheet: Bool
     @State private var showLoginPrompt = false
 
     var body: some View {
@@ -505,7 +502,11 @@ struct MenuItemRow: View {
                             .frame(minWidth: 30)
 
                         Button {
-                            cart.addItem(item)
+                            if authViewModel.isAuthenticated {
+                                cart.addItem(item)
+                            } else {
+                                showLoginSheet = true
+                            }
                         } label: {
                             Image(systemName: "plus.circle.fill")
                                 .font(.title3)
@@ -515,7 +516,11 @@ struct MenuItemRow: View {
                     }
                 } else {
                     Button {
-                        cart.addItem(item)
+                        if authViewModel.isAuthenticated {
+                            cart.addItem(item)
+                        } else {
+                            showLoginSheet = true
+                        }
                     } label: {
                         Text("Add")
                             .font(.urbanist(size: 15, weight: .semibold))

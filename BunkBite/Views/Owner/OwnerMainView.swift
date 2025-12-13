@@ -9,7 +9,10 @@ import SwiftUI
 
 struct OwnerMainView: View {
     @ObservedObject var viewModel: AuthViewModel
+    @StateObject private var scannerViewModel = ScannerViewModel()
     @State private var selectedTab = 0
+    @State private var showScanner = false
+    @State private var showScannedOrder = false
     @Namespace private var animation
 
     var body: some View {
@@ -39,6 +42,30 @@ struct OwnerMainView: View {
                         selectedTab = 0
                     }
                 }
+                
+                // Scanner FAB
+                Button {
+                    showScanner = true
+                } label: {
+                    VStack(spacing: 4) {
+                        ZStack {
+                            Circle()
+                                .fill(Constants.primaryColor)
+                                .frame(width: 64, height: 64)
+                                .shadow(color: Constants.primaryColor.opacity(0.4), radius: 12, x: 0, y: 6)
+                            
+                            Image(systemName: "qrcode.viewfinder")
+                                .font(.system(size: 28, weight: .bold))
+                                .foregroundColor(.white)
+                        }
+                        
+                        Text("Scan")
+                            .font(.urbanist(size: 11, weight: .semibold))
+                            .foregroundColor(Constants.primaryColor)
+                    }
+                }
+                .offset(y: -28)
+                .padding(.horizontal, 12)
 
                 OwnerTabBarButton(
                     icon: "list.bullet.clipboard.fill",
@@ -69,6 +96,40 @@ struct OwnerMainView: View {
                     .shadow(color: Color.black.opacity(0.08), radius: 20, x: 0, y: -5)
             )
             .edgesIgnoringSafeArea(.bottom)
+        }
+        .fullScreenCover(isPresented: $showScanner) {
+            ZStack(alignment: .topLeading) {
+                QRScannerView(viewModel: scannerViewModel, token: viewModel.authToken ?? "")
+                
+                Button {
+                    showScanner = false
+                } label: {
+                    Image(systemName: "xmark.circle.fill")
+                        .font(.system(size: 32))
+                        .foregroundStyle(.white)
+                        .padding()
+                }
+            }
+        }
+        .sheet(isPresented: $showScannedOrder) {
+            if let order = scannerViewModel.scannedOrder {
+                ScannedOrderSheet(
+                    order: order,
+                    qrData: scannerViewModel.lastScannedCode,
+                    token: viewModel.authToken ?? "",
+                    viewModel: scannerViewModel,
+                    isPresented: $showScannedOrder
+                )
+            }
+        }
+        .onChange(of: scannerViewModel.scannedOrder) {
+            if scannerViewModel.scannedOrder != nil {
+                showScanner = false
+                // Small delay to allow scanner to close before opening sheet
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                    showScannedOrder = true
+                }
+            }
         }
     }
 }

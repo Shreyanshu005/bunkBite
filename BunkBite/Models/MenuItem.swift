@@ -22,12 +22,7 @@ struct MenuItem: Codable, Identifiable, Hashable {
     }
 }
 
-struct MenuResponse: Codable {
-    let success: Bool
-    let message: String?
-    let items: [MenuItem]?
-    let item: MenuItem?
-}
+
 
 struct Menu: Codable {
     let canteenId: String

@@ -17,7 +17,7 @@ struct RootView: View {
                 ProgressView()
             } else {
                 // Check role: "admin" = owner, "user" = authenticated user, nil = guest
-                if userRole == "admin" {
+                if userRole?.lowercased() == "admin" {
                     NewOwnerMainView()
                 } else {
                     // Always show user view (supports both authenticated and guest mode)

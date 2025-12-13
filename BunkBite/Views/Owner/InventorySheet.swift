@@ -144,9 +144,7 @@ struct InventorySheet: View {
             }
             .searchable(text: $searchText, prompt: "Search items")
             .refreshable {
-                if let token = authViewModel.authToken {
-                    await menuViewModel.fetchMenu(canteenId: canteen.id, token: token)
-                }
+                await menuViewModel.fetchMenu(canteenId: canteen.id)
             }
             .sheet(isPresented: $showAddItem) {
                 AddMenuItemSheet(
@@ -165,9 +163,7 @@ struct InventorySheet: View {
             }
         }
         .task {
-            if let token = authViewModel.authToken {
-                await menuViewModel.fetchMenu(canteenId: canteen.id, token: token)
-            }
+            await menuViewModel.fetchMenu(canteenId: canteen.id)
         }
     }
 }

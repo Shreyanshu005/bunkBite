@@ -11,6 +11,8 @@
 		<string>amazonpay</string>
 		<string>upi</string>
 	</array>
+	<key>NSCameraUsageDescription</key>
+	<string>We need camera access to scan QR codes for order verification.</string>
 	<key>NSAppTransportSecurity</key>
 	<dict>
 		<key>NSAllowsArbitraryLoads</key>
@@ -43,18 +45,5 @@
 		<key>UIImageName</key>
 		<string></string>
 	</dict>
-	<key>CFBundleURLTypes</key>
-	<array>
-		<dict>
-			<key>CFBundleTypeRole</key>
-			<string>Editor</string>
-			<key>CFBundleURLName</key>
-			<string>com.bunkbite.payment</string>
-			<key>CFBundleURLSchemes</key>
-			<array>
-				<string>myapp</string>
-			</array>
-		</dict>
-	</array>
 </dict>
 </plist>

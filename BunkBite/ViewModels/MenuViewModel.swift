@@ -17,12 +17,12 @@ class MenuViewModel: ObservableObject {
 
     private let apiService = APIService.shared
 
-    func fetchMenu(canteenId: String, token: String) async {
+    func fetchMenu(canteenId: String) async {
         isLoading = true
         errorMessage = nil
 
         do {
-            menuItems = try await apiService.getMenu(canteenId: canteenId, token: token)
+            menuItems = try await apiService.getMenu(canteenId: canteenId)
         } catch {
             errorMessage = "Failed to fetch menu"
         }

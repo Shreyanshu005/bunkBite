@@ -76,15 +76,11 @@
 		};
 		63B2D7052EBC558500D6B594 /* BunkBiteTests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-			);
 			path = BunkBiteTests;
 			sourceTree = "<group>";
 		};
 		63B2D70F2EBC558500D6B594 /* BunkBiteUITests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-			);
 			path = BunkBiteUITests;
 			sourceTree = "<group>";
 		};
@@ -324,7 +320,6 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
-
 
 /* Begin PBXSourcesBuildPhase section */
 		63B2D6F12EBC558200D6B594 /* Sources */ = {

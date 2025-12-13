@@ -9,12 +9,13 @@ import SwiftUI
 
 struct CartSheet: View {
     @ObservedObject var cart: Cart
+    @ObservedObject var authViewModel: AuthViewModel
     let canteen: Canteen?
 
     @Environment(\.dismiss) var dismiss
-    @State private var showPaymentSheet = false
+    @StateObject private var orderViewModel = OrderViewModel()
+    @State private var showOrderReview = false
     @State private var isAnimating = false
-    @State private var isProcessingPayment = false
     @State private var showSuccessPopup = false
     @State private var showErrorAlert = false
     @State private var errorMessage = ""
@@ -160,22 +161,15 @@ struct CartSheet: View {
                         .opacity(isAnimating ? 1 : 0)
                         .offset(y: isAnimating ? 0 : 30)
 
-                        // Proceed to Payment Button
+                        // Proceed to Checkout Button
                         Button {
-                            showPaymentSheet = true
+                            showOrderReview = true
                         } label: {
                             HStack(spacing: 12) {
-                                if isProcessingPayment {
-                                    ProgressView()
-                                        .progressViewStyle(CircularProgressViewStyle(tint: .white))
-                                    Text("Processing...")
-                                        .font(.urbanist(size: 18, weight: .semibold))
-                                } else {
-                                    Text("Pay ₹\(Int(cart.totalAmount))")
-                                        .font(.urbanist(size: 18, weight: .semibold))
-                                    Image(systemName: "arrow.right.circle.fill")
-                                        .font(.system(size: 22))
-                                }
+                                Text("Proceed to Checkout")
+                                    .font(.urbanist(size: 18, weight: .semibold))
+                                Image(systemName: "arrow.right.circle.fill")
+                                    .font(.system(size: 22))
                             }
                             .foregroundStyle(.white)
                             .frame(maxWidth: .infinity)
@@ -190,7 +184,6 @@ struct CartSheet: View {
                             .cornerRadius(16)
                             .shadow(color: Constants.primaryColor.opacity(0.3), radius: 10, x: 0, y: 5)
                         }
-                        .disabled(isProcessingPayment)
                         .padding(.horizontal, 24)
                         .opacity(isAnimating ? 1 : 0)
                         .scaleEffect(isAnimating ? 1 : 0.9)
@@ -252,25 +245,15 @@ struct CartSheet: View {
         } message: {
             Text(errorMessage)
         }
-        .sheet(isPresented: $showSuccessSheet) {
-            PaymentSuccessSheet(paymentId: paymentSuccessId) {
-                dismiss()
+        .sheet(isPresented: $showOrderReview) {
+            if let canteen = canteen {
+                OrderReviewSheet(
+                    cart: cart,
+                    orderViewModel: orderViewModel,
+                    authViewModel: authViewModel,
+                    canteen: canteen
+                )
             }
-            .presentationDetents([.large])
-            .presentationDragIndicator(.visible)
-        }
-        .sheet(isPresented: $showFailureSheet) {
-            PaymentFailureSheet(errorMessage: errorMessage) {
-                // Retry
-                showPaymentSheet = true
-            } onDismiss: {
-                showFailureSheet = false
-            }
-            .presentationDetents([.large])
-            .presentationDragIndicator(.visible)
-        }
-        .sheet(isPresented: $showPaymentSheet) {
-            PaymentSheet(cart: cart, canteen: canteen)
         }
     }
 

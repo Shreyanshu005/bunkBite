@@ -203,8 +203,8 @@ struct OwnerMenuTab: View {
             }
             .searchable(text: $searchText, prompt: "Search items")
             .refreshable {
-                if let token = authViewModel.authToken {
-                    await menuViewModel.fetchMenu(canteenId: selectedCanteen.id, token: token)
+                if authViewModel.authToken != nil {
+                    await menuViewModel.fetchMenu(canteenId: selectedCanteen.id)
                 }
             }
             .sheet(isPresented: $showAddItem) {
@@ -223,8 +223,8 @@ struct OwnerMenuTab: View {
                 )
             }
             .task {
-                if let token = authViewModel.authToken {
-                    await menuViewModel.fetchMenu(canteenId: selectedCanteen.id, token: token)
+                if authViewModel.authToken != nil {
+                    await menuViewModel.fetchMenu(canteenId: selectedCanteen.id)
                 }
             }
             .sheet(item: $showQuantityUpdate) { item in

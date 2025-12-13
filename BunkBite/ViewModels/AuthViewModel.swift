@@ -45,9 +45,12 @@ class AuthViewModel: ObservableObject {
             let response = try await apiService.sendOTP(email: email)
             if response.success {
                 isOTPSent = true
+            } else {
+                errorMessage = response.message ?? "Failed to send OTP"
             }
         } catch {
             errorMessage = "Failed to send OTP. Please try again."
+            print("Send OTP Error: \(error)")
         }
 
         isLoading = false
@@ -92,21 +95,46 @@ class AuthViewModel: ObservableObject {
         // Regular OTP verification flow
         do {
             let response = try await apiService.verifyOTP(email: email, otp: otp)
-            if response.success, let user = response.user, let token = response.token {
-                currentUser = user
-                authToken = token
-                isAuthenticated = true
+            if response.success, let token = response.token {
+                // Decode JWT to get user details
+                let claims = JWTDecoder.decode(jwtToken: token)
+                print("DEBUG: JWT Claims: \(claims)") // Add logging
 
-                // Save to UserDefaults
-                saveAuthData(user: user, token: token)
+                // Try multiple keys for ID: 'sub', 'id', '_id', 'userId'
+                let userId = (claims["sub"] as? String) ??
+                             (claims["id"] as? String) ??
+                             (claims["_id"] as? String) ??
+                             (claims["userId"] as? String)
 
-                // Notify RootView about login
-                NotificationCenter.default.post(name: NSNotification.Name("UserDidLogin"), object: nil)
+                if let userId = userId {
+                    let userRole = claims["role"] as? String ?? "user" // Default to user if role missing
+                    let userName = claims["name"] as? String ?? "User"
+                    let userEmail = claims["email"] as? String ?? email
+                    
+                    let user = User(id: userId, email: userEmail, name: userName, role: userRole)
+                    
+                    currentUser = user
+                    authToken = token
+                    isAuthenticated = true
 
-                print("✅ User logged in with role: \(user.role)")
+                    // Save to UserDefaults
+                    saveAuthData(user: user, token: token)
+
+                    // Notify RootView about login
+                    NotificationCenter.default.post(name: NSNotification.Name("UserDidLogin"), object: nil)
+
+                    print("✅ User logged in with role: \(user.role)")
+                    print("✅ User ID: \(user.id)")
+                } else {
+                    print("❌ Failed to find User ID in claims. Keys found: \(claims.keys)")
+                    errorMessage = "Failed to decode user information from token. Check logs."
+                }
+            } else {
+                errorMessage = "Invalid OTP"
             }
         } catch {
             errorMessage = "Invalid OTP. Please try again."
+            print("Verify OTP Error: \(error)")
         }
 
         isLoading = false

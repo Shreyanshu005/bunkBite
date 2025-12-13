@@ -53,14 +53,14 @@ class CanteenViewModel: ObservableObject {
         selectedCanteen = nil
     }
 
-    func fetchAllCanteens(token: String) async {
+    func fetchAllCanteens() async {
         isLoading = true
         errorMessage = nil
 
-        print("🔄 Fetching all canteens with token: \(token.prefix(20))...")
+        print("🔄 Fetching all canteens (public endpoint)")
 
         do {
-            canteens = try await apiService.getAllCanteens(token: token)
+            canteens = try await apiService.getAllCanteens()
             print("✅ Fetched \(canteens.count) canteens")
             for canteen in canteens {
                 print("   - \(canteen.name) at \(canteen.place)")
@@ -80,6 +80,7 @@ class CanteenViewModel: ObservableObject {
         do {
             canteens = try await apiService.getMyCanteens(token: token)
         } catch {
+            print("❌ ViewModel Error fetching canteens: \(error.localizedDescription)")
             errorMessage = "Failed to fetch your canteens"
         }
 
@@ -90,13 +91,18 @@ class CanteenViewModel: ObservableObject {
         isLoading = true
         errorMessage = nil
 
+        print("🛠️ ViewModel: Creating canteen...")
+        print("Name: \(name), Place: \(place), Owner: \(ownerId)")
+
         do {
             let canteen = try await apiService.createCanteen(name: name, place: place, ownerId: ownerId, token: token)
             canteens.append(canteen)
+            print("✅ ViewModel: Canteen appended to list")
             isLoading = false
             return true
         } catch {
-            errorMessage = "Failed to create canteen"
+            errorMessage = "Failed to create canteen. Check logs."
+            print("❌ ViewModel Error: \(error)")
             isLoading = false
             return false
         }

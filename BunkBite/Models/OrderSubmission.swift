@@ -89,43 +89,6 @@ struct OrderItem: Codable {
     }
 }
 
-// MARK: - Payment Response from Razorpay (Extended)
-struct RazorpayPaymentResponse {
-    let paymentId: String
-    let orderId: String
-    let signature: String
-    let email: String?
-    let contact: String?
-    let method: String?  // "card", "upi", "netbanking", "wallet"
-    let cardId: String?
-    let bank: String?
-    let wallet: String?
-    let vpa: String?  // UPI ID
-    let amountPaid: Int  // in paise
-    let currency: String
-
-    // Convert to dictionary for logging
-    func toDictionary() -> [String: Any] {
-        var dict: [String: Any] = [
-            "payment_id": paymentId,
-            "order_id": orderId,
-            "signature": signature,
-            "amount_paid": amountPaid,
-            "currency": currency
-        ]
-
-        if let email = email { dict["email"] = email }
-        if let contact = contact { dict["contact"] = contact }
-        if let method = method { dict["method"] = method }
-        if let cardId = cardId { dict["card_id"] = cardId }
-        if let bank = bank { dict["bank"] = bank }
-        if let wallet = wallet { dict["wallet"] = wallet }
-        if let vpa = vpa { dict["vpa"] = vpa }
-
-        return dict
-    }
-}
-
 // MARK: - Order Submission Helper
 class OrderSubmissionHelper {
 
@@ -155,16 +118,16 @@ class OrderSubmissionHelper {
         }
 
         return OrderSubmission(
-            razorpayPaymentId: paymentResponse.paymentId,
-            razorpayOrderId: paymentResponse.orderId,
-            razorpaySignature: paymentResponse.signature,
+            razorpayPaymentId: paymentResponse.razorpayPaymentId,
+            razorpayOrderId: paymentResponse.razorpayOrderId,
+            razorpaySignature: paymentResponse.razorpaySignature,
             orderId: "ORD_\(Date().timeIntervalSince1970)",  // Temporary local ID
             totalAmount: cart.totalAmount,
-            currency: paymentResponse.currency,
+            currency: "INR", // Default to INR as per new model
             itemCount: cart.items.count,
             userId: userId,
-            userPhone: paymentResponse.contact,
-            userEmail: paymentResponse.email,
+            userPhone: nil, // Not available in new response
+            userEmail: nil, // Not available in new response
             userName: UserDefaults.standard.string(forKey: "userName"),
             canteenId: canteen.id,
             canteenName: canteen.name,
