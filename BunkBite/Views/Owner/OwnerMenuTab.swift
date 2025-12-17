@@ -18,8 +18,6 @@ struct OwnerMenuTab: View {
     @State private var showAddItem = false
     @State private var showEditItem: MenuItem?
     @State private var showQuantityUpdate: MenuItem?
-    @State private var showDeleteCanteen = false
-    @State private var deleteConfirmationEmail = ""
     @State private var searchText = ""
 
     var filteredItems: [MenuItem] {
@@ -75,20 +73,11 @@ struct OwnerMenuTab: View {
 
                         Spacer()
 
-                        VStack(spacing: 8) {
-                            Button("Change") {
-                                canteenViewModel.selectedCanteen = nil
-                                onSelectCanteen()
-                            }
-                            .buttonStyle(.bordered)
-                            .tint(Constants.primaryColor)
-
-                            Button("Delete") {
-                                showDeleteCanteen = true
-                            }
-                            .buttonStyle(.bordered)
-                            .tint(.red)
+                        Button("Change") {
+                            onSelectCanteen()
                         }
+                        .buttonStyle(.bordered)
+                        .tint(Constants.primaryColor)
                     }
 
                         // Stats
@@ -235,22 +224,6 @@ struct OwnerMenuTab: View {
                     authViewModel: authViewModel
                 )
             }
-            .popup(isPresented: $showDeleteCanteen) {
-                DeleteCanteenPopup(
-                    canteen: selectedCanteen,
-                    canteenViewModel: canteenViewModel,
-                    authViewModel: authViewModel,
-                    deleteConfirmationEmail: $deleteConfirmationEmail,
-                    isPresented: $showDeleteCanteen
-                )
-            } customize: {
-                $0
-                    .type(.floater(verticalPadding: 20, useSafeAreaInset: true))
-                    .position(.center)
-                    .animation(.spring())
-                    .closeOnTapOutside(true)
-                    .backgroundColor(.black.opacity(0.5))
-            }
     }
 }
 
@@ -350,121 +323,4 @@ struct QuickQuantityUpdateSheet: View {
 }
 
 // MARK: - Delete Canteen Popup
-struct DeleteCanteenPopup: View {
-    let canteen: Canteen
-    @ObservedObject var canteenViewModel: CanteenViewModel
-    @ObservedObject var authViewModel: AuthViewModel
-    @Binding var deleteConfirmationEmail: String
-    @Binding var isPresented: Bool
 
-    var body: some View {
-        VStack(spacing: 20) {
-            headerView
-            Divider()
-            warningMessageView
-            emailConfirmationView
-            actionButtonsView
-            statusView
-        }
-        .padding(24)
-        .background(popupBackground)
-        .padding(40)
-    }
-
-    private var headerView: some View {
-        HStack {
-            Image(systemName: "exclamationmark.triangle.fill")
-                .font(.title)
-                .foregroundStyle(.red)
-            Text("Delete Canteen")
-                .font(.title2)
-                .fontWeight(.bold)
-        }
-    }
-
-    private var warningMessageView: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Text("You are about to delete:")
-                .font(.subheadline)
-                .foregroundStyle(.gray)
-
-            Text(canteen.name)
-                .font(.headline)
-                .foregroundStyle(.black)
-
-            Text("This action cannot be undone!")
-                .font(.caption)
-                .foregroundStyle(.red)
-                .fontWeight(.semibold)
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-    }
-
-    private var emailConfirmationView: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text("Type your email to confirm:")
-                .font(.subheadline)
-                .fontWeight(.semibold)
-
-            TextField("Email", text: $deleteConfirmationEmail)
-                .textFieldStyle(.roundedBorder)
-                .textContentType(.emailAddress)
-                .autocapitalization(.none)
-                .keyboardType(.emailAddress)
-        }
-    }
-
-    private var actionButtonsView: some View {
-        HStack(spacing: 12) {
-            Button("Cancel") {
-                deleteConfirmationEmail = ""
-                isPresented = false
-            }
-            .buttonStyle(.bordered)
-            .tint(.gray)
-
-            Button("Delete") {
-                handleDelete()
-            }
-            .buttonStyle(.borderedProminent)
-            .tint(.red)
-            .disabled(deleteConfirmationEmail != authViewModel.currentUser?.email || canteenViewModel.isLoading)
-        }
-    }
-
-    @ViewBuilder
-    private var statusView: some View {
-        if canteenViewModel.isLoading {
-            ProgressView()
-        }
-
-        if let error = canteenViewModel.errorMessage {
-            Text(error)
-                .font(.caption)
-                .foregroundStyle(.red)
-        }
-    }
-
-    private var popupBackground: some View {
-        RoundedRectangle(cornerRadius: 20)
-            .fill(.white)
-            .shadow(color: .black.opacity(0.2), radius: 20, x: 0, y: 10)
-    }
-
-    private func handleDelete() {
-        Task {
-            if deleteConfirmationEmail == authViewModel.currentUser?.email,
-               let token = authViewModel.authToken {
-                let success = await canteenViewModel.deleteCanteen(
-                    id: canteen.id,
-                    token: token
-                )
-                if success {
-                    canteenViewModel.selectedCanteen = nil
-                    deleteConfirmationEmail = ""
-                    isPresented = false
-                }
-            }
-        }
-    }
-}

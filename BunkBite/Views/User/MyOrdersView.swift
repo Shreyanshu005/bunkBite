@@ -10,16 +10,27 @@ import SwiftUI
 struct MyOrdersView: View {
     @StateObject private var orderViewModel = OrderViewModel()
     @EnvironmentObject var authViewModel: AuthViewModel
+    @EnvironmentObject var cart: Cart
+    @EnvironmentObject var canteenViewModel: CanteenViewModel
     
     @State private var selectedFilter: OrderStatus? = nil
     @State private var showOrderDetail = false
     @State private var selectedOrder: Order?
+    @State private var showReorderConfirmation = false
+    @State private var reorderedItemsCount = 0
+    @State private var showCart = false
+    @State private var showLoginSheet = false
     
     var filteredOrders: [Order] {
-        if let filter = selectedFilter {
-            return orderViewModel.orders.filter { $0.status == filter }
+        // Only show paid and completed orders
+        let relevantOrders = orderViewModel.orders.filter { 
+            $0.status == .paid || $0.status == .completed 
         }
-        return orderViewModel.orders
+        
+        if let filter = selectedFilter {
+            return relevantOrders.filter { $0.status == filter }
+        }
+        return relevantOrders
     }
     
     var body: some View {
@@ -39,14 +50,6 @@ struct MyOrdersView: View {
                             
                             OrderFilterChip(title: "Paid", isSelected: selectedFilter == .paid) {
                                 selectedFilter = .paid
-                            }
-                            
-                            OrderFilterChip(title: "Preparing", isSelected: selectedFilter == .preparing) {
-                                selectedFilter = .preparing
-                            }
-                            
-                            OrderFilterChip(title: "Ready", isSelected: selectedFilter == .ready) {
-                                selectedFilter = .ready
                             }
                             
                             OrderFilterChip(title: "Completed", isSelected: selectedFilter == .completed) {
@@ -71,11 +74,16 @@ struct MyOrdersView: View {
                         ScrollView {
                             LazyVStack(spacing: 16) {
                                 ForEach(filteredOrders) { order in
-                                    UserOrderCard(order: order)
-                                        .onTapGesture {
+                                    UserOrderCard(
+                                        order: order,
+                                        onReorder: {
+                                            reorderItems(from: order)
+                                        },
+                                        onViewDetails: {
                                             selectedOrder = order
                                             showOrderDetail = true
                                         }
+                                    )
                                 }
                             }
                             .padding(20)
@@ -90,12 +98,60 @@ struct MyOrdersView: View {
             .refreshable {
                 fetchOrders()
             }
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    CartToolbarButton(
+                        authViewModel: authViewModel,
+                        showCart: $showCart,
+                        showLoginSheet: $showLoginSheet
+                    )
+                }
+            }
+            .sheet(isPresented: $showCart) {
+                CartSheet(cart: cart, authViewModel: authViewModel, canteen: canteenViewModel.selectedCanteen)
+            }
+            .sheet(isPresented: $showLoginSheet) {
+                LoginSheet(authViewModel: authViewModel)
+            }
             .sheet(isPresented: $showOrderDetail) {
                 if let order = selectedOrder {
                     OrderDetailView(order: order, orderViewModel: orderViewModel, authViewModel: authViewModel)
+                        .id(order.orderId) // Force recreation to ensure .task runs
                 }
             }
+            .alert("Items Added to Cart", isPresented: $showReorderConfirmation) {
+                Button("OK", role: .cancel) { }
+            } message: {
+                Text("\(reorderedItemsCount) items have been added to your cart")
+            }
         }
+    }
+    
+    private func reorderItems(from order: Order) {
+        // Clear existing cart or add to existing items
+        var addedCount = 0
+        
+        for item in order.items {
+            // Create a MenuItem from OrderLineItem
+            let menuItem = MenuItem(
+                id: item.menuItemId,
+                name: item.name,
+                image: nil,
+                price: item.price,
+                availableQuantity: 999, // Assume available
+                createdAt: "",
+                updatedAt: ""
+            )
+            
+            // Add the quantity from the order
+            for _ in 0..<item.quantity {
+                cart.addItem(menuItem)
+                addedCount += 1
+            }
+        }
+        
+        reorderedItemsCount = addedCount
+        showReorderConfirmation = true
     }
     
     private func fetchOrders() {
@@ -129,6 +185,8 @@ struct OrderFilterChip: View {
 
 struct UserOrderCard: View {
     let order: Order
+    let onReorder: () -> Void
+    let onViewDetails: () -> Void
     
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
@@ -139,8 +197,8 @@ struct UserOrderCard: View {
                         .font(.urbanist(size: 16, weight: .bold))
                     
                     if let canteen = order.canteen {
-                        Text(canteen.name)
-                            .font(.urbanist(size: 14, weight: .medium))
+                        Label(canteen.name, systemImage: "building.2.fill")
+                            .font(.urbanist(size: 13, weight: .medium))
                             .foregroundStyle(.gray)
                     }
                 }
@@ -150,17 +208,43 @@ struct UserOrderCard: View {
                 StatusBadge(status: order.status)
             }
             
+            Divider()
+            
+            // Order Details
+            VStack(alignment: .leading, spacing: 8) {
+                HStack {
+                    Label(formatDate(order.createdAt), systemImage: "clock.fill")
+                        .font(.urbanist(size: 12, weight: .medium))
+                        .foregroundStyle(.secondary)
+                    
+                    Spacer()
+                    
+                    // Show payment status
+                    Label(order.paymentStatus.rawValue.capitalized, systemImage: order.paymentId != nil ? "creditcard.fill" : "banknote.fill")
+                        .font(.urbanist(size: 12, weight: .medium))
+                        .foregroundStyle(order.paymentStatus == .success ? .green : .secondary)
+                }
+            }
+            
+            Divider()
+            
             // Items
             VStack(alignment: .leading, spacing: 8) {
-                ForEach(order.items.prefix(2)) { item in
-                    HStack {
+                ForEach(order.items.prefix(3)) { item in
+                    HStack(alignment: .top) {
                         Text("\(item.quantity)x")
                             .font(.urbanist(size: 14, weight: .semibold))
                             .foregroundStyle(Constants.primaryColor)
                             .frame(width: 30)
                         
-                        Text(item.name)
-                            .font(.urbanist(size: 14, weight: .medium))
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(item.name)
+                                .font(.urbanist(size: 14, weight: .medium))
+                            
+                            Text("₹\(Int(item.price)) each")
+                                .font(.urbanist(size: 11, weight: .regular))
+                                .foregroundStyle(.secondary)
+                        }
                         
                         Spacer()
                         
@@ -169,26 +253,65 @@ struct UserOrderCard: View {
                     }
                 }
                 
-                if order.items.count > 2 {
-                    Text("+\(order.items.count - 2) more items")
+                if order.items.count > 3 {
+                    Text("+\(order.items.count - 3) more items")
                         .font(.urbanist(size: 12, weight: .medium))
                         .foregroundStyle(.gray)
+                        .padding(.leading, 30)
                 }
             }
             
             Divider()
             
-            // Footer
-            HStack {
-                Text(formatDate(order.createdAt))
-                    .font(.urbanist(size: 12, weight: .regular))
-                    .foregroundStyle(.gray)
+            // Footer with Total and Action Buttons
+            VStack(spacing: 12) {
+                // Total Amount
+                HStack {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Total Amount")
+                            .font(.urbanist(size: 12, weight: .medium))
+                            .foregroundStyle(.secondary)
+                        
+                        Text("₹\(Int(order.totalAmount))")
+                            .font(.urbanist(size: 18, weight: .bold))
+                            .foregroundStyle(Constants.primaryColor)
+                    }
+                    
+                    Spacer()
+                }
                 
-                Spacer()
-                
-                Text("Total: ₹\(Int(order.totalAmount))")
-                    .font(.urbanist(size: 16, weight: .bold))
-                    .foregroundStyle(Constants.primaryColor)
+                // Action Buttons
+                HStack(spacing: 8) {
+                    // View Details Button
+                    Button(action: onViewDetails) {
+                        HStack(spacing: 6) {
+                            Image(systemName: "doc.text.fill")
+                            Text("View Details")
+                        }
+                        .font(.urbanist(size: 14, weight: .semibold))
+                        .foregroundStyle(Constants.primaryColor)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 12)
+                        .background(Constants.primaryColor.opacity(0.1))
+                        .cornerRadius(12)
+                    }
+                    .buttonStyle(.plain)
+                    
+                    // Reorder Button
+                    Button(action: onReorder) {
+                        HStack(spacing: 6) {
+                            Image(systemName: "arrow.clockwise")
+                            Text("Reorder")
+                        }
+                        .font(.urbanist(size: 14, weight: .semibold))
+                        .foregroundStyle(.white)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 12)
+                        .background(Constants.primaryColor)
+                        .cornerRadius(12)
+                    }
+                    .buttonStyle(.plain)
+                }
             }
         }
         .padding(16)

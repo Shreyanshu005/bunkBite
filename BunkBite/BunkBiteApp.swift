@@ -26,8 +26,8 @@ struct BunkBiteApp: App {
                 }
             }
             .onAppear {
-                DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
-                    withAnimation(.easeOut(duration: 0.5)) {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 2.5) {
+                    withAnimation(.easeOut(duration: 0.3)) {
                         showLaunchScreen = false
                     }
                 }
@@ -44,6 +44,9 @@ class AppDelegate: NSObject, UIApplicationDelegate {
                 window.overrideUserInterfaceStyle = .light
             }
         }
+        
+        NotificationManager.shared.requestPermission()
+        
         return true
     }
 
@@ -61,42 +64,6 @@ class SceneDelegate: NSObject, UIWindowSceneDelegate {
         if let windowScene = scene as? UIWindowScene {
             windowScene.windows.forEach { window in
                 window.overrideUserInterfaceStyle = .light
-            }
-        }
-
-        // Handle deep link if app was opened via URL
-        if let urlContext = connectionOptions.urlContexts.first {
-            handleDeepLink(url: urlContext.url, scene: scene)
-        }
-    }
-
-    func scene(_ scene: UIScene, openURLContexts URLContexts: Set<UIOpenURLContext>) {
-        // Handle deep links when app is already running
-        if let urlContext = URLContexts.first {
-            handleDeepLink(url: urlContext.url, scene: scene)
-        }
-    }
-
-    private func handleDeepLink(url: URL, scene: UIScene) {
-        print("\n🔗 Deep link received in SceneDelegate: \(url.absoluteString)")
-
-        if url.scheme == "myapp" && url.host == "payment-status" {
-            print("✅ Payment callback detected")
-            CashfreeWebCheckoutManager.shared.handlePaymentCallback(url: url)
-
-            // Dismiss Safari VC if it's still open
-            if let windowScene = scene as? UIWindowScene,
-               let window = windowScene.windows.first,
-               let rootViewController = window.rootViewController {
-
-                var topController = rootViewController
-                while let presentedViewController = topController.presentedViewController {
-                    topController = presentedViewController
-                }
-
-                if topController is SFSafariViewController {
-                    topController.dismiss(animated: true)
-                }
             }
         }
     }

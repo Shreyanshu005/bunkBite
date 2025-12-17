@@ -544,11 +544,21 @@ struct MenuItemRow: View {
                             .frame(minWidth: 30)
 
                         Button {
-                            if authViewModel.isAuthenticated { cart.addItem(item) } else { showLoginSheet = true }
+                            if authViewModel.isAuthenticated { 
+                                // Check if cart quantity is less than available quantity
+                                if cart.getQuantity(for: item) < item.availableQuantity {
+                                    cart.addItem(item) 
+                                }
+                            } else { 
+                                showLoginSheet = true 
+                            }
                         } label: {
-                            Image(systemName: "plus.circle.fill").font(.title3).foregroundStyle(Constants.primaryColor)
+                            Image(systemName: "plus.circle.fill")
+                                .font(.title3)
+                                .foregroundStyle(cart.getQuantity(for: item) >= item.availableQuantity ? .gray : Constants.primaryColor)
                         }
                         .buttonStyle(.plain)
+                        .disabled(cart.getQuantity(for: item) >= item.availableQuantity)
                     }
                 } else {
                     Button {

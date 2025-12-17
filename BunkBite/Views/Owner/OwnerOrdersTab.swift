@@ -179,15 +179,22 @@ private struct OrdersTabCard: View {
     
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            // Header
+            // Header with Order ID and Status
             HStack {
                 VStack(alignment: .leading, spacing: 4) {
                     Text("Order #\(order.orderId)")
                         .font(.urbanist(size: 16, weight: .bold))
                     
-                    Text(formatDate(order.createdAt))
-                        .font(.urbanist(size: 13, weight: .medium))
-                        .foregroundStyle(.secondary)
+                    HStack(spacing: 12) {
+                        Label(formatDate(order.createdAt), systemImage: "clock.fill")
+                            .font(.urbanist(size: 12, weight: .medium))
+                            .foregroundStyle(.secondary)
+                        
+                        // Show payment status
+                        Label(order.paymentStatus.rawValue.capitalized, systemImage: order.paymentId != nil ? "creditcard.fill" : "banknote.fill")
+                            .font(.urbanist(size: 12, weight: .medium))
+                            .foregroundStyle(order.paymentStatus == .success ? .green : .secondary)
+                    }
                 }
                 
                 Spacer()
@@ -200,14 +207,20 @@ private struct OrdersTabCard: View {
             // Items
             VStack(alignment: .leading, spacing: 8) {
                 ForEach(order.items) { item in
-                    HStack {
+                    HStack(alignment: .top) {
                         Text("\(item.quantity)x")
                             .font(.urbanist(size: 14, weight: .semibold))
                             .foregroundStyle(Constants.primaryColor)
                             .frame(width: 30, alignment: .leading)
                         
-                        Text(item.name)
-                            .font(.urbanist(size: 14, weight: .medium))
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(item.name)
+                                .font(.urbanist(size: 14, weight: .medium))
+                            
+                            Text("₹\(Int(item.price)) each")
+                                .font(.urbanist(size: 11, weight: .regular))
+                                .foregroundStyle(.secondary)
+                        }
                         
                         Spacer()
                         
@@ -219,10 +232,17 @@ private struct OrdersTabCard: View {
             
             Divider()
             
-            // Footer
+            // Footer with Total and Actions
             HStack {
-                Text("Total: ₹\(Int(order.totalAmount))")
-                    .font(.urbanist(size: 16, weight: .bold))
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Total Amount")
+                        .font(.urbanist(size: 12, weight: .medium))
+                        .foregroundStyle(.secondary)
+                    
+                    Text("₹\(Int(order.totalAmount))")
+                        .font(.urbanist(size: 18, weight: .bold))
+                        .foregroundStyle(Constants.primaryColor)
+                }
                 
                 Spacer()
                 
@@ -235,9 +255,9 @@ private struct OrdersTabCard: View {
                         } label: {
                             HStack(spacing: 4) {
                                 Image(systemName: "arrow.right.circle.fill")
-                                Text("Start Preparing")
+                                Text("Start")
                             }
-                            .font(.urbanist(size: 14, weight: .semibold))
+                            .font(.urbanist(size: 13, weight: .semibold))
                             .padding(.horizontal, 12)
                             .padding(.vertical, 6)
                             .background(Constants.primaryColor)

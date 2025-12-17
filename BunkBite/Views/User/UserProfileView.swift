@@ -9,37 +9,55 @@ import SwiftUI
 
 struct UserProfileView: View {
     @ObservedObject var viewModel: AuthViewModel
+    @EnvironmentObject var cart: Cart
+    @EnvironmentObject var canteenViewModel: CanteenViewModel
     @Binding var showLoginSheet: Bool
     @State private var showContent = false
     @State private var showLogoutAlert = false
+    @State private var showCart = false
 
     var body: some View {
-        ZStack {
-            Constants.backgroundColor.ignoresSafeArea()
+        NavigationStack {
+            ZStack {
+                Constants.backgroundColor.ignoresSafeArea()
 
-            if viewModel.isAuthenticated {
-                profileContent
-            } else {
-                loginPrompt
-            }
-        }
-        .alert("Logout", isPresented: $showLogoutAlert) {
-            Button("Cancel", role: .cancel) {}
-            Button("Logout", role: .destructive) {
-                withAnimation {
-                    viewModel.logout()
+                if viewModel.isAuthenticated {
+                    profileContent
+                } else {
+                    loginPrompt
                 }
             }
-        } message: {
-            Text("Are you sure you want to logout?")
-        }
-        .onAppear {
-            withAnimation(Constants.bouncyAnimation.delay(0.1)) {
-                showContent = true
+            .navigationTitle("Profile")
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    CartToolbarButton(
+                        authViewModel: viewModel,
+                        showCart: $showCart,
+                        showLoginSheet: $showLoginSheet
+                    )
+                }
+            }
+            .alert("Logout", isPresented: $showLogoutAlert) {
+                Button("Cancel", role: .cancel) {}
+                Button("Logout", role: .destructive) {
+                    withAnimation {
+                        viewModel.logout()
+                    }
+                }
+            } message: {
+                Text("Are you sure you want to logout?")
+            }
+            .sheet(isPresented: $showCart) {
+                CartSheet(cart: cart, authViewModel: viewModel, canteen: canteenViewModel.selectedCanteen)
+            }
+            .onAppear {
+                withAnimation(Constants.bouncyAnimation.delay(0.1)) {
+                    showContent = true
+                }
             }
         }
     }
-
+    
     private var loginPrompt: some View {
         VStack(spacing: 0) {
             Spacer()

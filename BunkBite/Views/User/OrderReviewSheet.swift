@@ -222,6 +222,13 @@ struct OrderReviewSheet: View {
                     createdOrder = verifiedOrder
                     // 3. Clear Cart and Show Detail
                     cart.clear()
+                    
+                    // Trigger Local Notification
+                    NotificationManager.shared.sendOrderPlacedNotification(
+                        orderId: verifiedOrder.orderId,
+                        canteenName: canteen.name
+                    )
+                    
                     navigateToDetail = true
                 } else {
                     isProcessing = false

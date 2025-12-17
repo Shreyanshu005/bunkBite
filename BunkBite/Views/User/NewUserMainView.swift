@@ -34,12 +34,16 @@ struct NewUserMainView: View {
             // My Orders Tab
             MyOrdersView()
                 .environmentObject(authViewModel)
+                .environmentObject(cart)
+                .environmentObject(canteenViewModel)
                 .tabItem {
                     Label("Orders", systemImage: "bag")
                 }
 
             // Profile Tab
             UserProfileView(viewModel: authViewModel, showLoginSheet: $showLoginSheet)
+                .environmentObject(cart)
+                .environmentObject(canteenViewModel)
                 .tabItem {
                     Label("Profile", systemImage: "person")
                 }
