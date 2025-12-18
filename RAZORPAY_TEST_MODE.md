@@ -4,7 +4,7 @@
 BunkBite is configured to use Razorpay in **TEST MODE** for development and testing. This allows you to simulate real payments without any actual money being transferred.
 
 ## 🔑 Test Configuration
-- **Test Key:** `rzp_test_RgMWemF69VDJHw`
+
 - **Mode:** Test/Sandbox
 - **Location:** `BunkBite/Utils/Constants.swift`
 
@@ -44,7 +44,7 @@ When user clicks "Pay Now":
 1. Cart total calculated
 2. Temporary order ID generated (format: order_XXXXX)
 3. Razorpay checkout UI opens
-```
+`
 
 ### 2. Payment Processing
 ```

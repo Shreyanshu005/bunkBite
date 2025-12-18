@@ -4,7 +4,7 @@
 
 ### 1. Razorpay Test Mode Integration
 - ✅ Razorpay iOS SDK properly integrated via CocoaPods
-- ✅ Test mode enabled with test key: `rzp_test_RgMWemF69VDJHw`
+- ✅ Test mode enabled with test key: 
 - ✅ Razorpay checkout UI opens successfully
 - ✅ View controller presentation issues resolved
 
