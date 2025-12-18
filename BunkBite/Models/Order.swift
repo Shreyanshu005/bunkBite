@@ -45,7 +45,7 @@ struct OrderLineItem: Codable, Identifiable, Hashable {
 struct Order: Codable, Identifiable {
     let id: String
     let orderId: String
-    let userId: String
+    let userId: String?
     let canteenId: String
     let items: [OrderLineItem]
     let totalAmount: Double
@@ -97,7 +97,7 @@ struct Order: Codable, Identifiable {
         if let partialUser = try? container.decode(PartialUser.self, forKey: .userId) {
             userId = partialUser.id
         } else {
-            userId = try container.decode(String.self, forKey: .userId)
+            userId = try? container.decode(String.self, forKey: .userId)
         }
         
         items = try container.decode([OrderLineItem].self, forKey: .items)
@@ -130,7 +130,7 @@ struct Order: Codable, Identifiable {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(id, forKey: .id)
         try container.encode(orderId, forKey: .orderId)
-        try container.encode(userId, forKey: .userId)
+        try container.encodeIfPresent(userId, forKey: .userId)
         try container.encode(canteenId, forKey: .canteenId)
         try container.encode(items, forKey: .items)
         try container.encode(totalAmount, forKey: .totalAmount)

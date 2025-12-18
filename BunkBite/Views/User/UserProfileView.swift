@@ -14,6 +14,7 @@ struct UserProfileView: View {
     @Binding var showLoginSheet: Bool
     @State private var showContent = false
     @State private var showLogoutAlert = false
+    @State private var showDeleteConfirmation = false
     @State private var showCart = false
 
     var body: some View {
@@ -118,27 +119,23 @@ struct UserProfileView: View {
             VStack(spacing: 32) {
                 // Profile Header
                 VStack(spacing: 20) {
-                    // Avatar
+                    // Avatar (Generic)
                     Circle()
                         .fill(Constants.primaryColor.opacity(0.1))
                         .frame(width: 100, height: 100)
                         .overlay(
-                            Text(String(viewModel.currentUser?.name.prefix(1) ?? "U"))
-                                .font(.urbanist(size: 40, weight: .bold))
+                            Image(systemName: "person.fill")
+                                .font(.system(size: 40))
                                 .foregroundColor(Constants.primaryColor)
                         )
                         .scaleEffect(showContent ? 1 : 0.5)
                         .opacity(showContent ? 1 : 0)
 
-                    // User Info
+                    // User Info (Email Only)
                     VStack(spacing: 8) {
-                        Text(viewModel.currentUser?.name ?? "User")
-                            .font(.urbanist(size: 28, weight: .bold))
-                            .foregroundColor(.black)
-
                         Text(viewModel.currentUser?.email ?? "")
-                            .font(.urbanist(size: 15, weight: .regular))
-                            .foregroundColor(.gray)
+                            .font(.urbanist(size: 20, weight: .bold)) // Increased size for emphasis
+                            .foregroundColor(.black)
                     }
                     .offset(y: showContent ? 0 : 20)
                     .opacity(showContent ? 1 : 0)
@@ -190,8 +187,26 @@ struct UserProfileView: View {
                 .offset(y: showContent ? 0 : 30)
                 .opacity(showContent ? 1 : 0)
 
+                // Delete Account Button (Danger Zone)
+                Button(action: {
+                    showDeleteConfirmation = true
+                }) {
+                    Text("Delete Account")
+                        .font(.urbanist(size: 15, weight: .medium))
+                        .foregroundStyle(.red)
+                }
+                .padding(.top, 10)
+                .padding(.bottom, 20)
+                .offset(y: showContent ? 0 : 30)
+                .opacity(showContent ? 1 : 0)
+
                 Spacer(minLength: 60)
             }
+        }
+        .sheet(isPresented: $showDeleteConfirmation) {
+            DeleteAccountSheet(viewModel: viewModel)
+                .presentationDetents([.height(350)])
+                .presentationDragIndicator(.visible)
         }
     }
 }
@@ -228,5 +243,95 @@ struct ProfileDetailRow: View {
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 16)
+    }
+}
+
+struct DeleteAccountSheet: View {
+    @ObservedObject var viewModel: AuthViewModel
+    @Environment(\.dismiss) var dismiss
+    
+    @State private var confirmationText = ""
+    @State private var isDeleting = false
+    
+    var body: some View {
+        NavigationStack {
+            VStack(spacing: 24) {
+                // Warning Icon
+                Image(systemName: "exclamationmark.triangle.fill")
+                    .font(.system(size: 50))
+                    .foregroundStyle(.red)
+                    .padding(.top, 20)
+                
+                // Warning Text
+                VStack(spacing: 8) {
+                    Text("Delete Account?")
+                        .font(.urbanist(size: 22, weight: .bold))
+                    
+                    Text("This action is irreversible. All your pending orders and managed canteens (if any) will be deleted/closed.")
+                        .font(.urbanist(size: 14, weight: .regular))
+                        .foregroundStyle(.secondary)
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal)
+                        .fixedSize(horizontal: false, vertical: true) // Force wrapping
+                }
+                
+                // Confirmation Input
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Type 'delete' to confirm:")
+                        .font(.urbanist(size: 14, weight: .medium))
+                        .foregroundStyle(.secondary)
+                    
+                    TextField("delete", text: $confirmationText)
+                        .textFieldStyle(.roundedBorder)
+                        .textInputAutocapitalization(.never)
+                        .autocorrectionDisabled()
+                }
+                .padding(.horizontal, 30)
+                
+                if let error = viewModel.errorMessage {
+                    Text(error)
+                        .font(.urbanist(size: 13, weight: .medium))
+                        .foregroundStyle(.red)
+                        .padding(.horizontal)
+                }
+                
+                Spacer()
+                
+                // Action Buttons
+                HStack(spacing: 12) {
+                    Button("Cancel") {
+                        dismiss()
+                    }
+                    .buttonStyle(.bordered)
+                    .frame(maxWidth: .infinity)
+                    
+                    Button {
+                        isDeleting = true
+                        Task {
+                            let success = await viewModel.deleteAccount()
+                            if success {
+                                dismiss()
+                            }
+                            isDeleting = false
+                        }
+                    } label: {
+                        if isDeleting {
+                            ProgressView()
+                                .progressViewStyle(.circular)
+                                .tint(.white)
+                        } else {
+                            Text("Delete Forever")
+                        }
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .tint(.red)
+                    .frame(maxWidth: .infinity)
+                    .disabled(confirmationText != "delete" || isDeleting)
+                }
+                .padding(.horizontal, 24)
+                .padding(.bottom, 20)
+            }
+            .navigationBarTitleDisplayMode(.inline)
+        }
     }
 }

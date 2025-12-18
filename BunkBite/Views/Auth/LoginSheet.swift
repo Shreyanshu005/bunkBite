@@ -19,20 +19,7 @@ struct LoginSheet: View {
                 showOTPSheet = false
                 dismiss() // This dismisses the LoginSheet
             })
-            // Add a back button to return to email entry if needed
-            .overlay(alignment: .topLeading) {
-                Button {
-                    showOTPSheet = false
-                } label: {
-                    HStack(spacing: 4) {
-                        Image(systemName: "chevron.left")
-                        Text("Back")
-                    }
-                    .font(.urbanist(size: 16, weight: .semibold))
-                    .foregroundStyle(.gray)
-                    .padding()
-                }
-            }
+
         } else {
             loginContent
         }

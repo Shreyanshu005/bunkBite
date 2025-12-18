@@ -44,6 +44,46 @@ class APIService {
         return try JSONDecoder().decode(AuthResponse.self, from: data)
     }
 
+    func deleteAccount(token: String) async throws {
+        let url = URL(string: "\(Constants.baseURL)/api/v1/auth/me")!
+        let request = createRequest(url: url, method: "DELETE", token: token)
+        
+        print("\n🗑️ DELETING ACCOUNT")
+        print("URL: \(url.absoluteString)")
+        
+        let (data, response) = try await URLSession.shared.data(for: request)
+        
+        if let httpResponse = response as? HTTPURLResponse {
+            print("Response Status: \(httpResponse.statusCode)")
+        }
+        
+        let responseString = String(data: data, encoding: .utf8) ?? ""
+        print("Raw Response Data: \(responseString)")
+        
+        // CHECK FOR HTML (Likely 404 or 500)
+        if responseString.trimmingCharacters(in: .whitespacesAndNewlines).hasPrefix("<") {
+            print("❌ Server returned HTML. Probable cause: Endpoint not found (404) on this URL.")
+            print("Verify if '\(url.absoluteString)' is the correct deployed address.")
+            throw APIError.invalidResponse
+        }
+        
+        // Use JSONSerialization for flexibility
+        do {
+            if let json = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any] {
+                if let success = json["success"] as? Bool, success {
+                    return // Success!
+                } else {
+                    let message = json["message"] as? String ?? "Unknown error"
+                    print("❌ API returned success=false: \(message)")
+                    throw APIError.invalidResponse
+                }
+            }
+        } catch {
+            print("❌ JSON Serialization Error: \(error)")
+            throw APIError.decodingError
+        }
+    }
+
     // MARK: - Canteen APIs
     func getAllCanteens() async throws -> [Canteen] {
         let url = URL(string: "\(Constants.baseURL)/api/v1/canteens")!

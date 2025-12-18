@@ -188,13 +188,16 @@ struct OrderDetailView: View {
                 }
             }
             .task {
+                // Show initial data immediately using animation
+                withAnimation(.spring(response: 0.6, dampingFraction: 0.7)) {
+                    isAnimating = true
+                }
+                
+                // Then fetch fresh data in background
                 if let token = authViewModel.authToken {
                     if let fetched = await orderViewModel.fetchOrder(orderId: order.orderId, token: token) {
                         self.fullOrder = fetched
                     }
-                }
-                withAnimation(.spring(response: 0.6, dampingFraction: 0.7)) {
-                    isAnimating = true
                 }
             }
         }

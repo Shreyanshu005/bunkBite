@@ -84,8 +84,32 @@ class OrderViewModel: ObservableObject {
     }
 
     func fetchOrder(orderId: String, token: String) async -> Order? {
+        // 1. Check if we already have this order in our list (Cache)
+        if let existing = orders.first(where: { $0.orderId == orderId }) {
+            // If it has a QR code or full details, return it immediately for speed
+            // Still refresh in background to get latest status
+            Task {
+                do {
+                    let updated = try await apiService.getOrderById(id: orderId, token: token)
+                    await MainActor.run {
+                        if let index = self.orders.firstIndex(where: { $0.orderId == orderId }) {
+                            self.orders[index] = updated
+                        }
+                    }
+                } catch {
+                    print("⚠️ Background refresh failed for order \(orderId)")
+                }
+            }
+            return existing
+        }
+        
+        // 2. Not in list, fetch from API
         do {
             let order = try await apiService.getOrderById(id: orderId, token: token)
+            // Add to list for future caching
+            if !orders.contains(where: { $0.id == order.id }) {
+                orders.append(order)
+            }
             return order
         } catch {
             print("❌ Fetch order error: \(error)")

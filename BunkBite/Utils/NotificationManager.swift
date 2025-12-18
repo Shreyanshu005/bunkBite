@@ -31,7 +31,7 @@ class NotificationManager: NSObject, UNUserNotificationCenterDelegate {
     func sendOrderPlacedNotification(orderId: String, canteenName: String) {
         let content = UNMutableNotificationContent()
         content.title = "Order Placed Successfully! 🎉"
-        content.body = "Your order #\(orderId.suffix(6)) at \(canteenName) has been confirmed. You can pick up your order now!"
+        content.body = "Your order #\(orderId.suffix(6)) at \(canteenName) has been confirmed. You can pick it up when it's ready!"
         content.sound = .default
         
         // Trigger immediately (time interval must be > 0)

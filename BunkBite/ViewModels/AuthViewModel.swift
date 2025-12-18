@@ -140,6 +140,28 @@ class AuthViewModel: ObservableObject {
         isLoading = false
     }
 
+    func deleteAccount() async -> Bool {
+        guard let token = authToken else { return false }
+        
+        isLoading = true
+        errorMessage = nil
+        
+        do {
+            try await apiService.deleteAccount(token: token)
+            print("✅ Account deleted successfully")
+            
+            // Log out locally after successful deletion on server
+            logout()
+            isLoading = false
+            return true
+        } catch {
+            print("❌ Delete Account Error: \(error)")
+            errorMessage = "Failed to delete account. Please try again."
+            isLoading = false
+            return false
+        }
+    }
+
     func logout() {
         currentUser = nil
         authToken = nil
