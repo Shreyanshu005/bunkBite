@@ -23,18 +23,3 @@ struct AuthResponse: Codable {
     let token: String?
 }
 
-struct CashfreeOrderResponse: Codable {
-    let success: Bool
-    let message: String?
-    let orderId: String
-    let paymentSessionId: String
-    let orderAmount: Double?
-
-    enum CodingKeys: String, CodingKey {
-        case success
-        case message
-        case orderId = "order_id"
-        case paymentSessionId = "payment_session_id"
-        case orderAmount = "order_amount"
-    }
-}

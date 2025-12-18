@@ -523,38 +523,7 @@ class APIService {
         return order
     }
 
-    // MARK: - Payment APIs (Cashfree)
-    func createCashfreeOrder(amount: Double, canteenId: String, items: [[String: Any]], token: String) async throws -> CashfreeOrderResponse {
-        let url = URL(string: "\(Constants.baseURL)/api/v1/payments/create-order")!
-        var request = createRequest(url: url, method: "POST", token: token)
 
-        let orderData: [String: Any] = [
-            "amount": amount,
-            "canteenId": canteenId,
-            "items": items
-        ]
-
-        request.httpBody = try JSONSerialization.data(withJSONObject: orderData)
-
-        print("\n🚀 CREATING CASHFREE ORDER")
-        print("URL: \(url.absoluteString)")
-        print("Amount: ₹\(amount)")
-        print("Canteen ID: \(canteenId)")
-        print("Items: \(items.count)")
-
-        let (data, response) = try await URLSession.shared.data(for: request)
-
-        if let httpResponse = response as? HTTPURLResponse {
-            print("Response Status: \(httpResponse.statusCode)")
-        }
-
-        let responseString = String(data: data, encoding: .utf8) ?? ""
-        print("Response: \(responseString)\n")
-
-        let orderResponse = try JSONDecoder().decode(CashfreeOrderResponse.self, from: data)
-        return orderResponse
-    }
-    
     // MARK: - Scan-to-Pickup Endpoints
     
     func verifyQR(qrData: String, token: String) async throws -> Order {

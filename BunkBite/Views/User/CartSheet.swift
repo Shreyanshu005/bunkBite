@@ -225,15 +225,7 @@ struct CartSheet: View {
                 Spacer()
             }
 
-            // Loading overlay
-            if showLoadingSheet {
-                Color.black.opacity(0.4)
-                    .ignoresSafeArea()
-                    .transition(.opacity)
 
-                CashfreeLoadingOverlay()
-                    .transition(.scale.combined(with: .opacity))
-            }
         }
         .onAppear {
             withAnimation(.spring(response: 0.6, dampingFraction: 0.7)) {
@@ -350,46 +342,7 @@ struct CartItemCard: View {
 }
 
 
-// MARK: - Cashfree Loading Overlay
-struct CashfreeLoadingOverlay: View {
-    @State private var isAnimating = false
 
-    var body: some View {
-        VStack(spacing: 20) {
-            ZStack {
-                Circle()
-                    .stroke(Constants.primaryColor.opacity(0.2), lineWidth: 4)
-                    .frame(width: 60, height: 60)
-
-                Circle()
-                    .trim(from: 0, to: 0.7)
-                    .stroke(Constants.primaryColor, lineWidth: 4)
-                    .frame(width: 60, height: 60)
-                    .rotationEffect(Angle(degrees: isAnimating ? 360 : 0))
-                    .animation(Animation.linear(duration: 1).repeatForever(autoreverses: false), value: isAnimating)
-            }
-
-            VStack(spacing: 8) {
-                Text("Initializing Payment")
-                    .font(.urbanist(size: 18, weight: .semibold))
-                    .foregroundStyle(.black)
-
-                Text("Please wait...")
-                    .font(.urbanist(size: 14, weight: .regular))
-                    .foregroundStyle(.gray)
-            }
-        }
-        .padding(40)
-        .background(
-            RoundedRectangle(cornerRadius: 20)
-                .fill(Color.white)
-                .shadow(color: .black.opacity(0.2), radius: 20, x: 0, y: 10)
-        )
-        .onAppear {
-            isAnimating = true
-        }
-    }
-}
 
 // MARK: - Payment Success Sheet
 struct PaymentSuccessSheet: View {
@@ -546,20 +499,10 @@ struct PaymentFailureSheet: View {
                         .opacity(isAnimating ? 1 : 0)
                 }
 
-                // Test mode tips
-                VStack(alignment: .leading, spacing: 8) {
-                    Text("💡 Test Mode Tips:")
-                        .font(.urbanist(size: 14, weight: .semibold))
-                        .foregroundStyle(.gray)
-
-                    Text("• Test Card: 4111 1111 1111 1111")
+                    Text("• Use test cards or UPI IDs")
                         .font(.urbanist(size: 12, weight: .regular))
                         .foregroundStyle(.gray.opacity(0.8))
 
-                    Text("• Test UPI: testsuccess@gocash")
-                        .font(.urbanist(size: 12, weight: .regular))
-                        .foregroundStyle(.gray.opacity(0.8))
-                }
                 .padding(16)
                 .background(Color.gray.opacity(0.05))
                 .cornerRadius(12)
