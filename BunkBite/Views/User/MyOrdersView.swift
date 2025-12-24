@@ -14,7 +14,6 @@ struct MyOrdersView: View {
     @EnvironmentObject var canteenViewModel: CanteenViewModel
     
     @State private var selectedFilter: OrderStatus? = nil
-    @State private var showOrderDetail = false
     @State private var selectedOrder: Order?
     @State private var showReorderConfirmation = false
     @State private var reorderedItemsCount = 0
@@ -81,7 +80,6 @@ struct MyOrdersView: View {
                                         },
                                         onViewDetails: {
                                             selectedOrder = order
-                                            showOrderDetail = true
                                         }
                                     )
                                 }
@@ -113,11 +111,8 @@ struct MyOrdersView: View {
             .sheet(isPresented: $showLoginSheet) {
                 LoginSheet(authViewModel: authViewModel)
             }
-            .sheet(isPresented: $showOrderDetail) {
-                if let order = selectedOrder {
-                    OrderDetailView(order: order, orderViewModel: orderViewModel, authViewModel: authViewModel)
-                        .id(order.orderId) // Force recreation to ensure .task runs
-                }
+            .sheet(item: $selectedOrder) { order in
+                OrderDetailView(order: order, orderViewModel: orderViewModel, authViewModel: authViewModel)
             }
             .alert("Items Added to Cart", isPresented: $showReorderConfirmation) {
                 Button("OK", role: .cancel) { }

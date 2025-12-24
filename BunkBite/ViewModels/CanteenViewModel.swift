@@ -164,4 +164,20 @@ class CanteenViewModel: ObservableObject {
             print("❌ Failed to refresh selected canteen: \(error.localizedDescription)")
         }
     }
+    
+    func fetchSelectedCanteenDetails(token: String) async {
+        guard let currentId = selectedCanteen?.id else { return }
+        isLoading = true
+        
+        do {
+            let updatedCanteen = try await apiService.getCanteenById(id: currentId, token: token)
+            selectedCanteen = updatedCanteen
+            print("✅ Fetched fresh details for canteen: \(updatedCanteen.name)")
+        } catch {
+            print("❌ Failed to fetch canteen details: \(error.localizedDescription)")
+            errorMessage = "Failed to refresh canteen details"
+        }
+        
+        isLoading = false
+    }
 }

@@ -73,6 +73,15 @@ struct OwnerCanteenSettingsView: View {
             .navigationTitle("Canteen Settings")
             .onAppear {
                 loadCurrentSettings()
+                // Fetch fresh data from API
+                if let token = authViewModel.authToken {
+                    Task {
+                        await canteenViewModel.fetchSelectedCanteenDetails(token: token)
+                    }
+                }
+            }
+            .onChange(of: canteenViewModel.selectedCanteen) { _, _ in
+                loadCurrentSettings()
             }
             .alert("Settings", isPresented: $showSaveAlert) {
                 Button("OK", role: .cancel) { }
