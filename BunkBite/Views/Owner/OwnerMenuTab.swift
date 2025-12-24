@@ -211,7 +211,7 @@ struct OwnerMenuTab: View {
                     authViewModel: authViewModel
                 )
             }
-            .task {
+            .task(id: selectedCanteen.id) {
                 if authViewModel.authToken != nil {
                     await menuViewModel.fetchMenu(canteenId: selectedCanteen.id)
                 }

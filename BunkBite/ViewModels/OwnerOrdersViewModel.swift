@@ -21,6 +21,7 @@ class OwnerOrdersViewModel: ObservableObject {
     func fetchOrders(canteenId: String, status: String? = nil, token: String) async {
         isLoading = true
         errorMessage = nil
+        orders = [] // Clear old orders to prevent stale data
         selectedStatus = status
         
         do {

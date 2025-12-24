@@ -117,7 +117,7 @@ struct OwnerOrdersTab: View {
             }
         }
         .navigationTitle("Orders")
-        .task {
+        .task(id: selectedCanteen.id) {
             await loadOrders(for: selectedCanteen)
         }
         .onChange(of: orderCompletedTrigger) {

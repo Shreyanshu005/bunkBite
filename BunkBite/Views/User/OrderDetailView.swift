@@ -20,6 +20,13 @@ struct OrderDetailView: View {
         fullOrder ?? order
     }
     
+    init(order: Order, orderViewModel: OrderViewModel, authViewModel: AuthViewModel) {
+        self.order = order
+        self.orderViewModel = orderViewModel
+        self.authViewModel = authViewModel
+        _fullOrder = State(initialValue: order)
+    }
+    
     var body: some View {
         NavigationStack {
             ZStack {
