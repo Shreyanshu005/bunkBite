@@ -20,7 +20,7 @@ class MenuViewModel: ObservableObject {
     func fetchMenu(canteenId: String) async {
         isLoading = true
         errorMessage = nil
-        menuItems = [] // Clear old items to prevent stale data
+        // menuItems = [] // REMOVED: keep old items until new ones arrive for a smoother experience
 
         do {
             menuItems = try await apiService.getMenu(canteenId: canteenId)

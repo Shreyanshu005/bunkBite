@@ -45,7 +45,11 @@ class OrderViewModel: ObservableObject {
             isLoading = false
             return order
         } catch {
-            errorMessage = "Failed to create order. Please try again."
+            if let apiError = error as? APIError {
+                errorMessage = apiError.localizedDescription
+            } else {
+                errorMessage = "Failed to create order. Please try again."
+            }
             print("❌ Order creation error: \(error)")
             isLoading = false
             return nil

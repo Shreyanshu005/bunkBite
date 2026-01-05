@@ -20,11 +20,15 @@ struct MyOrdersView: View {
     @State private var showCart = false
     @State private var showLoginSheet = false
     
+    // Payment-related state
+    @State private var showPaymentGateway = false
+    @State private var paymentData: RazorpayPaymentInitiation?
+    @State private var processingOrderId: String?
+    @State private var isProcessing = false
+    
     var filteredOrders: [Order] {
-        // Only show paid and completed orders
-        let relevantOrders = orderViewModel.orders.filter { 
-            $0.status == .paid || $0.status == .completed 
-        }
+        // Show all orders
+        let relevantOrders = orderViewModel.orders
         
         if let filter = selectedFilter {
             return relevantOrders.filter { $0.status == filter }
@@ -47,12 +51,20 @@ struct MyOrdersView: View {
                                 selectedFilter = nil
                             }
                             
+                            OrderFilterChip(title: "Pending", isSelected: selectedFilter == .pending) {
+                                selectedFilter = .pending
+                            }
+                            
                             OrderFilterChip(title: "Paid", isSelected: selectedFilter == .paid) {
                                 selectedFilter = .paid
                             }
                             
                             OrderFilterChip(title: "Completed", isSelected: selectedFilter == .completed) {
                                 selectedFilter = .completed
+                            }
+                            
+                            OrderFilterChip(title: "Cancelled", isSelected: selectedFilter == .cancelled) {
+                                selectedFilter = .cancelled
                             }
                         }
                         .padding(.horizontal, 20)
@@ -80,7 +92,12 @@ struct MyOrdersView: View {
                                         },
                                         onViewDetails: {
                                             selectedOrder = order
-                                        }
+                                        },
+                                        onPayNow: { orderToPay in
+                                            payForPendingOrder(orderToPay)
+                                        },
+                                        isProcessing: isProcessing,
+                                        processingOrderId: processingOrderId
                                     )
                                 }
                             }
@@ -113,6 +130,27 @@ struct MyOrdersView: View {
             }
             .sheet(item: $selectedOrder) { order in
                 OrderDetailView(order: order, orderViewModel: orderViewModel, authViewModel: authViewModel)
+            }
+            .fullScreenCover(isPresented: $showPaymentGateway) {
+                if let data = paymentData {
+                    RazorpayCheckoutView(
+                        paymentData: data,
+                        onSuccess: { response in verifyPayment(response) },
+                        onFailure: { error in
+                            isProcessing = false
+                            orderViewModel.errorMessage = error
+                        },
+                        onDismiss: {
+                            showPaymentGateway = false
+                            isProcessing = false
+                        }
+                    )
+                }
+            }
+            .alert("Error", isPresented: .constant(orderViewModel.errorMessage != nil)) {
+                Button("OK") { orderViewModel.errorMessage = nil }
+            } message: {
+                Text(orderViewModel.errorMessage ?? "")
             }
             .alert("Items Added to Cart", isPresented: $showReorderConfirmation) {
                 Button("OK", role: .cancel) { }
@@ -156,6 +194,52 @@ struct MyOrdersView: View {
             await orderViewModel.fetchMyOrders(token: token)
         }
     }
+    
+    private func payForPendingOrder(_ order: Order) {
+        guard let token = authViewModel.authToken else { return }
+        isProcessing = true
+        processingOrderId = order.id
+        
+        Task {
+            if let payData = await orderViewModel.initiatePayment(orderId: order.orderId, token: token) {
+                paymentData = payData
+                showPaymentGateway = true
+            } else {
+                isProcessing = false
+            }
+        }
+    }
+    
+    private func verifyPayment(_ response: RazorpayPaymentResponse) {
+        guard let token = authViewModel.authToken else { return }
+        showPaymentGateway = false
+        
+        Task {
+            if let verifiedOrder = await orderViewModel.verifyPayment(
+                razorpayOrderId: response.razorpayOrderId,
+                razorpayPaymentId: response.razorpayPaymentId,
+                razorpaySignature: response.razorpaySignature,
+                token: token
+            ) {
+                if verifiedOrder.paymentStatus == .success {
+                    // Refresh orders to show updated status
+                    fetchOrders()
+                    
+                    // Show detail view
+                    selectedOrder = verifiedOrder
+                    
+                    // Clear state
+                    isProcessing = false
+                    processingOrderId = nil
+                } else {
+                    isProcessing = false
+                    orderViewModel.errorMessage = "Payment verification failed"
+                }
+            } else {
+                isProcessing = false
+            }
+        }
+    }
 }
 
 struct OrderFilterChip: View {
@@ -182,6 +266,9 @@ struct UserOrderCard: View {
     let order: Order
     let onReorder: () -> Void
     let onViewDetails: () -> Void
+    let onPayNow: (Order) -> Void
+    let isProcessing: Bool
+    let processingOrderId: String?
     
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
@@ -292,20 +379,45 @@ struct UserOrderCard: View {
                     }
                     .buttonStyle(.plain)
                     
-                    // Reorder Button
-                    Button(action: onReorder) {
-                        HStack(spacing: 6) {
-                            Image(systemName: "arrow.clockwise")
-                            Text("Reorder")
+                    // Pay Now Button (for Pending orders)
+                    if order.status == .pending {
+                        Button {
+                            onPayNow(order)
+                        } label: {
+                            HStack(spacing: 6) {
+                                if isProcessing && processingOrderId == order.id {
+                                    ProgressView()
+                                        .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                                } else {
+                                    Image(systemName: "creditcard.fill")
+                                    Text("Pay Now")
+                                }
+                            }
+                            .font(.urbanist(size: 14, weight: .semibold))
+                            .foregroundStyle(.white)
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 12)
+                            .background(Constants.primaryColor)
+                            .cornerRadius(12)
                         }
-                        .font(.urbanist(size: 14, weight: .semibold))
-                        .foregroundStyle(.white)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 12)
-                        .background(Constants.primaryColor)
-                        .cornerRadius(12)
+                        .buttonStyle(.plain)
+                        .disabled(isProcessing)
+                    } else {
+                        // Reorder Button
+                        Button(action: onReorder) {
+                            HStack(spacing: 6) {
+                                Image(systemName: "arrow.clockwise")
+                                Text("Reorder")
+                            }
+                            .font(.urbanist(size: 14, weight: .semibold))
+                            .foregroundStyle(.white)
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 12)
+                            .background(Constants.primaryColor)
+                            .cornerRadius(12)
+                        }
+                        .buttonStyle(.plain)
                     }
-                    .buttonStyle(.plain)
                 }
             }
         }
@@ -316,12 +428,7 @@ struct UserOrderCard: View {
     }
     
     private func formatDate(_ dateString: String) -> String {
-        let formatter = ISO8601DateFormatter()
-        guard let date = formatter.date(from: dateString) else { return dateString }
-        
-        let displayFormatter = DateFormatter()
-        displayFormatter.dateFormat = "MMM d, h:mm a"
-        return displayFormatter.string(from: date)
+        return DateFormatter.formatOrderDate(dateString)
     }
 }
 

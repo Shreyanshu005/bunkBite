@@ -412,9 +412,9 @@ class APIService {
 
         let apiResponse = try JSONDecoder().decode(APIResponse<Order>.self, from: data)
         guard let order = apiResponse.data else {
-            print("❌ API Error Message: \(apiResponse.message ?? "Unknown")")
-            print("❌ API Success: \(apiResponse.success)")
-            throw APIError.invalidResponse
+            let errorMsg = apiResponse.message ?? "Failed to create order"
+            print("❌ API Error Message: \(errorMsg)")
+            throw APIError.apiMessage(errorMsg)
         }
         print("✅ Order created: \(order.orderId)\n")
         return order
@@ -680,6 +680,7 @@ enum APIError: Error {
     case networkError
     case decodingError
     case invalidRequest
+    case apiMessage(String)
 
     var localizedDescription: String {
         switch self {
@@ -691,6 +692,8 @@ enum APIError: Error {
             return "Failed to decode response"
         case .invalidRequest:
             return "Invalid request"
+        case .apiMessage(let message):
+            return message
         }
     }
 }

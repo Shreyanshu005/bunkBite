@@ -15,6 +15,7 @@ struct OwnerCanteenSettingsView: View {
     private let timeFormatter: DateFormatter = {
         let formatter = DateFormatter()
         formatter.dateFormat = "HH:mm"
+        formatter.locale = Locale(identifier: "en_US_POSIX")
         return formatter
     }()
     
@@ -41,6 +42,11 @@ struct OwnerCanteenSettingsView: View {
                         .onChange(of: isOpen) { oldValue, newValue in
                             // Auto-save toggle status
                             updateStatus(isOpen: newValue)
+                        }
+                        
+                        if canteenViewModel.isLoading {
+                            ProgressView()
+                                .scaleEffect(0.8)
                         }
                     }
                     .padding(.vertical, 4)
@@ -80,7 +86,7 @@ struct OwnerCanteenSettingsView: View {
                     }
                 }
             }
-            .onChange(of: canteenViewModel.selectedCanteen) { _, _ in
+            .onChange(of: canteenViewModel.selectedCanteen) {
                 loadCurrentSettings()
             }
             .alert("Settings", isPresented: $showSaveAlert) {

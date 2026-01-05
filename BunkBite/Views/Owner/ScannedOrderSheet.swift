@@ -144,16 +144,7 @@ struct ScannedOrderSheet: View {
     }
     
     private func formatDate(_ dateString: String) -> String {
-        let inputFormatter = ISO8601DateFormatter()
-        inputFormatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
-        
-        if let date = inputFormatter.date(from: dateString) {
-            let formatter = DateFormatter()
-            formatter.dateStyle = .medium
-            formatter.timeStyle = .short
-            return formatter.string(from: date)
-        }
-        return dateString
+        return DateFormatter.formatOrderDate(dateString)
     }
 }
 

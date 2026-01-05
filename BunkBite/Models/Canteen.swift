@@ -33,13 +33,14 @@ struct Canteen: Codable, Identifiable, Hashable {
     let image: String?
     let category: String?
     let isOpen: Bool
+    let isCurrentlyOpen: Bool?
     let openingTime: String?
     let closingTime: String?
 
     enum CodingKeys: String, CodingKey {
         case id = "_id"
         case name, place, ownerId, owner, menu, createdAt, updatedAt
-        case image, category, isOpen, openingTime, closingTime
+        case image, category, isOpen, isCurrentlyOpen, openingTime, closingTime
     }
     
     // Custom init for decoding flexibility
@@ -72,12 +73,13 @@ struct Canteen: Codable, Identifiable, Hashable {
         image = try? container.decode(String.self, forKey: .image)
         category = try? container.decode(String.self, forKey: .category)
         isOpen = try container.decodeIfPresent(Bool.self, forKey: .isOpen) ?? true
+        isCurrentlyOpen = try? container.decode(Bool.self, forKey: .isCurrentlyOpen)
         openingTime = try container.decodeIfPresent(String.self, forKey: .openingTime)
         closingTime = try container.decodeIfPresent(String.self, forKey: .closingTime)
     }
     
     // Manual init
-    init(id: String, name: String, place: String, ownerId: String, owner: CanteenOwner? = nil, menu: [MenuItem]? = nil, isOpen: Bool = true, openingTime: String? = nil, closingTime: String? = nil) {
+    init(id: String, name: String, place: String, ownerId: String, owner: CanteenOwner? = nil, menu: [MenuItem]? = nil, isOpen: Bool = true, isCurrentlyOpen: Bool? = nil, openingTime: String? = nil, closingTime: String? = nil) {
         self.id = id
         self.name = name
         self.place = place
@@ -89,6 +91,7 @@ struct Canteen: Codable, Identifiable, Hashable {
         self.image = nil
         self.category = nil
         self.isOpen = isOpen
+        self.isCurrentlyOpen = isCurrentlyOpen
         self.openingTime = openingTime
         self.closingTime = closingTime
     }
@@ -100,26 +103,32 @@ struct Canteen: Codable, Identifiable, Hashable {
             return (false, "Canteen is currently closed (Manually Closed)")
         }
         
-        // 2. Check Time Range
+        // 2. Use Backend-provided availability if available
+        if let currentlyOpen = isCurrentlyOpen {
+            if currentlyOpen {
+                return (true, "Open")
+            } else {
+                let range = (openingTime != nil && closingTime != nil) ? ": \(openingTime!) - \(closingTime!)" : ""
+                return (false, "Canteen is closed. Operating hours\(range)")
+            }
+        }
+        
+        // 3. Fallback to client-side logic (Keep as backup for older API responses)
         guard let openStr = openingTime, let closeStr = closingTime else {
-            // If times are not set, rely only on manual switch (which is open here)
             return (true, "Open")
         }
         
-        // Simple time parsing without date (HH:mm)
         let formatter = DateFormatter()
         formatter.dateFormat = "HH:mm"
         formatter.locale = Locale(identifier: "en_US_POSIX")
-        formatter.timeZone = TimeZone.current // Use device time zone
+        formatter.timeZone = TimeZone(identifier: "Asia/Kolkata") // Use IST for consistency
         
         let now = Date()
         let calendar = Calendar.current
         
-        // Extract hour and minute components
-        let currentComp = calendar.dateComponents([.hour, .minute], from: now)
+        let currentComp = calendar.dateComponents(in: TimeZone(identifier: "Asia/Kolkata")!, from: now)
         let currentMinutes = (currentComp.hour ?? 0) * 60 + (currentComp.minute ?? 0)
         
-        // Parse opening time
         guard let openDate = formatter.date(from: openStr),
               let closeDate = formatter.date(from: closeStr) else {
             return (true, "Open")
@@ -130,10 +139,6 @@ struct Canteen: Codable, Identifiable, Hashable {
         
         let openMinutes = (openComp.hour ?? 0) * 60 + (openComp.minute ?? 0)
         let closeMinutes = (closeComp.hour ?? 0) * 60 + (closeComp.minute ?? 0)
-        
-        // Check if current time is within range
-        // Handle overnight ranges (e.g. 22:00 to 02:00) not covered here for simplicity unless requested
-        // Assuming standard day hours
         
         if currentMinutes >= openMinutes && currentMinutes < closeMinutes {
             return (true, "Open")

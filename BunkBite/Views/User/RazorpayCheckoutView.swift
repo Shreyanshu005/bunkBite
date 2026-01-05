@@ -173,6 +173,30 @@ struct RazorpayCheckoutView: UIViewRepresentable {
             }
         }
         
+        func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction, decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
+            if let url = navigationAction.request.url {
+                let urlString = url.absoluteString
+                
+                // Intercept UPI and other payment-related deep links
+                if urlString.hasPrefix("upi://") || 
+                   urlString.hasPrefix("phonepe://") || 
+                   urlString.hasPrefix("paytmmp://") || 
+                   urlString.hasPrefix("tez://") || 
+                   urlString.hasPrefix("gpay://") || 
+                   urlString.hasPrefix("whatsapp://") {
+                    
+                    UIApplication.shared.open(url, options: [:]) { success in
+                        if !success {
+                            print("❌ Failed to open deep link: \(urlString)")
+                        }
+                    }
+                    decisionHandler(.cancel)
+                    return
+                }
+            }
+            decisionHandler(.allow)
+        }
+        
         func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
             print("🌐 WebView loaded successfully")
         }

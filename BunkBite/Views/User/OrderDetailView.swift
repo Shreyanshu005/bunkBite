@@ -58,8 +58,8 @@ struct OrderDetailView: View {
             
             ScrollView {
                 VStack(spacing: 24) {
-                    // Success Header (if paid)
-                    if fullOrder.paymentStatus == .success {
+                    // Success Header (if paid and not cancelled)
+                    if fullOrder.paymentStatus == .success && fullOrder.status != .cancelled {
                         VStack(spacing: 16) {
                             ZStack {
                                 Circle()

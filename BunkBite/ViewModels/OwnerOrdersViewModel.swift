@@ -19,9 +19,10 @@ class OwnerOrdersViewModel: ObservableObject {
     private let apiService = APIService.shared
     
     func fetchOrders(canteenId: String, status: String? = nil, token: String) async {
-        isLoading = true
+        if orders.isEmpty {
+            isLoading = true
+        }
         errorMessage = nil
-        orders = [] // Clear old orders to prevent stale data
         selectedStatus = status
         
         do {

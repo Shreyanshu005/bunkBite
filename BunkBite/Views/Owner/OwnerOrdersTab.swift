@@ -87,7 +87,7 @@ struct OwnerOrdersTab: View {
             Divider()
             
             // Orders List
-            if ordersViewModel.isLoading {
+            if ordersViewModel.isLoading && ordersViewModel.orders.isEmpty {
                 ProgressView()
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else if ordersViewModel.orders.isEmpty {
@@ -247,24 +247,7 @@ private struct OrdersTabCard: View {
                 Spacer()
                 
                 if order.status != .completed && order.status != .cancelled {
-                    if order.status == .pending {
-                        Button {
-                            Task {
-                                await onStatusUpdate("preparing")
-                            }
-                        } label: {
-                            HStack(spacing: 4) {
-                                Image(systemName: "arrow.right.circle.fill")
-                                Text("Start")
-                            }
-                            .font(.urbanist(size: 13, weight: .semibold))
-                            .padding(.horizontal, 12)
-                            .padding(.vertical, 6)
-                            .background(Constants.primaryColor)
-                            .foregroundStyle(.white)
-                            .clipShape(Capsule())
-                        }
-                    } else if order.status == .preparing {
+                    if order.status == .preparing {
                         Button {
                             Task {
                                 await onStatusUpdate("ready")
@@ -309,15 +292,6 @@ private struct OrdersTabCard: View {
     }
     
     private func formatDate(_ dateString: String) -> String {
-        let inputFormatter = ISO8601DateFormatter()
-        inputFormatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
-        
-        if let date = inputFormatter.date(from: dateString) {
-            let formatter = DateFormatter()
-            formatter.dateStyle = .medium
-            formatter.timeStyle = .short
-            return formatter.string(from: date)
-        }
-        return dateString
+        return DateFormatter.formatOrderDate(dateString)
     }
 }
