@@ -9,7 +9,7 @@ import SwiftUI
 
 struct Constants {
     // API
-    static let baseURL = "https://steellike-giana-periphrastic.ngrok-free.dev"
+    static let baseURL = "https://api.dranjali.tech"
 
     // Colors
     static let primaryColor = Color(hex: "0B7D3B") // Updated Green
