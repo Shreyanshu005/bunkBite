@@ -33,8 +33,8 @@ struct OwnerMainView: View {
         .onAppear {
             authViewModel.checkExistingAuth()
         }
-        .sheet(isPresented: $showLoginSheet) {
-            LoginSheet(authViewModel: authViewModel)
+        .fullScreenCover(isPresented: $showLoginSheet) {
+            NewLoginSheet(authViewModel: authViewModel, isPresented: $showLoginSheet)
         }
         .sheet(isPresented: $showCanteenSelector) {
             OwnerCanteenSelectorSheet(

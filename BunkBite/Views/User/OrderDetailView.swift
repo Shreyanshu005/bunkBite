@@ -13,6 +13,7 @@ struct OrderDetailView: View {
     @ObservedObject var authViewModel: AuthViewModel
     
     @Environment(\.dismiss) var dismiss
+    @Environment(\.presentationMode) var presentationMode
     @State private var isAnimating = false
     @State private var fullOrder: Order
     
@@ -24,196 +25,204 @@ struct OrderDetailView: View {
     }
     
     var body: some View {
-        VStack(spacing: 0) {
-            // Header
-            HStack {
-                Button(action: { dismiss() }) {
-                    Image(systemName: "xmark")
-                        .font(.system(size: 16, weight: .bold))
-                        .foregroundStyle(Constants.textColor)
-                        .padding(8)
-                        .background(Color.white)
-                        .clipShape(Circle())
-                        .shadow(color: .black.opacity(0.05), radius: 5)
-                }
-                
-                Spacer()
-                
-                Text("Order Details")
-                    .font(.urbanist(size: 18, weight: .bold))
-                    .foregroundStyle(Constants.textColor)
-                
-                Spacer()
-                
-                // Invisible spacer for balance
-                Image(systemName: "xmark")
-                    .font(.system(size: 16, weight: .bold))
-                    .padding(8)
-                    .opacity(0)
-            }
-            .padding(.horizontal, 20)
-            .padding(.top, 20)
-            .padding(.bottom, 10)
-            .background(Color.white)
+        ZStack {
+            Color.white.ignoresSafeArea()
             
-            ScrollView {
-                VStack(spacing: 24) {
-                    // Success Header (if paid and not cancelled)
-                    if fullOrder.paymentStatus == .success && fullOrder.status != .cancelled {
-                        VStack(spacing: 16) {
-                            ZStack {
-                                Circle()
-                                    .fill(Color.green.opacity(0.1))
-                                    .frame(width: 80, height: 80)
-                                    .scaleEffect(isAnimating ? 1 : 0.8)
-                                
-                                Image(systemName: "checkmark.circle.fill")
-                                    .font(.system(size: 50))
-                                    .foregroundStyle(.green)
-                            }
-                            
-                            Text("Order Placed Successfully!")
-                                .font(.urbanist(size: 22, weight: .bold))
-                                .foregroundStyle(Constants.textColor)
-                            
-                            Text("Order #\(fullOrder.orderId)")
-                                .font(.urbanist(size: 16, weight: .medium))
-                                .foregroundStyle(.gray)
-                        }
-                        .padding(.top, 20)
-                        .frame(maxWidth: .infinity)
+            VStack(spacing: 0) {
+                // Header
+                HStack {
+                    Button(action: {
+                        presentationMode.wrappedValue.dismiss()
+                    }) {
+                        Image(systemName: "chevron.left")
+                            .font(.system(size: 20, weight: .bold))
+                            .foregroundStyle(.black)
                     }
                     
-                    // QR Code (if ready or paid)
-                    if (fullOrder.status == .ready || fullOrder.status == .paid), let qrCodeString = fullOrder.qrCode {
-                        VStack(spacing: 16) {
-                            Text("Show this QR code at pickup")
-                                .font(.urbanist(size: 16, weight: .semibold))
-                                .foregroundStyle(.gray)
+                    Text("Order Details")
+                        .font(.custom("Urbanist-Bold", size: 20))
+                        .foregroundStyle(.black)
+                    
+                    Spacer()
+                }
+                .padding(.horizontal, 20)
+                .padding(.vertical, 16)
+                .background(Color.white)
+                
+                // Separator
+                Rectangle()
+                    .fill(Color(hex: "E5E7EB"))
+                    .frame(height: 1)
+                
+                ScrollView {
+                    VStack(spacing: 24) {
+                        // Order ID and Date
+                        VStack(spacing: 8) {
+                            Text("Order ID")
+                                .font(.custom("Urbanist-Medium", size: 14))
+                                .foregroundStyle(Color(hex: "6B7280"))
                             
-                            if let qrImage = decodeBase64ToImage(qrCodeString) {
+                            Text(fullOrder.orderId)
+                                .font(.custom("Urbanist-Bold", size: 18))
+                                .foregroundStyle(.black)
+                            
+                            Text(formatDate(fullOrder.createdAt))
+                                .font(.custom("Urbanist-Regular", size: 14))
+                                .foregroundStyle(Color(hex: "6B7280"))
+                        }
+                        .padding(.top, 24)
+                        
+                        // QR Code (hide for completed and cancelled orders)
+                        if fullOrder.status != .completed && fullOrder.status != .cancelled, let qrCodeString = fullOrder.qrCode, let qrImage = decodeBase64ToImage(qrCodeString) {
+                            VStack(spacing: 12) {
                                 Image(uiImage: qrImage)
                                     .interpolation(.none)
                                     .resizable()
                                     .scaledToFit()
-                                    .frame(width: 200, height: 200)
+                                    .frame(width: 180, height: 180)
                                     .padding(20)
                                     .background(Color.white)
-                                    .cornerRadius(20)
-                                    .shadow(color: .black.opacity(0.1), radius: 15)
+                                    .cornerRadius(16)
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 16)
+                                            .stroke(Color(hex: "E5E7EB"), lineWidth: 1.5)
+                                    )
+                                
+                                Text("Show this QR code at the counter for pickup")
+                                    .font(.custom("Urbanist-Medium", size: 14))
+                                    .foregroundStyle(Color(hex: "6B7280"))
+                                    .multilineTextAlignment(.center)
+                                    .padding(.horizontal, 40)
                             }
                         }
-                        .padding(.vertical, 10)
-                    }
-                    
-                    // Status Visuals & Animation
-                    SimplifiedOrderStatusView(order: fullOrder)
-                        .padding(.horizontal, 20)
-                        .padding(.vertical, 10)
-                    
-                    // Order Items
-                    VStack(alignment: .leading, spacing: 16) {
-                        Text("Order Items")
-                            .font(.urbanist(size: 18, weight: .semibold))
-                            .padding(.horizontal, 20)
                         
-                        ForEach(fullOrder.items) { item in
-                            HStack(spacing: 16) {
-                                ZStack {
-                                    Circle()
-                                        .fill(Constants.primaryColor.opacity(0.1))
-                                        .frame(width: 40, height: 40)
-                                    
-                                    Text("\(item.quantity)")
-                                        .font(.urbanist(size: 16, weight: .bold))
-                                        .foregroundStyle(Constants.primaryColor)
-                                }
+                        // Status Card
+                        HStack(spacing: 12) {
+                            Image(systemName: "clock")
+                                .font(.system(size: 20))
+                                .foregroundStyle(Constants.primaryColor)
+                            
+                            Text(getStatusText(fullOrder.status))
+                                .font(.custom("Urbanist-Bold", size: 16))
+                                .foregroundStyle(.black)
+                            
+                            Spacer()
+                        }
+                        .padding(16)
+                        .background(Color(hex: "F9FFFC"))
+                        .cornerRadius(12)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 12)
+                                .stroke(Color(hex: "AECEBB"), lineWidth: 1.5)
+                        )
+                        .padding(.horizontal, 20)
+                        
+                        // Pickup Location
+                        if let canteen = fullOrder.canteen {
+                            VStack(alignment: .leading, spacing: 8) {
+                                Text("Pickup Location")
+                                    .font(.custom("Urbanist-Bold", size: 18))
+                                    .foregroundStyle(.black)
                                 
-                                VStack(alignment: .leading, spacing: 4) {
-                                    Text(item.name)
-                                        .font(.urbanist(size: 16, weight: .semibold))
-                                    
-                                    Text("₹\(Int(item.price)) each")
-                                        .font(.urbanist(size: 14, weight: .regular))
-                                        .foregroundStyle(.gray)
-                                }
-                                
-                                Spacer()
-                                
-                                Text("₹\(Int(item.subtotal))")
-                                    .font(.urbanist(size: 16, weight: .bold))
-                                    .foregroundStyle(Constants.primaryColor)
+                                Text(canteen.name)
+                                    .font(.custom("Urbanist-Regular", size: 16))
+                                    .foregroundStyle(Color(hex: "6B7280"))
                             }
+                            .frame(maxWidth: .infinity, alignment: .leading)
                             .padding(.horizontal, 20)
                         }
-                    }
-                    .padding(.vertical, 16)
-                    .background(Color.white)
-                    .cornerRadius(16)
-                    .shadow(color: .black.opacity(0.05), radius: 10)
-                    .padding(.horizontal, 20)
-                    
-                    // Price Summary
-                    VStack(spacing: 12) {
+                        
+                        // Order Items
+                        VStack(alignment: .leading, spacing: 12) {
+                            Text("Order Items")
+                                .font(.custom("Urbanist-Bold", size: 18))
+                                .foregroundStyle(.black)
+                                .padding(.horizontal, 20)
+                            
+                            ForEach(fullOrder.items) { item in
+                                HStack {
+                                    Text("\(item.name) x\(item.quantity)")
+                                        .font(.custom("Urbanist-Regular", size: 16))
+                                        .foregroundStyle(.black)
+                                    
+                                    Spacer()
+                                    
+                                    Text("₹\(Int(item.subtotal))")
+                                        .font(.custom("Urbanist-Bold", size: 16))
+                                        .foregroundStyle(.black)
+                                }
+                                .padding(.horizontal, 20)
+                                .padding(.vertical, 12)
+                                .background(Color(hex: "C4C4C4"))
+                                .cornerRadius(8)
+                                .padding(.horizontal, 20)
+                            }
+                        }
+                        
+                        // Total Amount
                         HStack {
                             Text("Total Amount")
-                                .font(.urbanist(size: 16, weight: .medium))
+                                .font(.custom("Urbanist-Bold", size: 18))
+                                .foregroundStyle(.black)
+                            
                             Spacer()
+                            
                             Text("₹\(Int(fullOrder.totalAmount))")
-                                .font(.urbanist(size: 20, weight: .bold))
+                                .font(.custom("Urbanist-Bold", size: 24))
                                 .foregroundStyle(Constants.primaryColor)
                         }
-                        
-                        if let paymentId = fullOrder.paymentId {
-                            Divider()
-                            HStack {
-                                Text("Payment ID")
-                                    .font(.urbanist(size: 14, weight: .medium))
-                                    .foregroundStyle(.gray)
-                                Spacer()
-                                Text(paymentId)
-                                    .font(.urbanist(size: 12, weight: .regular))
-                                    .foregroundStyle(.gray)
-                                    .lineLimit(1)
-                            }
-                        }
+                        .padding(.horizontal, 20)
+                        .padding(.vertical, 16)
+                        .background(Color(hex: "C4C4C4"))
+                        .cornerRadius(12)
+                        .padding(.horizontal, 20)
+                        .padding(.bottom, 40)
                     }
-                    .padding(20)
-                    .background(Color.white)
-                    .cornerRadius(16)
-                    .shadow(color: .black.opacity(0.05), radius: 10)
-                    .padding(.horizontal, 20)
-                    
-                    // Done Button
-                    Button {
-                        dismiss()
-                    } label: {
-                        Text("Done")
-                            .font(.urbanist(size: 18, weight: .semibold))
-                            .foregroundStyle(.white)
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 18)
-                            .background(Constants.primaryColor)
-                            .cornerRadius(16)
-                    }
-                    .padding(.horizontal, 20)
-                    .padding(.bottom, 20)
                 }
-                .padding(.top, 10)
+                .background(Color.white)
             }
         }
+        .navigationBarHidden(true)
         .task {
-            // Show initial data immediately using animation
             withAnimation(.spring(response: 0.6, dampingFraction: 0.7)) {
                 isAnimating = true
             }
             
-            // Then fetch fresh data in background
             if let token = authViewModel.authToken {
-                if let fetched = await orderViewModel.fetchOrder(orderId: order.orderId, token: token) {
+                if let fetched = await orderViewModel.fetchOrder(orderId: order.orderId, internalId: order.id, token: token) {
                     self.fullOrder = fetched
                 }
             }
+        }
+    }
+    
+    private func formatDate(_ dateString: String) -> String {
+        let formatter = ISO8601DateFormatter()
+        formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        
+        guard let date = formatter.date(from: dateString) else {
+            formatter.formatOptions = [.withInternetDateTime]
+            guard let date = formatter.date(from: dateString) else {
+                return dateString
+            }
+            let displayFormatter = DateFormatter()
+            displayFormatter.dateFormat = "MMMM d, yyyy 'at' h:mm a"
+            return displayFormatter.string(from: date)
+        }
+        
+        let displayFormatter = DateFormatter()
+        displayFormatter.dateFormat = "MMMM d, yyyy 'at' h:mm a"
+        return displayFormatter.string(from: date)
+    }
+    
+    private func getStatusText(_ status: OrderStatus) -> String {
+        switch status {
+        case .preparing: return "Cooking in Progress"
+        case .ready: return "Ready for Pickup"
+        case .completed: return "Order Completed"
+        case .cancelled: return "Order Cancelled"
+        case .pending: return "Payment Pending"
+        case .paid: return "Paid - Preparing"
         }
     }
     
@@ -223,5 +232,3 @@ struct OrderDetailView: View {
         return UIImage(data: imageData)
     }
 }
-
-

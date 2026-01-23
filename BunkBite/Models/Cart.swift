@@ -38,6 +38,18 @@ class Cart: ObservableObject {
     var totalItems: Int {
         items.reduce(0) { $0 + $1.quantity }
     }
+    
+    init() {
+        // Listen for logout notification to clear cart
+        NotificationCenter.default.addObserver(
+            forName: NSNotification.Name("ClearCart"),
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            self?.clear()
+            print("✅ Cart cleared on logout")
+        }
+    }
 
     func addItem(_ menuItem: MenuItem) {
         if let index = items.firstIndex(where: { $0.menuItem.id == menuItem.id }) {

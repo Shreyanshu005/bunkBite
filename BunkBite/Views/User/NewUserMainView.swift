@@ -1,9 +1,3 @@
-//
-//  NewUserMainView.swift
-//  BunkBite
-//
-//  Created by Shreyanshu on 06/11/25.
-//
 
 import SwiftUI
 
@@ -12,55 +6,116 @@ struct NewUserMainView: View {
     @StateObject private var canteenViewModel = CanteenViewModel()
     @StateObject private var menuViewModel = MenuViewModel()
     @StateObject private var cart = Cart()
+    @StateObject private var orderViewModel = OrderViewModel()
 
     @State private var showLoginSheet = false
     @State private var showCanteenSelector = false
+    @State private var selectedTab: CustomFloatingTabBar.Tab = .menu
+    
+    init() {}
 
     var body: some View {
-        TabView {
-            // Menu Tab
-            UserMenuView(
-                authViewModel: authViewModel,
-                canteenViewModel: canteenViewModel,
-                menuViewModel: menuViewModel,
-                cart: cart,
-                showLoginSheet: $showLoginSheet,
-                showCanteenSelector: $showCanteenSelector
-            )
-            .tabItem {
-                Label("Menu", systemImage: "fork.knife")
+        ZStack(alignment: .bottom) {
+            Color.white.ignoresSafeArea()
+            
+            // Main Content Area
+            // Switch between different tabs
+            switch selectedTab {
+            case .menu:
+                HomeView(
+                    authViewModel: authViewModel,
+                    canteenViewModel: canteenViewModel,
+                    menuViewModel: menuViewModel,
+                    cart: cart,
+                    showLoginSheet: $showLoginSheet,
+                    showCanteenSelector: $showCanteenSelector
+                )
+            case .orders:
+                MyOrdersView(orderViewModel: orderViewModel)
+            case .profile:
+                UserProfileView(
+                     viewModel: authViewModel,
+                     orderViewModel: orderViewModel,
+                     showLoginSheet: $showLoginSheet
+                )
             }
-
-            // My Orders Tab
-            MyOrdersView()
-                .environmentObject(authViewModel)
-                .environmentObject(cart)
-                .environmentObject(canteenViewModel)
-                .tabItem {
-                    Label("Orders", systemImage: "bag")
-                }
-
-            // Profile Tab
-            UserProfileView(viewModel: authViewModel, showLoginSheet: $showLoginSheet)
-                .environmentObject(cart)
-                .environmentObject(canteenViewModel)
-                .tabItem {
-                    Label("Profile", systemImage: "person")
-                }
+            
+            // Floating Tab Bar
+            CustomFloatingTabBar(selectedTab: $selectedTab)
+                .padding(.bottom, 14) // Pixel perfect 14px from bottom
         }
-        .tint(Constants.primaryColor)
+        .ignoresSafeArea(.all, edges: .bottom)
+        .ignoresSafeArea(.keyboard) 
+        .environmentObject(authViewModel)
+        .environmentObject(canteenViewModel)
+        .environmentObject(cart)
         .onAppear {
             authViewModel.checkExistingAuth()
+            
+            // Listen for tab switch notifications
+            NotificationCenter.default.addObserver(
+                forName: NSNotification.Name("SwitchToOrders"),
+                object: nil,
+                queue: .main
+            ) { _ in
+                selectedTab = .orders
+            }
+            
+            NotificationCenter.default.addObserver(
+                forName: NSNotification.Name("SwitchToHome"),
+                object: nil,
+                queue: .main
+            ) { _ in
+                selectedTab = .menu
+            }
+            
+            // Fetch orders after successful login
+            NotificationCenter.default.addObserver(
+                forName: NSNotification.Name("UserDidLogin"),
+                object: nil,
+                queue: .main
+            ) { _ in
+                Task {
+                    if let token = authViewModel.authToken {
+                        await orderViewModel.fetchMyOrders(token: token)
+                        orderViewModel.hasLoadedInitially = true
+                    }
+                }
+            }
+            
+            // Refresh orders after order placement
+            NotificationCenter.default.addObserver(
+                forName: NSNotification.Name("RefreshOrders"),
+                object: nil,
+                queue: .main
+            ) { _ in
+                Task {
+                    if let token = authViewModel.authToken {
+                        await orderViewModel.fetchMyOrders(token: token)
+                    }
+                }
+            }
+            
+            // Clear all data on logout
+            NotificationCenter.default.addObserver(
+                forName: NSNotification.Name("UserDidLogout"),
+                object: nil,
+                queue: .main
+            ) { _ in
+                // Clear orders
+                orderViewModel.orders = []
+                orderViewModel.hasLoadedInitially = false
+                
+                // Clear cart
+                cart.clear()
+            }
         }
         .sheet(isPresented: $showLoginSheet) {
-            LoginSheet(authViewModel: authViewModel)
-        }
-        .sheet(isPresented: $showCanteenSelector) {
-            CanteenSelectorSheet(
-                canteenViewModel: canteenViewModel,
-                authViewModel: authViewModel,
-                menuViewModel: menuViewModel
-            )
+            NewLoginSheet(authViewModel: authViewModel, isPresented: $showLoginSheet)
+                .presentationDetents([.fraction(0.5), .large])
+                .presentationDragIndicator(.visible)
+                .presentationBackground(Color.white)
+                .interactiveDismissDisabled(false)
         }
     }
 }

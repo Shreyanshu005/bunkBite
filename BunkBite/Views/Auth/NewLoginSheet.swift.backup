@@ -1,0 +1,127 @@
+//
+//  NewLoginSheet.swift
+//  BunkBite
+//
+//  Created by Shreyanshu on 15/01/26.
+//
+
+import SwiftUI
+
+struct NewLoginSheet: View {
+    @ObservedObject var authViewModel: AuthViewModel
+    @Binding var isPresented: Bool
+    @State private var email: String = ""
+    @State private var showOTPSheet = false
+    @State private var isLoading = false
+    
+    var body: some View {
+        VStack(spacing: 24) {
+                    // Close button
+                    HStack {
+                        Spacer()
+                        Button(action: {
+                            isPresented = false
+                        }) {
+                            Image(systemName: "xmark")
+                                .font(.system(size: 20, weight: .semibold))
+                                .foregroundStyle(.black)
+                                .frame(width: 32, height: 32)
+                                .background(Color(hex: "F3F4F6"))
+                                .clipShape(Circle())
+                        }
+                    }
+                    .padding(.top, 16)
+                    
+                    
+                    // Heading
+                    VStack(spacing: 8) {
+                        Text("Welcome to BunkBite")
+                            .font(.custom("Urbanist-Bold", size: 24))
+                            .foregroundStyle(.black)
+                        
+                        Text("Order food from your favourite canteen")
+                            .font(.custom("Urbanist-Regular", size: 16))
+                            .foregroundStyle(Color(hex: "6B7280"))
+                    }
+                    
+                    // Email Input
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Enter your Email")
+                            .font(.custom("Urbanist-Medium", size: 14))
+                            .foregroundStyle(.black)
+                        
+                        TextField("you@example.com", text: $email)
+                            .font(.custom("Urbanist-Regular", size: 16))
+                            .padding(16)
+                            .background(Color.white)
+                            .cornerRadius(12)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 12)
+                                    .stroke(Color(hex: "E5E7EB"), lineWidth: 1.0)
+                            )
+                            .keyboardType(.emailAddress)
+                            .autocapitalization(.none)
+                            .textContentType(.emailAddress)
+                    }
+                    
+                    // Send OTP Button
+                    Button(action: {
+                        sendOTP()
+                    }) {
+                        if isLoading {
+                            ProgressView()
+                                .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, 18)
+                        } else {
+                            Text("Send OTP")
+                                .font(.custom("Urbanist-Bold", size: 16))
+                                .foregroundStyle(.white)
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, 18)
+                        }
+                    }
+                    .background(Color.black)
+                    .cornerRadius(12)
+                    .disabled(email.isEmpty || isLoading)
+                    .opacity(email.isEmpty ? 0.5 : 1.0)
+                    
+                    // Error message
+                    if let error = authViewModel.errorMessage {
+                        Text(error)
+                            .font(.custom("Urbanist-Regular", size: 14))
+                            .foregroundStyle(.red)
+                            .multilineTextAlignment(.center)
+                    }
+                }
+            }
+            .padding(.horizontal, 24)
+            .padding(.bottom, 40)
+            .background(Color.white)
+            .sheet(isPresented: $showOTPSheet) {
+                OTPVerificationSheet(
+                    authViewModel: authViewModel,
+                    email: email,
+                    isPresented: $showOTPSheet,
+                    parentIsPresented: $isPresented
+                )
+                .presentationDetents([.medium])
+                .presentationDragIndicator(.visible)
+            }
+        }
+    }
+    
+    private func sendOTP() {
+        isLoading = true
+        authViewModel.email = email
+        Task {
+            await authViewModel.sendOTP()
+            isLoading = false
+            
+            if authViewModel.errorMessage == nil {
+                showOTPSheet = true
+            }
+        }
+    }
+}
+

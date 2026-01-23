@@ -8,10 +8,11 @@
 import SwiftUI
 
 struct MyOrdersView: View {
-    @StateObject private var orderViewModel = OrderViewModel()
+    @ObservedObject var orderViewModel: OrderViewModel
     @EnvironmentObject var authViewModel: AuthViewModel
     @EnvironmentObject var cart: Cart
     @EnvironmentObject var canteenViewModel: CanteenViewModel
+    @Environment(\.dismiss) var dismiss
     
     @State private var selectedFilter: OrderStatus? = nil
     @State private var selectedOrder: Order?
@@ -37,100 +38,97 @@ struct MyOrdersView: View {
     }
     
     var body: some View {
-        NavigationStack {
-            ZStack {
-                // Background
-                Color(UIColor.systemGroupedBackground)
-                    .ignoresSafeArea()
-                
-                VStack(spacing: 0) {
-                    // Filter Chips
-                    ScrollView(.horizontal, showsIndicators: false) {
-                        HStack(spacing: 12) {
-                            OrderFilterChip(title: "All", isSelected: selectedFilter == nil) {
-                                selectedFilter = nil
-                            }
-                            
-                            OrderFilterChip(title: "Pending", isSelected: selectedFilter == .pending) {
-                                selectedFilter = .pending
-                            }
-                            
-                            OrderFilterChip(title: "Paid", isSelected: selectedFilter == .paid) {
-                                selectedFilter = .paid
-                            }
-                            
-                            OrderFilterChip(title: "Completed", isSelected: selectedFilter == .completed) {
-                                selectedFilter = .completed
-                            }
-                            
-                            OrderFilterChip(title: "Cancelled", isSelected: selectedFilter == .cancelled) {
-                                selectedFilter = .cancelled
-                            }
-                        }
-                        .padding(.horizontal, 20)
-                        .padding(.vertical, 16)
+        ZStack {
+            // Background
+            Color.white
+                .ignoresSafeArea()
+            
+            VStack(spacing: 0) {
+                // Header
+                VStack(alignment: .leading, spacing: 12) {
+                    HStack(spacing: 16) {
+                        Text("My Orders")
+                            .font(.custom("Urbanist-Bold", size: 28))
+                            .foregroundStyle(.black)
+                        
+                        Spacer()
                     }
-                    .background(Color.white)
+                    .padding(.horizontal, 20)
+                    .padding(.top, 20)
                     
-                    // Orders List
-                    if orderViewModel.isLoading {
-                        Spacer()
-                        ProgressView()
-                        Spacer()
-                    } else if filteredOrders.isEmpty {
-                        Spacer()
-                        EmptyOrdersView(filter: selectedFilter)
-                        Spacer()
-                    } else {
-                        ScrollView {
-                            LazyVStack(spacing: 16) {
-                                ForEach(filteredOrders) { order in
-                                    UserOrderCard(
-                                        order: order,
-                                        onReorder: {
-                                            reorderItems(from: order)
-                                        },
-                                        onViewDetails: {
-                                            selectedOrder = order
-                                        },
-                                        onPayNow: { orderToPay in
-                                            payForPendingOrder(orderToPay)
-                                        },
-                                        isProcessing: isProcessing,
-                                        processingOrderId: processingOrderId
-                                    )
-                                }
+                    Rectangle()
+                        .fill(Color(hex: "E5E7EB"))
+                        .frame(height: 1.0)
+                        .padding(.horizontal, -20)
+                        .padding(.top, 4)
+                }
+                .background(Color.white)
+                
+                // Orders List
+                if orderViewModel.isLoading && orderViewModel.orders.isEmpty {
+                    Spacer()
+                    ProgressView()
+                    Spacer()
+                } else if filteredOrders.isEmpty && !orderViewModel.isLoading {
+                    Spacer()
+                    EmptyOrdersView(filter: selectedFilter)
+                    Spacer()
+                } else {
+                    ScrollView {
+                        LazyVStack(spacing: 16) {
+                            ForEach(filteredOrders) { order in
+                                UserOrderCard(
+                                    order: order,
+                                    onReorder: {
+                                        reorderItems(from: order)
+                                    },
+                                    onViewDetails: {
+                                        selectedOrder = order
+                                    },
+                                    onPayNow: { orderToPay in
+                                        payForPendingOrder(orderToPay)
+                                    },
+                                    isProcessing: isProcessing,
+                                    processingOrderId: processingOrderId
+                                )
                             }
-                            .padding(20)
                         }
+                        .padding(20)
+                    }
+                    .refreshable {
+                        // Use detached task to prevent cancellation
+                        await Task.detached { @MainActor in
+                            guard let token = authViewModel.authToken else { return }
+                            await orderViewModel.fetchMyOrders(token: token)
+                        }.value
                     }
                 }
             }
-            .navigationTitle("My Orders")
-            .onAppear {
-                fetchOrders()
-            }
-            .refreshable {
-                fetchOrders()
-            }
-            .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    CartToolbarButton(
-                        authViewModel: authViewModel,
-                        showCart: $showCart,
-                        showLoginSheet: $showLoginSheet
-                    )
+        }
+        .onAppear {
+            if !orderViewModel.hasLoadedInitially {
+                orderViewModel.hasLoadedInitially = true
+                // Use unstructured task that won't be cancelled
+                Task.detached { @MainActor in
+                    guard let token = authViewModel.authToken else {
+                        print("❌ No auth token available")
+                        return
+                    }
+                    print("🔄 Initial order fetch")
+                    await orderViewModel.fetchMyOrders(token: token)
                 }
             }
-            .sheet(isPresented: $showCart) {
-                CartSheet(cart: cart, authViewModel: authViewModel, canteen: canteenViewModel.selectedCanteen)
-            }
-            .sheet(isPresented: $showLoginSheet) {
-                LoginSheet(authViewModel: authViewModel)
-            }
-            .sheet(item: $selectedOrder) { order in
-                OrderDetailView(order: order, orderViewModel: orderViewModel, authViewModel: authViewModel)
-            }
+        }
+        .toolbar(.hidden, for: .navigationBar)
+        .sheet(isPresented: $showCart) {
+            CartSheet(cart: cart, authViewModel: authViewModel, canteen: canteenViewModel.selectedCanteen)
+        }
+        .fullScreenCover(isPresented: $showLoginSheet) {
+            NewLoginSheet(authViewModel: authViewModel, isPresented: $showLoginSheet)
+        }
+        .fullScreenCover(item: $selectedOrder) { order in
+            OrderDetailView(order: order, orderViewModel: orderViewModel, authViewModel: authViewModel)
+        }
             .fullScreenCover(isPresented: $showPaymentGateway) {
                 if let data = paymentData {
                     RazorpayCheckoutView(
@@ -147,17 +145,11 @@ struct MyOrdersView: View {
                     )
                 }
             }
-            .alert("Error", isPresented: .constant(orderViewModel.errorMessage != nil)) {
-                Button("OK") { orderViewModel.errorMessage = nil }
-            } message: {
-                Text(orderViewModel.errorMessage ?? "")
-            }
             .alert("Items Added to Cart", isPresented: $showReorderConfirmation) {
                 Button("OK", role: .cancel) { }
             } message: {
                 Text("\(reorderedItemsCount) items have been added to your cart")
             }
-        }
     }
     
     private func reorderItems(from order: Order) {
@@ -187,12 +179,11 @@ struct MyOrdersView: View {
         showReorderConfirmation = true
     }
     
-    private func fetchOrders() {
-        guard let token = authViewModel.authToken else { return }
-        
-        Task {
-            await orderViewModel.fetchMyOrders(token: token)
+    private func fetchOrders() async {
+        guard let token = authViewModel.authToken else { 
+            return 
         }
+        await orderViewModel.fetchMyOrders(token: token)
     }
     
     private func payForPendingOrder(_ order: Order) {
@@ -223,7 +214,7 @@ struct MyOrdersView: View {
             ) {
                 if verifiedOrder.paymentStatus == .success {
                     // Refresh orders to show updated status
-                    fetchOrders()
+                    Task { await fetchOrders() }
                     
                     // Show detail view
                     selectedOrder = verifiedOrder
@@ -271,212 +262,244 @@ struct UserOrderCard: View {
     let processingOrderId: String?
     
     var body: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            // Header
+        VStack(alignment: .leading, spacing: 12) {
+            // Header: Order ID + Status Badge
             HStack {
-                VStack(alignment: .leading, spacing: 4) {
-                    Text("Order #\(order.orderId)")
-                        .font(.urbanist(size: 16, weight: .bold))
-                    
-                    if let canteen = order.canteen {
-                        Label(canteen.name, systemImage: "building.2.fill")
-                            .font(.urbanist(size: 13, weight: .medium))
-                            .foregroundStyle(.gray)
-                    }
-                }
+                Text(order.orderId)
+                    .font(.custom("Urbanist-Bold", size: 16))
+                    .foregroundStyle(.black)
                 
                 Spacer()
                 
                 StatusBadge(status: order.status)
             }
             
-            Divider()
+            // Timestamp
+            Text(formatDate(order.createdAt))
+                .font(.custom("Urbanist-Medium", size: 14))
+                .foregroundStyle(Color(hex: "6B7280"))
             
-            // Order Details
-            VStack(alignment: .leading, spacing: 8) {
-                HStack {
-                    Label(formatDate(order.createdAt), systemImage: "clock.fill")
-                        .font(.urbanist(size: 12, weight: .medium))
-                        .foregroundStyle(.secondary)
-                    
-                    Spacer()
-                    
-                    // Show payment status
-                    Label(order.paymentStatus.rawValue.capitalized, systemImage: order.paymentId != nil ? "creditcard.fill" : "banknote.fill")
-                        .font(.urbanist(size: 12, weight: .medium))
-                        .foregroundStyle(order.paymentStatus == .success ? .green : .secondary)
-                }
+            // Items count
+            Text("\(order.items.count) item\(order.items.count == 1 ? "" : "s")")
+                .font(.custom("Urbanist-Regular", size: 14))
+                .foregroundStyle(Color(hex: "6B7280"))
+                .padding(.top, 4)
+            
+            // Item list (first 2 items)
+            ForEach(order.items.prefix(2)) { item in
+                Text("\(item.name) x\(item.quantity)")
+                    .font(.custom("Urbanist-Regular", size: 14))
+                    .foregroundStyle(.black)
             }
             
-            Divider()
-            
-            // Items
-            VStack(alignment: .leading, spacing: 8) {
-                ForEach(order.items.prefix(3)) { item in
-                    HStack(alignment: .top) {
-                        Text("\(item.quantity)x")
-                            .font(.urbanist(size: 14, weight: .semibold))
-                            .foregroundStyle(Constants.primaryColor)
-                            .frame(width: 30)
-                        
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text(item.name)
-                                .font(.urbanist(size: 14, weight: .medium))
-                            
-                            Text("₹\(Int(item.price)) each")
-                                .font(.urbanist(size: 11, weight: .regular))
-                                .foregroundStyle(.secondary)
-                        }
-                        
-                        Spacer()
-                        
-                        Text("₹\(Int(item.subtotal))")
-                            .font(.urbanist(size: 14, weight: .semibold))
-                    }
-                }
-                
-                if order.items.count > 3 {
-                    Text("+\(order.items.count - 3) more items")
-                        .font(.urbanist(size: 12, weight: .medium))
-                        .foregroundStyle(.gray)
-                        .padding(.leading, 30)
-                }
+            if order.items.count > 2 {
+                Text("+\(order.items.count - 2) more")
+                    .font(.custom("Urbanist-Regular", size: 14))
+                    .foregroundStyle(Color(hex: "6B7280"))
             }
             
-            Divider()
+            // Separator before Total
+            Rectangle()
+                .fill(Color(hex: "E5E7EB"))
+                .frame(height: 1)
+                .padding(.top, 8)
             
-            // Footer with Total and Action Buttons
-            VStack(spacing: 12) {
-                // Total Amount
-                HStack {
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text("Total Amount")
-                            .font(.urbanist(size: 12, weight: .medium))
-                            .foregroundStyle(.secondary)
-                        
-                        Text("₹\(Int(order.totalAmount))")
-                            .font(.urbanist(size: 18, weight: .bold))
-                            .foregroundStyle(Constants.primaryColor)
-                    }
-                    
-                    Spacer()
-                }
+            // Total
+            HStack {
+                Text("Total")
+                    .font(.custom("Urbanist-Medium", size: 14))
+                    .foregroundStyle(Color(hex: "6B7280"))
                 
-                // Action Buttons
-                HStack(spacing: 8) {
-                    // View Details Button
-                    Button(action: onViewDetails) {
-                        HStack(spacing: 6) {
-                            Image(systemName: "doc.text.fill")
-                            Text("View Details")
-                        }
-                        .font(.urbanist(size: 14, weight: .semibold))
-                        .foregroundStyle(Constants.primaryColor)
+                Spacer()
+                
+                Text("₹\(Int(order.totalAmount))")
+                    .font(.custom("Urbanist-Bold", size: 18))
+                    .foregroundStyle(Constants.primaryColor)
+            }
+            .padding(.top, 8)
+            
+            // Action Buttons
+            HStack(spacing: 12) {
+                // View Details Button
+                Button(action: onViewDetails) {
+                    Text("View Details")
+                        .font(.custom("Urbanist-Bold", size: 14))
+                        .foregroundStyle(.black)
                         .frame(maxWidth: .infinity)
-                        .padding(.vertical, 12)
-                        .background(Constants.primaryColor.opacity(0.1))
+                        .frame(height: 44)
+                        .background(Color(hex: "C4C4C4"))
+                        .cornerRadius(12)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 12)
+                                .stroke(Color(hex: "A0A0A0"), lineWidth: 1.0)
+                        )
+                }
+                .buttonStyle(.plain)
+                
+                // Pay Now button for pending orders, Reorder for others
+                if order.status == .pending {
+                    Button(action: { onPayNow(order) }) {
+                        HStack(spacing: 6) {
+                            if isProcessing && processingOrderId == order.orderId {
+                                ProgressView()
+                                    .tint(.white)
+                            } else {
+                                Image(systemName: "creditcard.fill")
+                                    .font(.system(size: 14))
+                                Text("Pay Now")
+                                    .font(.custom("Urbanist-Bold", size: 14))
+                            }
+                        }
+                        .foregroundStyle(.white)
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 44)
+                        .background(Constants.primaryColor)
                         .cornerRadius(12)
                     }
                     .buttonStyle(.plain)
-                    
-                    // Pay Now Button (for Pending orders)
-                    if order.status == .pending {
-                        Button {
-                            onPayNow(order)
-                        } label: {
-                            HStack(spacing: 6) {
-                                if isProcessing && processingOrderId == order.id {
-                                    ProgressView()
-                                        .progressViewStyle(CircularProgressViewStyle(tint: .white))
-                                } else {
-                                    Image(systemName: "creditcard.fill")
-                                    Text("Pay Now")
-                                }
-                            }
-                            .font(.urbanist(size: 14, weight: .semibold))
-                            .foregroundStyle(.white)
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 12)
-                            .background(Constants.primaryColor)
-                            .cornerRadius(12)
+                    .disabled(isProcessing)
+                } else {
+                    Button(action: onReorder) {
+                        HStack(spacing: 6) {
+                            Image(systemName: "arrow.clockwise")
+                                .font(.system(size: 14))
+                            Text("Reorder")
+                                .font(.custom("Urbanist-Bold", size: 14))
                         }
-                        .buttonStyle(.plain)
-                        .disabled(isProcessing)
-                    } else {
-                        // Reorder Button
-                        Button(action: onReorder) {
-                            HStack(spacing: 6) {
-                                Image(systemName: "arrow.clockwise")
-                                Text("Reorder")
-                            }
-                            .font(.urbanist(size: 14, weight: .semibold))
-                            .foregroundStyle(.white)
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 12)
-                            .background(Constants.primaryColor)
-                            .cornerRadius(12)
-                        }
-                        .buttonStyle(.plain)
+                        .foregroundStyle(.white)
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 44)
+                        .background(Color(hex: "0D1317"))
+                        .cornerRadius(12)
                     }
+                    .buttonStyle(.plain)
                 }
             }
+            .padding(.top, 8)
         }
         .padding(16)
-        .background(Color.white)
+        .background(Color(hex: "F9FAFB"))
         .cornerRadius(16)
-        .shadow(color: .black.opacity(0.05), radius: 10)
+        .overlay(
+            RoundedRectangle(cornerRadius: 16)
+                .stroke(Color(hex: "E5E7EB"), lineWidth: 1.5)
+        )
+        .shadow(color: Color.black.opacity(0.03), radius: 8, x: 0, y: 2)
     }
     
     private func formatDate(_ dateString: String) -> String {
-        return DateFormatter.formatOrderDate(dateString)
+        let formatter = ISO8601DateFormatter()
+        formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        
+        guard let date = formatter.date(from: dateString) else {
+            // Fallback: try without fractional seconds
+            formatter.formatOptions = [.withInternetDateTime]
+            guard let date = formatter.date(from: dateString) else {
+                return dateString
+            }
+            let displayFormatter = DateFormatter()
+            displayFormatter.dateFormat = "MMM d, h:mm a"
+            return displayFormatter.string(from: date)
+        }
+        
+        let displayFormatter = DateFormatter()
+        displayFormatter.dateFormat = "MMM d, h:mm a"
+        return displayFormatter.string(from: date)
     }
 }
 
 struct StatusBadge: View {
     let status: OrderStatus
     
-    var statusColor: Color {
+    var badgeColor: (background: Color, text: Color, border: Color) {
         switch status {
-        case .pending: return .orange
-        case .paid: return .blue
-        case .preparing: return .purple
-        case .ready: return .green
-        case .completed: return .gray
-        case .cancelled: return .red
+        case .preparing:
+            return (Color(hex: "F9FFFC"), Color(hex: "0B7D3B"), Color(hex: "AECEBB"))
+        case .cancelled:
+            return (Color(hex: "FFDFE0"), Color(hex: "FF373D"), Color(hex: "FF373D"))
+        case .pending:
+            return (Color(hex: "FFF3E0"), Color(hex: "F57C00"), Color(hex: "F57C00"))
+        case .paid:
+            return (Color(hex: "E3F2FD"), Color(hex: "1976D2"), Color(hex: "1976D2"))
+        case .ready:
+            return (Color(hex: "F9FFFC"), Color(hex: "0B7D3B"), Color(hex: "AECEBB"))
+        case .completed:
+            return (Color(hex: "F0FFF6"), Color(hex: "0B7D3B"), Color(hex: "AECEBB"))
         }
     }
     
     var statusText: String {
-        status.rawValue.capitalized
+        switch status {
+        case .preparing: return "Cooking"
+        case .cancelled: return "Cancelled"
+        case .pending: return "Pending"
+        case .paid: return "Paid"
+        case .ready: return "Ready"
+        case .completed: return "Completed"
+        }
     }
     
     var body: some View {
-        Text(statusText)
-            .font(.urbanist(size: 12, weight: .bold))
-            .foregroundStyle(.white)
-            .padding(.horizontal, 12)
-            .padding(.vertical, 6)
-            .background(statusColor)
-            .cornerRadius(12)
+        HStack(spacing: 6) {
+            Image(systemName: "clock")
+                .font(.system(size: 16))
+                .foregroundStyle(badgeColor.text)
+            
+            Text(statusText)
+                .font(.custom("Urbanist-Bold", size: 14))
+                .foregroundStyle(badgeColor.text)
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 10)
+        .background(badgeColor.background)
+        .cornerRadius(100)
+        .overlay(
+            RoundedRectangle(cornerRadius: 100)
+                .stroke(badgeColor.border, lineWidth: 1.5)
+        )
     }
 }
 
 struct EmptyOrdersView: View {
     let filter: OrderStatus?
+    @Environment(\.dismiss) var dismiss
     
     var body: some View {
-        VStack(spacing: 16) {
-            Image(systemName: "tray")
-                .font(.system(size: 60))
-                .foregroundStyle(.gray.opacity(0.5))
+        VStack(spacing: 24) {
+            ZStack {
+                Circle()
+                    .fill(Color(hex: "F3F4F6"))
+                    .frame(width: 140, height: 140)
+                
+                Image(systemName: "shippingbox")
+                    .font(.system(size: 60))
+                    .foregroundStyle(.gray.opacity(0.6))
+            }
             
-            Text(filter == nil ? "No orders yet" : "No \(filter!.rawValue) orders")
-                .font(.urbanist(size: 20, weight: .semibold))
-                .foregroundStyle(.gray)
+            VStack(spacing: 8) {
+                Text(filter == nil ? "No orders yet" : "No \(filter!.rawValue) orders")
+                    .font(.custom("Urbanist-Bold", size: 22))
+                    .foregroundStyle(.black)
+                
+                Text("Your order history will appear here")
+                    .font(.custom("Urbanist-Medium", size: 16))
+                    .foregroundStyle(.gray)
+            }
             
-            Text("Your orders will appear here")
-                .font(.urbanist(size: 14, weight: .regular))
-                .foregroundStyle(.gray.opacity(0.7))
+            Button {
+                // Return to home/menu
+                NotificationCenter.default.post(name: NSNotification.Name("SwitchToHome"), object: nil)
+            } label: {
+                Text("Start Ordering")
+                    .font(.custom("Urbanist-Bold", size: 16))
+                    .foregroundStyle(.white)
+                    .padding(.vertical, 14)
+                    .padding(.horizontal, 32)
+                    .background(Color(hex: "0D1317"))
+                    .cornerRadius(12)
+            }
+            .padding(.top, 8)
         }
+        .padding(.horizontal, 40)
     }
 }

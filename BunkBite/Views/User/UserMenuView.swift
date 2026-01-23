@@ -186,7 +186,6 @@ struct UserMenuView: View {
                                      .frame(width: 200, height: 50)
                                      .background(Constants.primaryColor)
                                      .cornerRadius(25)
-                                     .shadow(color: Constants.primaryColor.opacity(0.3), radius: 10, x: 0, y: 5)
                              }
                              .padding(.top, 20)
                          }
@@ -344,7 +343,6 @@ struct UserMenuView: View {
                         )
                     )
                     .cornerRadius(16)
-                    .shadow(color: Constants.primaryColor.opacity(0.4), radius: 12, x: 0, y: 6)
                 }
                 .scaleEffect(isAnimating ? 1 : 0.9)
                 .opacity(isAnimating ? 1 : 0)
@@ -649,6 +647,9 @@ struct CanteenHeaderView: View {
         .padding(16)
         .background(Color.white)
         .cornerRadius(16)
-        .shadow(color: .black.opacity(0.05), radius: 8, x: 0, y: 4)
+        .overlay(
+            RoundedRectangle(cornerRadius: 16)
+                .stroke(Color(hex: "E5E7EB"), lineWidth: 1.0)
+        )
     }
 }

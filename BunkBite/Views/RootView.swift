@@ -10,11 +10,23 @@ import SwiftUI
 struct RootView: View {
     @State private var userRole: String? = nil
     @State private var isCheckingAuth = true
+    @AppStorage("hasSeenWelcome") private var hasSeenWelcome = false
+    @StateObject private var versionManager = VersionManager()
 
     var body: some View {
         Group {
-            if isCheckingAuth {
+            if versionManager.needsUpdate {
+                // Force update screen
+                VersionCheckView(
+                    currentVersion: Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "Unknown",
+                    minimumVersion: versionManager.minimumVersion,
+                    appStoreURL: "https://apps.apple.com/in/app/bunkbite/id6755028590"
+                )
+            } else if isCheckingAuth {
                 ProgressView()
+            } else if !hasSeenWelcome {
+                // Show welcome screen for first-time users
+                WelcomeScreen(hasSeenWelcome: $hasSeenWelcome)
             } else {
                 // Check role: "admin" = owner, "user" = authenticated user, nil = guest
                 if userRole?.lowercased() == "admin" {
@@ -24,6 +36,10 @@ struct RootView: View {
                     NewUserMainView()
                 }
             }
+        }
+        .task {
+            // Check version on app launch
+            await versionManager.checkVersion()
         }
         .onAppear {
             checkUserRole()

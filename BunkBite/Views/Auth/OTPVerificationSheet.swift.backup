@@ -1,0 +1,167 @@
+//
+//  OTPVerificationSheet.swift
+//  BunkBite
+//
+//  Created by Shreyanshu on 15/01/26.
+//
+
+import SwiftUI
+
+struct OTPVerificationSheet: View {
+    @ObservedObject var authViewModel: AuthViewModel
+    let email: String
+    @Binding var isPresented: Bool
+    @Binding var parentIsPresented: Bool
+    
+    @State private var otp: String = ""
+    @State private var isLoading = false
+    @State private var isResending = false
+    
+    var body: some View {
+        VStack(spacing: 24) {
+                    // Close button
+                    HStack {
+                        Spacer()
+                        Button(action: {
+                            isPresented = false
+                        }) {
+                            Image(systemName: "xmark")
+                                .font(.system(size: 20, weight: .semibold))
+                                .foregroundStyle(.black)
+                                .frame(width: 32, height: 32)
+                                .background(Color(hex: "F3F4F6"))
+                                .clipShape(Circle())
+                        }
+                    }
+                    .padding(.top, 16)
+                    
+                    // Heading
+                    VStack(spacing: 8) {
+                        Text("Verify OTP")
+                            .font(.custom("Urbanist-Bold", size: 24))
+                            .foregroundStyle(.black)
+                        
+                        Text("Enter the 6-digit code sent to \(maskEmail(email))")
+                            .font(.custom("Urbanist-Regular", size: 16))
+                            .foregroundStyle(Color(hex: "6B7280"))
+                            .multilineTextAlignment(.center)
+                    }
+                    
+                    // OTP Input
+                    TextField("Enter otp", text: $otp)
+                        .font(.custom("Urbanist-Regular", size: 16))
+                        .padding(16)
+                        .background(Color.white)
+                        .cornerRadius(12)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 12)
+                                .stroke(Color(hex: "E5E7EB"), lineWidth: 1.0)
+                        )
+                        .keyboardType(.numberPad)
+                        .textContentType(.oneTimeCode)
+                        .onChange(of: otp) { _, newValue in
+                            // Limit to 6 digits
+                            if newValue.count > 6 {
+                                otp = String(newValue.prefix(6))
+                            }
+                        }
+                    
+                    // Resend link
+                    HStack(spacing: 4) {
+                        Text("Didn't receive code?")
+                            .font(.custom("Urbanist-Regular", size: 14))
+                            .foregroundStyle(Color(hex: "6B7280"))
+                        
+                        Button(action: {
+                            resendOTP()
+                        }) {
+                            if isResending {
+                                ProgressView()
+                                    .progressViewStyle(CircularProgressViewStyle(tint: .black))
+                                    .scaleEffect(0.8)
+                            } else {
+                                Text("Resend")
+                                    .font(.custom("Urbanist-Bold", size: 14))
+                                    .foregroundStyle(.black)
+                                    .underline()
+                            }
+                        }
+                        .disabled(isResending)
+                    }
+                    
+                    // Verify Button
+                    Button(action: {
+                        verifyOTP()
+                    }) {
+                        if isLoading {
+                            ProgressView()
+                                .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, 18)
+                        } else {
+                            Text("Verify & Login")
+                                .font(.custom("Urbanist-Bold", size: 16))
+                                .foregroundStyle(.white)
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, 18)
+                        }
+                    }
+                    .background(Color.black)
+                    .cornerRadius(12)
+                    .disabled(otp.count != 6 || isLoading)
+                    .opacity(otp.count != 6 ? 0.5 : 1.0)
+                    
+                    // Error message
+                    if let error = authViewModel.errorMessage {
+                        Text(error)
+                            .font(.custom("Urbanist-Regular", size: 14))
+                            .foregroundStyle(.red)
+                            .multilineTextAlignment(.center)
+                    }
+            }
+            .padding(.horizontal, 24)
+            .padding(.bottom, 40)
+            .background(Color.white)
+        }
+    
+    
+    private func verifyOTP() {
+        isLoading = true
+        authViewModel.email = email
+        authViewModel.otp = otp
+        Task {
+            await authViewModel.verifyOTP()
+            isLoading = false
+            
+            if authViewModel.errorMessage == nil {
+                // Success - close both sheets
+                isPresented = false
+                parentIsPresented = false
+            }
+        }
+    }
+    
+    private func resendOTP() {
+        isResending = true
+        authViewModel.email = email
+        Task {
+            await authViewModel.sendOTP()
+            isResending = false
+        }
+    }
+    
+    private func maskEmail(_ email: String) -> String {
+        let components = email.split(separator: "@")
+        guard components.count == 2 else { return email }
+        
+        let username = String(components[0])
+        let domain = String(components[1])
+        
+        if username.count <= 2 {
+            return "\(username)@\(domain)"
+        }
+        
+        let visibleChars = username.prefix(2)
+        return "\(visibleChars)...@\(domain)"
+    }
+}

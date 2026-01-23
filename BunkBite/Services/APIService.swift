@@ -428,9 +428,51 @@ class APIService {
         let url = URL(string: urlString)!
         let request = createRequest(url: url, method: "GET", token: token)
 
-        let (data, _) = try await URLSession.shared.data(for: request)
-        let apiResponse = try JSONDecoder().decode(APIResponse<[Order]>.self, from: data)
-        return apiResponse.data ?? []
+        print("\n📦 FETCHING MY ORDERS")
+        print("URL: \(url.absoluteString)")
+        print("Token: \(token.prefix(15))...")
+
+        let (data, response) = try await URLSession.shared.data(for: request)
+        
+        guard let httpResponse = response as? HTTPURLResponse else {
+            throw NSError(domain: "APIService", code: -1, userInfo: [NSLocalizedDescriptionKey: "Invalid response"])
+        }
+        
+        print("Response Status: \(httpResponse.statusCode)")
+        
+        // Check for non-200 status codes
+        guard (200...299).contains(httpResponse.statusCode) else {
+            if let responseString = String(data: data, encoding: .utf8) {
+                print("❌ Error Response: \(responseString.prefix(500))")
+            }
+            throw NSError(domain: "APIService", code: httpResponse.statusCode, userInfo: [NSLocalizedDescriptionKey: "HTTP \(httpResponse.statusCode)"])
+        }
+        
+        // Check content type
+        if let contentType = httpResponse.value(forHTTPHeaderField: "Content-Type"),
+           !contentType.contains("application/json") {
+            if let responseString = String(data: data, encoding: .utf8) {
+                print("❌ Non-JSON Response (Content-Type: \(contentType)): \(responseString.prefix(500))")
+            }
+            throw NSError(domain: "APIService", code: -2, userInfo: [NSLocalizedDescriptionKey: "Server returned non-JSON response"])
+        }
+        
+        if let responseString = String(data: data, encoding: .utf8) {
+            print("Raw Response Length: \(data.count) bytes")
+            if responseString.count < 1000 {
+                print("Raw Response: \(responseString)")
+            }
+        }
+
+        do {
+            let apiResponse = try JSONDecoder().decode(APIResponse<[Order]>.self, from: data)
+            let orders = apiResponse.data ?? []
+            print("✅ Successfully decoded \(orders.count) orders\n")
+            return orders
+        } catch {
+            print("❌ Decoding Error in getMyOrders: \(error)")
+            throw error
+        }
     }
 
     func getOrderById(id: String, token: String) async throws -> Order {
@@ -673,6 +715,21 @@ class APIService {
         guard let canteen = apiResponse.data else { throw APIError.invalidResponse }
         return canteen
     }
+    
+    // MARK: - Version Check
+    func getMinimumVersion() async throws -> String {
+        let url = URL(string: "\(Constants.baseURL)/api/v1/app/version")!
+        let request = createRequest(url: url, method: "GET")
+        
+        let (data, _) = try await URLSession.shared.data(for: request)
+        let response = try JSONDecoder().decode(APIResponse<[String: String]>.self, from: data)
+        
+        guard let versionData = response.data, let minVersion = versionData["minimumVersion"] else {
+            throw NSError(domain: "APIService", code: -1, userInfo: [NSLocalizedDescriptionKey: "Invalid version data"])
+        }
+        
+        return minVersion
+    }
 }
 
 enum APIError: Error {
@@ -696,4 +753,6 @@ enum APIError: Error {
             return message
         }
     }
+    
 }
+

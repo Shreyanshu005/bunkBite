@@ -11,27 +11,11 @@ import SafariServices
 @main
 struct BunkBiteApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
-    @State private var showLaunchScreen = true
 
     var body: some Scene {
         WindowGroup {
-            ZStack {
-                RootView()
-                    .preferredColorScheme(.light)
-
-                if showLaunchScreen {
-                    LaunchScreenView()
-                        .transition(.opacity)
-                        .zIndex(1)
-                }
-            }
-            .onAppear {
-                DispatchQueue.main.asyncAfter(deadline: .now() + 2.5) {
-                    withAnimation(.easeOut(duration: 0.3)) {
-                        showLaunchScreen = false
-                    }
-                }
-            }
+            RootView()
+                .preferredColorScheme(.light)
         }
     }
 }

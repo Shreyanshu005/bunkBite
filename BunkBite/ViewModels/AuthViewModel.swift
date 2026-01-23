@@ -170,15 +170,24 @@ class AuthViewModel: ObservableObject {
         otp = ""
         isOTPSent = false
 
-        // Clear UserDefaults
+        // Clear ALL UserDefaults data
         UserDefaults.standard.removeObject(forKey: "authToken")
         UserDefaults.standard.removeObject(forKey: "userData")
         UserDefaults.standard.removeObject(forKey: "selectedCanteen")
+        
+        // Clear any other cached data
+        UserDefaults.standard.synchronize()
 
+        // Notify app to clear all data
+        NotificationCenter.default.post(name: NSNotification.Name("UserDidLogout"), object: nil)
+
+        // Notify to clear cart
+        NotificationCenter.default.post(name: NSNotification.Name("ClearCart"), object: nil)
+        
         // Notify RootView about logout
         NotificationCenter.default.post(name: NSNotification.Name("UserDidLogout"), object: nil)
 
-        print("✅ User logged out")
+        print("✅ User logged out - all data cleared")
     }
 
     func checkExistingAuth() {

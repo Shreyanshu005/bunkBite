@@ -9,17 +9,19 @@ import SwiftUI
 
 struct Constants {
     // API
-    static let baseURL = "https://api.dranjali.tech"
+    static let baseURL = "https://steellike-giana-periphrastic.ngrok-free.dev"
 
     // Colors
-    static let primaryColor = Color(hex: "#f62f56")
-    static let backgroundColor = Color.white
+    static let primaryColor = Color(hex: "0B7D3B") // Updated Green
+    static let backgroundColor = Color(hex: "FFFFFF")
+    static let secondaryColor = Color(hex: "F3F4F6")
+    static let darkColor = Color(hex: "0D1317")
     static let textColor = Color.black
     static let lightGray = Color(hex: "#F5F5F5")
     static let darkGray = Color(hex: "#666666")
     
     // App Info
-    static let appVersion = "1.4"
+    static let appVersion = "2.0"
 
     // Animation
     static let bouncyAnimation = Animation.spring(response: 0.6, dampingFraction: 0.7, blendDuration: 0.3)

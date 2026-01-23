@@ -15,6 +15,7 @@ class OrderViewModel: ObservableObject {
     @Published var currentOrder: Order?
     @Published var isLoading = false
     @Published var errorMessage: String?
+    @Published var hasLoadedInitially = false
     
     private let apiService = APIService.shared
     
@@ -58,14 +59,23 @@ class OrderViewModel: ObservableObject {
     
     // MARK: - Fetch Orders
     func fetchMyOrders(status: String? = nil, token: String) async {
+        // Prevent multiple simultaneous requests
+        guard !isLoading else {
+            print("⚠️ Already loading orders, skipping duplicate request")
+            return
+        }
+        
         isLoading = true
         errorMessage = nil
         
+        print("🔄 Fetching orders from API...")
+        
         do {
-            orders = try await apiService.getMyOrders(status: status, token: token)
-            print("✅ Fetched \(orders.count) orders")
+            let fetchedOrders = try await apiService.getMyOrders(status: status, token: token)
+            orders = fetchedOrders
+            print("✅ Fetched \(orders.count) orders - Data refreshed")
         } catch {
-            errorMessage = "Failed to fetch orders"
+            errorMessage = error.localizedDescription
             print("❌ Fetch orders error: \(error)")
         }
         
@@ -87,21 +97,21 @@ class OrderViewModel: ObservableObject {
         isLoading = false
     }
 
-    func fetchOrder(orderId: String, token: String) async -> Order? {
+    func fetchOrder(orderId: String, internalId: String, token: String) async -> Order? {
         // 1. Check if we already have this order in our list (Cache)
-        if let existing = orders.first(where: { $0.orderId == orderId }) {
+        if let existing = orders.first(where: { $0.id == internalId }) {
             // If it has a QR code or full details, return it immediately for speed
             // Still refresh in background to get latest status
             Task {
                 do {
-                    let updated = try await apiService.getOrderById(id: orderId, token: token)
+                    let updated = try await apiService.getOrderById(id: internalId, token: token)
                     await MainActor.run {
-                        if let index = self.orders.firstIndex(where: { $0.orderId == orderId }) {
+                        if let index = self.orders.firstIndex(where: { $0.id == internalId }) {
                             self.orders[index] = updated
                         }
                     }
                 } catch {
-                    print("⚠️ Background refresh failed for order \(orderId)")
+                    print("⚠️ Background refresh failed for order \(internalId)")
                 }
             }
             return existing
@@ -109,7 +119,7 @@ class OrderViewModel: ObservableObject {
         
         // 2. Not in list, fetch from API
         do {
-            let order = try await apiService.getOrderById(id: orderId, token: token)
+            let order = try await apiService.getOrderById(id: internalId, token: token)
             // Add to list for future caching
             if !orders.contains(where: { $0.id == order.id }) {
                 orders.append(order)

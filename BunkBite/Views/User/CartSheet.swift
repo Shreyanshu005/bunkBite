@@ -23,6 +23,10 @@ struct CartSheet: View {
     @State private var showSuccessSheet = false
     @State private var showFailureSheet = false
     @State private var paymentSuccessId = ""
+    
+    private var isCanteenOpen: Bool {
+        canteen?.isAcceptingOrders.0 ?? true
+    }
 
     var body: some View {
         ZStack {
@@ -97,6 +101,12 @@ struct CartSheet: View {
                             }
                             .opacity(isAnimating ? 1 : 0)
                             .offset(y: isAnimating ? 0 : 20)
+                            
+                            Rectangle()
+                                .fill(Color(hex: "E5E7EB"))
+                                .frame(height: 1.0)
+                                .padding(.horizontal, -24) // Touching screen edges
+                                .padding(.top, 4)
                         }
                         .padding(.horizontal, 24)
 
@@ -140,7 +150,11 @@ struct CartSheet: View {
                                         .foregroundStyle(.black)
                                 }
 
-                                Divider()
+                                Rectangle()
+                                    .fill(Color(hex: "E5E7EB"))
+                                    .frame(height: 1.0)
+                                    .padding(.horizontal, -24) // Touching screen edges
+                                    .padding(.top, 4)
 
                                 HStack {
                                     Text("Total")
@@ -156,34 +170,45 @@ struct CartSheet: View {
                         .padding(20)
                         .background(Color.white)
                         .cornerRadius(16)
-                        .shadow(color: .black.opacity(0.05), radius: 10, x: 0, y: 2)
+                         .overlay(
+                             RoundedRectangle(cornerRadius: 16)
+                                 .stroke(Color(hex: "E5E7EB"), lineWidth: 1.0)
+                         )
                         .padding(.horizontal, 24)
                         .opacity(isAnimating ? 1 : 0)
                         .offset(y: isAnimating ? 0 : 30)
 
                         // Proceed to Checkout Button
                         Button {
-                            showOrderReview = true
+                            if isCanteenOpen {
+                                showOrderReview = true
+                            }
                         } label: {
                             HStack(spacing: 12) {
-                                Text("Proceed to Checkout")
-                                    .font(.urbanist(size: 18, weight: .semibold))
-                                Image(systemName: "arrow.right.circle.fill")
+                                Text(isCanteenOpen ? "Proceed to Checkout" : (canteen?.isAcceptingOrders.1 ?? "Canteen Closed"))
+                                    .font(.custom("Urbanist-Bold", size: 18))
+                                Image(systemName: isCanteenOpen ? "arrow.right.circle.fill" : "lock.fill")
                                     .font(.system(size: 22))
                             }
                             .foregroundStyle(.white)
                             .frame(maxWidth: .infinity)
                             .padding(.vertical, 18)
                             .background(
+                                isCanteenOpen ?
                                 LinearGradient(
                                     colors: [Constants.primaryColor, Constants.primaryColor.opacity(0.8)],
+                                    startPoint: .leading,
+                                    endPoint: .trailing
+                                ) :
+                                LinearGradient(
+                                    colors: [Color.gray, Color.gray.opacity(0.8)],
                                     startPoint: .leading,
                                     endPoint: .trailing
                                 )
                             )
                             .cornerRadius(16)
-                            .shadow(color: Constants.primaryColor.opacity(0.3), radius: 10, x: 0, y: 5)
                         }
+                        .disabled(!isCanteenOpen)
                         .padding(.horizontal, 24)
                         .opacity(isAnimating ? 1 : 0)
                         .scaleEffect(isAnimating ? 1 : 0.9)
@@ -337,7 +362,10 @@ struct CartItemCard: View {
         .padding(16)
         .background(Color.white)
         .cornerRadius(12)
-        .shadow(color: .black.opacity(0.05), radius: 8, x: 0, y: 2)
+         .overlay(
+             RoundedRectangle(cornerRadius: 12)
+                 .stroke(Color(hex: "E5E7EB"), lineWidth: 1.0)
+         )
     }
 }
 

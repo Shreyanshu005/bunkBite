@@ -9,205 +9,246 @@ import SwiftUI
 
 struct UserProfileView: View {
     @ObservedObject var viewModel: AuthViewModel
+    @ObservedObject var orderViewModel: OrderViewModel
+    @Binding var showLoginSheet: Bool
+    
+    // Environment
     @EnvironmentObject var cart: Cart
     @EnvironmentObject var canteenViewModel: CanteenViewModel
-    @Binding var showLoginSheet: Bool
-    @State private var showContent = false
-    @State private var showLogoutAlert = false
-    @State private var showDeleteConfirmation = false
-    @State private var showCart = false
 
+    // State
+    @State private var showOrdersSheet = false
+    @State private var showDeleteAlert = false
+    @State private var showLogoutAlert = false // Not used per se, direct action in new design or alert
+    
     var body: some View {
         NavigationStack {
             ZStack {
-                Constants.backgroundColor.ignoresSafeArea()
-
+                Color.white.ignoresSafeArea()
+                
                 if viewModel.isAuthenticated {
-                    profileContent
+                    ScrollView {
+                        VStack(spacing: 20) {
+                            VStack(alignment: .leading, spacing: 12) {
+                                Text("Profile")
+                                    .font(.custom("Urbanist-Bold", size: 28))
+                                    .foregroundStyle(.black)
+                                    .padding(.horizontal, 20)
+                                
+                                Rectangle()
+                                    .fill(Color(hex: "E5E7EB"))
+                                    .frame(height: 1.0)
+                                    .padding(.horizontal, -20)
+                                    .padding(.top, 4)
+                            }
+                            .background(Color.white)
+                            
+                            // User Info Card
+                            HStack(spacing: 16) {
+                                Circle()
+                                    .fill(Color(hex: "E0FDE8")) // Very light green
+                                    .frame(width: 80, height: 80)
+                                    .overlay(
+                                        Image(systemName: "person")
+                                            .font(.system(size: 32, weight: .medium))
+                                            .foregroundStyle(Color(hex: "22C55E")) // Green icon
+                                    )
+                                
+                                VStack(alignment: .leading, spacing: 4) {
+                                    Text(viewModel.currentUser?.email.split(separator: "@").first?.capitalized ?? "User")
+                                        .font(.custom("Urbanist-Bold", size: 20))
+                                        .foregroundStyle(.black)
+                                    
+                                    Text(viewModel.currentUser?.email ?? "user@example.com")
+                                        .font(.custom("Urbanist-Medium", size: 14))
+                                        .foregroundStyle(.gray)
+                                }
+                                
+                                Spacer()
+                            }
+                            .padding(20)
+                            .background(Color.white)
+                            .cornerRadius(16)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 16)
+                                    .stroke(Color(hex: "E5E7EB"), lineWidth: 1.0)
+                            )
+                            
+                            // Menu Group 1
+                            VStack(spacing: 0) {
+                                NavigationLink(destination: MyOrdersView(orderViewModel: orderViewModel).navigationBarBackButtonHidden(false)) {
+                                    ProfileOptionRow(icon: "cube.box", text: "My Orders")
+                                }
+                                
+                                Rectangle()
+                                    .fill(Color(hex: "E5E7EB"))
+                                    .frame(height: 1.0)
+                                    .padding(.leading, 56)
+                                
+                                Button {
+                                    if let url = URL(string: "mailto:bunkbite58@gmail.com") {
+                                        UIApplication.shared.open(url)
+                                    }
+                                } label: {
+                                    VStack(alignment: .leading, spacing: 4) {
+                                        ProfileOptionRow(icon: "questionmark.circle", text: "Help & Support")
+                                        
+                                        Text("bunkbite58@gmail.com")
+                                            .font(.custom("Urbanist-Medium", size: 12))
+                                            .foregroundStyle(.gray)
+                                            .padding(.leading, 56)
+                                            .padding(.bottom, 12)
+                                    }
+                                }
+                            }
+                            .background(Color.white)
+                            .cornerRadius(16)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 16)
+                                    .stroke(Color(hex: "E5E7EB"), lineWidth: 1.0)
+                            )
+                            
+                            // Menu Group 2 (Danger Zone)
+                            VStack(spacing: 0) {
+                                Button {
+                                    showDeleteAlert = true
+                                } label: {
+                                    HStack(spacing: 16) {
+                                        Image(systemName: "trash")
+                                            .font(.system(size: 20))
+                                            .foregroundStyle(.red)
+                                        
+                                        Text("Delete Account")
+                                            .font(.custom("Urbanist-Medium", size: 16))
+                                            .foregroundStyle(.red)
+                                        
+                                        Spacer()
+                                    }
+                                    .padding(20)
+                                }
+                                
+                                Rectangle()
+                                    .fill(Color(hex: "E5E7EB"))
+                                    .frame(height: 1.0)
+                                    .padding(.leading, 56)
+                                
+                                Button {
+                                    showLogoutAlert = true
+                                } label: {
+                                    HStack(spacing: 16) {
+                                        Image(systemName: "rectangle.portrait.and.arrow.right")
+                                            .font(.system(size: 20))
+                                            .foregroundStyle(.red)
+                                        
+                                        Text("Logout")
+                                            .font(.custom("Urbanist-Medium", size: 16))
+                                            .foregroundStyle(.red)
+                                        
+                                        Spacer()
+                                    }
+                                    .padding(20)
+                                }
+                                .alert("Logout", isPresented: $showLogoutAlert) {
+                                    Button("Cancel", role: .cancel) { }
+                                    Button("Logout", role: .destructive) {
+                                        viewModel.logout()
+                                    }
+                                } message: {
+                                    Text("Are you sure you want to log out?")
+                                }
+                            }
+                            .background(Color.white)
+                            .cornerRadius(16)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 16)
+                                    .stroke(Color(hex: "E5E7EB"), lineWidth: 1.0)
+                            )
+                            
+                            Spacer()
+                        }
+                        .padding(20)
+                    }
+
                 } else {
-                    loginPrompt
+                     // Login Prompt
+                     VStack(spacing: 20) {
+                         VStack(alignment: .leading, spacing: 12) {
+                             Text("Profile")
+                                 .font(.custom("Urbanist-Bold", size: 28))
+                                 .foregroundStyle(.black)
+                                 .padding(.horizontal, 20)
+                                 .padding(.top, 20)
+                             
+                             Rectangle()
+                                 .fill(Color(hex: "E5E7EB"))
+                                 .frame(height: 1.0)
+                                 .padding(.horizontal, -20)
+                                 .padding(.top, 4)
+                         }
+                         .background(Color.white)
+                         
+                         Spacer()
+                         Image(systemName: "person.circle")
+                             .font(.system(size: 80))
+                             .foregroundStyle(.gray)
+                         
+                         Text("Guest User")
+                             .font(.custom("Urbanist-Bold", size: 24))
+                         
+                         Text("Please log in to view your profile")
+                             .font(.custom("Urbanist-Medium", size: 16))
+                             .foregroundStyle(.gray)
+                         
+                         Button {
+                             showLoginSheet = true
+                         } label: {
+                             Text("Login / Sign Up")
+                                 .font(.custom("Urbanist-Bold", size: 16))
+                                 .foregroundStyle(.white)
+                                 .padding(.vertical, 16)
+                                 .padding(.horizontal, 40)
+                                 .background(Color.black)
+                                 .cornerRadius(12)
+                         }
+                         Spacer()
+                     }
                 }
             }
-            .navigationTitle("Profile")
-            .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    CartToolbarButton(
-                        authViewModel: viewModel,
-                        showCart: $showCart,
-                        showLoginSheet: $showLoginSheet
-                    )
-                }
-            }
-            .alert("Logout", isPresented: $showLogoutAlert) {
-                Button("Cancel", role: .cancel) {}
-                Button("Logout", role: .destructive) {
-                    withAnimation {
-                        viewModel.logout()
-                    }
-                }
-            } message: {
-                Text("Are you sure you want to logout?")
-            }
-            .sheet(isPresented: $showCart) {
-                CartSheet(cart: cart, authViewModel: viewModel, canteen: canteenViewModel.selectedCanteen)
-            }
-            .onAppear {
-                withAnimation(Constants.bouncyAnimation.delay(0.1)) {
-                    showContent = true
-                }
+            .toolbar(.hidden, for: .navigationBar)
+            .sheet(isPresented: $showDeleteAlert) {
+                DeleteAccountSheet(viewModel: viewModel)
+                    .presentationDetents([.medium])
+                    .presentationDragIndicator(.visible)
+                    .presentationCornerRadius(30)
+                    .background(Color.white.opacity(0.8))
+                    .background(.ultraThinMaterial)
             }
         }
     }
+}
+
+// Helper Row
+struct ProfileOptionRow: View {
+    let icon: String
+    let text: String
     
-    private var loginPrompt: some View {
-        VStack(spacing: 0) {
+    var body: some View {
+        HStack(spacing: 16) {
+            Image(systemName: icon)
+                .font(.system(size: 20))
+                .foregroundStyle(.black) // Standard color
+            
+            Text(text)
+                .font(.custom("Urbanist-Medium", size: 16))
+                .foregroundStyle(.black)
+            
             Spacer()
-
-            VStack(spacing: 32) {
-                // Icon with animation
-                ZStack {
-                    Circle()
-                        .fill(Constants.primaryColor.opacity(0.1))
-                        .frame(width: 120, height: 120)
-                        .scaleEffect(showContent ? 1 : 0.8)
-
-                    Image(systemName: "person.circle")
-                        .font(.urbanist(size: 50, weight: .light))
-                        .foregroundStyle(Constants.primaryColor)
-                        .scaleEffect(showContent ? 1 : 0.5)
-                }
-
-                // Message
-                VStack(spacing: 12) {
-                    Text("Profile")
-                        .font(.urbanist(size: 28, weight: .bold))
-                        .foregroundStyle(.black)
-
-                    Text("Login to access your profile")
-                        .font(.urbanist(size: 16, weight: .regular))
-                        .foregroundStyle(.gray)
-                }
-                .opacity(showContent ? 1 : 0)
-                .offset(y: showContent ? 0 : 20)
-
-                // CTA Button
-                Button {
-                    showLoginSheet = true
-                } label: {
-                    Text("Login")
-                        .font(.urbanist(size: 17, weight: .semibold))
-                        .foregroundStyle(.white)
-                        .frame(width: 200)
-                        .padding(.vertical, 16)
-                        .background(Constants.primaryColor)
-                        .cornerRadius(12)
-                }
-                .padding(.top, 8)
-                .opacity(showContent ? 1 : 0)
-                .scaleEffect(showContent ? 1 : 0.9)
-            }
-            .padding(.horizontal, 40)
-
-            Spacer()
+            
+            Image(systemName: "arrow.right")
+                .font(.system(size: 16))
+                .foregroundStyle(.gray)
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(Constants.backgroundColor)
-    }
-
-    private var profileContent: some View {
-        ScrollView {
-            VStack(spacing: 32) {
-                // Profile Header
-                VStack(spacing: 20) {
-                    // Avatar (Generic)
-                    Circle()
-                        .fill(Constants.primaryColor.opacity(0.1))
-                        .frame(width: 100, height: 100)
-                        .overlay(
-                            Image(systemName: "person.fill")
-                                .font(.system(size: 40))
-                                .foregroundColor(Constants.primaryColor)
-                        )
-                        .scaleEffect(showContent ? 1 : 0.5)
-                        .opacity(showContent ? 1 : 0)
-
-                    // User Info (Email Only)
-                    VStack(spacing: 8) {
-                        Text(viewModel.currentUser?.email ?? "")
-                            .font(.urbanist(size: 20, weight: .bold)) // Increased size for emphasis
-                            .foregroundColor(.black)
-                    }
-                    .offset(y: showContent ? 0 : 20)
-                    .opacity(showContent ? 1 : 0)
-                }
-                .padding(.top, 60)
-
-                // User Details Card
-                VStack(spacing: 0) {
-                    ProfileDetailRow(
-                        icon: "person.fill",
-                        label: "Name",
-                        value: viewModel.currentUser?.name ?? "N/A"
-                    )
-
-                    Divider()
-                        .padding(.leading, 56)
-
-                    ProfileDetailRow(
-                        icon: "envelope.fill",
-                        label: "Email",
-                        value: viewModel.currentUser?.email ?? "N/A"
-                    )
-                }
-                .background(Color.white)
-                .cornerRadius(16)
-                .shadow(color: .black.opacity(0.05), radius: 10, x: 0, y: 2)
-                .padding(.horizontal, 24)
-                .offset(y: showContent ? 0 : 30)
-                .opacity(showContent ? 1 : 0)
-
-                // Logout Button
-                Button(action: {
-                    showLogoutAlert = true
-                }) {
-                    HStack(spacing: 12) {
-                        Image(systemName: "rectangle.portrait.and.arrow.right")
-                            .font(.system(size: 20))
-                        Text("Logout")
-                            .font(.urbanist(size: 17, weight: .semibold))
-                    }
-                    .foregroundColor(.white)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 16)
-                    .background(Constants.primaryColor)
-                    .cornerRadius(16)
-                }
-                .padding(.horizontal, 24)
-                .padding(.top, 16)
-                .offset(y: showContent ? 0 : 30)
-                .opacity(showContent ? 1 : 0)
-
-                // Delete Account Button (Danger Zone)
-                Button(action: {
-                    showDeleteConfirmation = true
-                }) {
-                    Text("Delete Account")
-                        .font(.urbanist(size: 15, weight: .medium))
-                        .foregroundStyle(.red)
-                }
-                .padding(.top, 10)
-                .padding(.bottom, 20)
-                .offset(y: showContent ? 0 : 30)
-                .opacity(showContent ? 1 : 0)
-
-                Spacer(minLength: 60)
-            }
-        }
-        .sheet(isPresented: $showDeleteConfirmation) {
-            DeleteAccountSheet(viewModel: viewModel)
-                .presentationDetents([.height(350)])
-                .presentationDragIndicator(.visible)
-        }
+        .padding(20)
     }
 }
 
@@ -254,84 +295,76 @@ struct DeleteAccountSheet: View {
     @State private var isDeleting = false
     
     var body: some View {
-        NavigationStack {
-            VStack(spacing: 24) {
-                // Warning Icon
-                Image(systemName: "exclamationmark.triangle.fill")
-                    .font(.system(size: 50))
-                    .foregroundStyle(.red)
-                    .padding(.top, 20)
+        VStack(spacing: 24) {
+            // Detached Header
+            
+            // Warning Icon
+            Image(systemName: "exclamationmark.triangle.fill")
+                .font(.system(size: 50))
+                .foregroundStyle(.red)
+                .padding(.top, 10)
+            
+            // Warning Text
+            VStack(spacing: 8) {
+                Text("Delete Account?")
+                    .font(.custom("Urbanist-Bold", size: 24))
                 
-                // Warning Text
-                VStack(spacing: 8) {
-                    Text("Delete Account?")
-                        .font(.urbanist(size: 22, weight: .bold))
-                    
-                    Text("This action is irreversible. All your pending orders and managed canteens (if any) will be deleted/closed.")
-                        .font(.urbanist(size: 14, weight: .regular))
-                        .foregroundStyle(.secondary)
-                        .multilineTextAlignment(.center)
-                        .padding(.horizontal)
-                        .fixedSize(horizontal: false, vertical: true) // Force wrapping
-                }
+                Text("This action is irreversible. All your pending orders and data will be permanently deleted.")
+                    .font(.custom("Urbanist-Medium", size: 14))
+                    .foregroundStyle(.secondary)
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, 30)
+            }
+            
+            // Confirmation Input
+            VStack(alignment: .leading, spacing: 10) {
+                Text("Type 'delete' to confirm:")
+                    .font(.custom("Urbanist-Bold", size: 14))
+                    .foregroundStyle(.gray)
                 
-                // Confirmation Input
-                VStack(alignment: .leading, spacing: 8) {
-                    Text("Type 'delete' to confirm:")
-                        .font(.urbanist(size: 14, weight: .medium))
-                        .foregroundStyle(.secondary)
-                    
-                    TextField("delete", text: $confirmationText)
-                        .textFieldStyle(.roundedBorder)
-                        .textInputAutocapitalization(.never)
-                        .autocorrectionDisabled()
-                }
-                .padding(.horizontal, 30)
-                
-                if let error = viewModel.errorMessage {
-                    Text(error)
-                        .font(.urbanist(size: 13, weight: .medium))
-                        .foregroundStyle(.red)
-                        .padding(.horizontal)
-                }
-                
-                Spacer()
-                
-                // Action Buttons
-                HStack(spacing: 12) {
-                    Button("Cancel") {
+                TextField("Type 'delete' here", text: $confirmationText)
+                    .font(.custom("Urbanist-Medium", size: 16))
+                    .padding()
+                    .background(Color.gray.opacity(0.1))
+                    .cornerRadius(12)
+                    .textInputAutocapitalization(.never)
+                    .autocorrectionDisabled()
+            }
+            .padding(.horizontal, 30)
+            
+            Spacer()
+            
+            // Action Button
+            Button {
+                isDeleting = true
+                Task {
+                    let success = await viewModel.deleteAccount()
+                    if success {
                         dismiss()
                     }
-                    .buttonStyle(.bordered)
-                    .frame(maxWidth: .infinity)
-                    
-                    Button {
-                        isDeleting = true
-                        Task {
-                            let success = await viewModel.deleteAccount()
-                            if success {
-                                dismiss()
-                            }
-                            isDeleting = false
-                        }
-                    } label: {
-                        if isDeleting {
-                            ProgressView()
-                                .progressViewStyle(.circular)
-                                .tint(.white)
-                        } else {
-                            Text("Delete Forever")
-                        }
-                    }
-                    .buttonStyle(.borderedProminent)
-                    .tint(.red)
-                    .frame(maxWidth: .infinity)
-                    .disabled(confirmationText != "delete" || isDeleting)
+                    isDeleting = false
                 }
-                .padding(.horizontal, 24)
-                .padding(.bottom, 20)
+            } label: {
+                HStack {
+                    if isDeleting {
+                        ProgressView().tint(.white)
+                    } else {
+                        Image(systemName: "trash.fill")
+                        Text("Delete Permanently")
+                    }
+                }
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 16)
+                .background(confirmationText == "delete" ? Color.red : Color.gray.opacity(0.3))
+                .foregroundStyle(.white)
+                .font(.custom("Urbanist-Bold", size: 16))
+                .cornerRadius(16)
             }
-            .navigationBarTitleDisplayMode(.inline)
+            .disabled(confirmationText != "delete" || isDeleting)
+            .padding(.horizontal, 30)
+            .padding(.bottom, 30)
         }
+        .background(Color.white.opacity(0.5))
+        .background(.ultraThinMaterial)
     }
 }

@@ -66,15 +66,14 @@ struct OrderReviewSheet: View {
                     )
                 }
             }
-            // Detail Navigation
+            // Detail Navigation (Order Success)
             .fullScreenCover(isPresented: $navigateToDetail, onDismiss: {
                 if createdOrder != nil {
-                     NotificationCenter.default.post(name: NSNotification.Name("OrderCompleted"), object: nil)
                      dismiss()
                 }
             }) {
                 if let order = createdOrder {
-                    OrderDetailView(order: order, orderViewModel: orderViewModel, authViewModel: authViewModel)
+                    OrderSuccessView(order: order)
                 }
             }
             // Alerts
@@ -117,7 +116,10 @@ struct OrderReviewSheet: View {
         .padding(.vertical, 16)
         .background(Color.white)
         .cornerRadius(16)
-        .shadow(color: .black.opacity(0.05), radius: 10)
+        .overlay(
+            RoundedRectangle(cornerRadius: 16)
+                .stroke(Color(hex: "E5E7EB"), lineWidth: 1.0)
+        )
         .padding(.horizontal, 20)
     }
     
@@ -130,7 +132,9 @@ struct OrderReviewSheet: View {
                 Text("₹\(Int(cart.totalAmount))")
                     .font(.urbanist(size: 16, weight: .semibold))
             }
-            Divider()
+            Rectangle()
+                .fill(Color(hex: "E5E7EB"))
+                .frame(height: 1.0)
             HStack {
                 Text("Total")
                     .font(.urbanist(size: 20, weight: .bold))
@@ -143,7 +147,10 @@ struct OrderReviewSheet: View {
         .padding(20)
         .background(Color.white)
         .cornerRadius(16)
-        .shadow(color: .black.opacity(0.05), radius: 10)
+        .overlay(
+            RoundedRectangle(cornerRadius: 16)
+                .stroke(Color(hex: "E5E7EB"), lineWidth: 1.0)
+        )
         .padding(.horizontal, 20)
     }
     
@@ -169,7 +176,6 @@ struct OrderReviewSheet: View {
             .padding(.vertical, 18)
             .background(LinearGradient(colors: [Constants.primaryColor, Constants.primaryColor.opacity(0.8)], startPoint: .leading, endPoint: .trailing))
             .cornerRadius(16)
-            .shadow(color: Constants.primaryColor.opacity(0.3), radius: 10, x: 0, y: 5)
         }
         .disabled(isProcessing)
         .padding(.horizontal, 20)
@@ -228,6 +234,9 @@ struct OrderReviewSheet: View {
                         orderId: verifiedOrder.orderId,
                         canteenName: canteen.name
                     )
+                    
+                    // Notify other views that order is completed
+                    NotificationCenter.default.post(name: NSNotification.Name("OrderCompleted"), object: nil)
                     
                     navigateToDetail = true
                 } else {

@@ -1,0 +1,27 @@
+#!/bin/bash
+
+# Script to add new onboarding files to Xcode project
+
+echo "📝 New Onboarding Files to Add to Xcode Project:"
+echo ""
+echo "1. WelcomeScreen.swift"
+echo "   Location: BunkBite/Views/Onboarding/WelcomeScreen.swift"
+echo ""
+echo "2. NewLoginSheet.swift"
+echo "   Location: BunkBite/Views/Auth/NewLoginSheet.swift"
+echo ""
+echo "3. OTPVerificationSheet.swift"
+echo "   Location: BunkBite/Views/Auth/OTPVerificationSheet.swift"
+echo ""
+echo "4. food_illustrations.imageset"
+echo "   Location: BunkBite/Assets.xcassets/food_illustrations.imageset/"
+echo ""
+echo "📋 Steps to add files to Xcode:"
+echo "1. Open BunkBite.xcodeproj in Xcode"
+echo "2. Right-click on 'Views/Onboarding' folder → Add Files to 'BunkBite'"
+echo "3. Select WelcomeScreen.swift"
+echo "4. Right-click on 'Views/Auth' folder → Add Files to 'BunkBite'"
+echo "5. Select NewLoginSheet.swift and OTPVerificationSheet.swift"
+echo "6. The food_illustrations.imageset should already be in Assets.xcassets"
+echo ""
+echo "✅ After adding files, rebuild the project (Cmd+B)"

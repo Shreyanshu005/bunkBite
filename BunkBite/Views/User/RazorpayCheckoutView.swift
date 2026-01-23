@@ -32,12 +32,21 @@ struct RazorpayCheckoutView: UIViewRepresentable {
         let webView = WKWebView(frame: .zero, configuration: configuration)
         webView.navigationDelegate = context.coordinator
         
+        // Load HTML only once during creation
+        let html = generateRazorpayHTML()
+        webView.loadHTMLString(html, baseURL: nil)
+        context.coordinator.hasLoaded = true
+        
         return webView
     }
     
     func updateUIView(_ webView: WKWebView, context: Context) {
-        let html = generateRazorpayHTML()
-        webView.loadHTMLString(html, baseURL: nil)
+        // Don't reload if already loaded - prevents reload on app resume
+        if !context.coordinator.hasLoaded {
+            let html = generateRazorpayHTML()
+            webView.loadHTMLString(html, baseURL: nil)
+            context.coordinator.hasLoaded = true
+        }
     }
     
     private func generateRazorpayHTML() -> String {
@@ -133,6 +142,7 @@ struct RazorpayCheckoutView: UIViewRepresentable {
         let onSuccess: (RazorpayPaymentResponse) -> Void
         let onFailure: (String) -> Void
         let onDismiss: () -> Void
+        var hasLoaded = false
         
         init(onSuccess: @escaping (RazorpayPaymentResponse) -> Void,
              onFailure: @escaping (String) -> Void,

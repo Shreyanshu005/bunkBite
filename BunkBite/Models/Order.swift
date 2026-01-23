@@ -15,12 +15,24 @@ enum OrderStatus: String, Codable {
     case ready = "ready"
     case completed = "completed"
     case cancelled = "cancelled"
+    
+    init(from decoder: Decoder) throws {
+        let container = try decoder.singleValueContainer()
+        let status = try container.decode(String.self)
+        self = OrderStatus(rawValue: status.lowercased()) ?? .pending
+    }
 }
 
 enum PaymentStatus: String, Codable {
     case pending = "pending"
     case success = "success"
     case failed = "failed"
+    
+    init(from decoder: Decoder) throws {
+        let container = try decoder.singleValueContainer()
+        let status = try container.decode(String.self)
+        self = PaymentStatus(rawValue: status.lowercased()) ?? .pending
+    }
 }
 
 // MARK: - Order Line Item (renamed to avoid conflict)
@@ -38,6 +50,15 @@ struct OrderLineItem: Codable, Identifiable, Hashable {
     enum CodingKeys: String, CodingKey {
         case id = "_id"
         case menuItemId, name, price, quantity
+    }
+    
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        id = (try? container.decode(String.self, forKey: .id)) ?? UUID().uuidString
+        menuItemId = (try? container.decode(String.self, forKey: .menuItemId)) ?? ""
+        name = (try? container.decode(String.self, forKey: .name)) ?? "Unknown Item"
+        price = (try? container.decode(Double.self, forKey: .price)) ?? 0.0
+        quantity = (try? container.decode(Int.self, forKey: .quantity)) ?? 1
     }
 }
 
@@ -58,6 +79,7 @@ struct Order: Codable, Identifiable {
     
     // Populated fields (optional)
     let canteen: Canteen?
+
     
     enum CodingKeys: String, CodingKey {
         case id = "_id"
@@ -68,7 +90,7 @@ struct Order: Codable, Identifiable {
     
     // Helper for decoding partial canteen object
     private struct PartialCanteen: Codable {
-        let id: String
+        let id: String?
         enum CodingKeys: String, CodingKey {
             case id = "_id"
         }
@@ -76,7 +98,7 @@ struct Order: Codable, Identifiable {
     
     // Helper for decoding partial user object
     private struct PartialUser: Codable {
-        let id: String
+        let id: String?
         let email: String?
         enum CodingKeys: String, CodingKey {
             case id = "_id"
@@ -89,7 +111,7 @@ struct Order: Codable, Identifiable {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         
         id = try container.decode(String.self, forKey: .id)
-        orderId = try container.decode(String.self, forKey: .orderId)
+        orderId = (try? container.decode(String.self, forKey: .orderId)) ?? "Unknown"
         
         // Handle userId as:
         // 1. Partial User object (extract _id)
@@ -100,14 +122,14 @@ struct Order: Codable, Identifiable {
             userId = try? container.decode(String.self, forKey: .userId)
         }
         
-        items = try container.decode([OrderLineItem].self, forKey: .items)
-        totalAmount = try container.decode(Double.self, forKey: .totalAmount)
-        status = try container.decode(OrderStatus.self, forKey: .status)
-        paymentStatus = try container.decode(PaymentStatus.self, forKey: .paymentStatus)
+        items = (try? container.decode([OrderLineItem].self, forKey: .items)) ?? []
+        totalAmount = (try? container.decode(Double.self, forKey: .totalAmount)) ?? 0.0
+        status = (try? container.decode(OrderStatus.self, forKey: .status)) ?? .pending
+        paymentStatus = (try? container.decode(PaymentStatus.self, forKey: .paymentStatus)) ?? .pending
         paymentId = try? container.decode(String.self, forKey: .paymentId)
         qrCode = try? container.decode(String.self, forKey: .qrCode)
-        createdAt = try container.decode(String.self, forKey: .createdAt)
-        updatedAt = try container.decode(String.self, forKey: .updatedAt)
+        createdAt = (try? container.decode(String.self, forKey: .createdAt)) ?? ""
+        updatedAt = (try? container.decode(String.self, forKey: .updatedAt)) ?? ""
         
         // Handle canteenId as:
         // 1. Full Canteen object (ideal)
@@ -117,10 +139,10 @@ struct Order: Codable, Identifiable {
             canteen = canteenObj
             canteenId = canteenObj.id
         } else if let partialCanteen = try? container.decode(PartialCanteen.self, forKey: .canteenId) {
-            canteenId = partialCanteen.id
+            canteenId = partialCanteen.id ?? ""
             canteen = nil
         } else {
-            canteenId = try container.decode(String.self, forKey: .canteenId)
+            canteenId = (try? container.decode(String.self, forKey: .canteenId)) ?? ""
             canteen = nil
         }
     }

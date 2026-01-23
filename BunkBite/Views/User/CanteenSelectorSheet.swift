@@ -82,7 +82,10 @@ struct CanteenSelectorSheet: View {
                 .padding()
                 .background(Color.white)
                 .cornerRadius(12)
-                .shadow(color: .black.opacity(0.05), radius: 8, x: 0, y: 2)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 12)
+                        .stroke(Color(hex: "E5E7EB"), lineWidth: 1.0)
+                )
                 .padding(.horizontal, 24)
                 .padding(.bottom, 16)
                 .opacity(isAnimating ? 1 : 0)
@@ -143,7 +146,9 @@ struct CanteenSelectorSheet: View {
                             ForEach(filteredCanteens) { canteen in
                                 Button {
                                     canteenViewModel.selectedCanteen = canteen
-                                    menuViewModel.menuItems = []
+                                    Task {
+                                        await menuViewModel.fetchMenu(canteenId: canteen.id)
+                                    }
                                     dismiss()
                                 } label: {
                                     CanteenCard(
@@ -246,10 +251,9 @@ struct CanteenCard: View {
         .padding(16)
         .background(Color.white)
         .cornerRadius(16)
-        .shadow(color: .black.opacity(0.05), radius: 8, x: 0, y: 2)
         .overlay(
             RoundedRectangle(cornerRadius: 16)
-                .stroke(isSelected ? Constants.primaryColor : Color.clear, lineWidth: 2)
+                .stroke(isSelected ? Constants.primaryColor : Color(hex: "E5E7EB"), lineWidth: isSelected ? 2 : 1.0)
         )
     }
 }
