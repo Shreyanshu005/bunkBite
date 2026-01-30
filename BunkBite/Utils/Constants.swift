@@ -21,7 +21,7 @@ struct Constants {
     static let darkGray = Color(hex: "#666666")
     
     // App Info
-    static let appVersion = "2.0"
+    static let appVersion = "2.0.2"
 
     // Animation
     static let bouncyAnimation = Animation.spring(response: 0.6, dampingFraction: 0.7, blendDuration: 0.3)

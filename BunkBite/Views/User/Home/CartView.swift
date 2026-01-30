@@ -121,6 +121,21 @@ struct CartView: View {
                             }
                             .padding(.top, 10)
                             
+                            // Pickup Policy Notice
+                            HStack(spacing: 8) {
+                                Image(systemName: "info.circle.fill")
+                                    .font(.system(size: 14))
+                                    .foregroundStyle(.gray)
+                                
+                                Text("Orders must be picked up within 12 hours or will be refunded.")
+                                    .font(.custom("Urbanist-Medium", size: 13))
+                                    .foregroundStyle(.gray)
+                            }
+                            .padding(12)
+                            .background(Color(hex: "F9FAFB"))
+                            .cornerRadius(8)
+                            .padding(.top, 16)
+                            
                             // Checkout Button
                             let (isCanteenOpen, closedReason) = canteenViewModel.selectedCanteen?.isAcceptingOrders ?? (true, "")
                             

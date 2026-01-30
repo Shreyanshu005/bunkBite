@@ -117,6 +117,42 @@ struct OrderDetailView: View {
                         )
                         .padding(.horizontal, 20)
                         
+                        // Refund Information (if refunded)
+                        if fullOrder.isRefunded {
+                            VStack(alignment: .leading, spacing: 12) {
+                                HStack(spacing: 12) {
+                                    Image(systemName: "arrow.uturn.backward.circle.fill")
+                                        .font(.system(size: 20))
+                                        .foregroundStyle(.blue)
+                                    
+                                    Text("Refund Processed")
+                                        .font(.custom("Urbanist-Bold", size: 16))
+                                        .foregroundStyle(.black)
+                                    
+                                    Spacer()
+                                }
+                                
+                                if let refundId = fullOrder.refundId {
+                                    Text("Refund ID: \(refundId)")
+                                        .font(.custom("Urbanist-Medium", size: 14))
+                                        .foregroundStyle(Color(hex: "6B7280"))
+                                }
+                                
+                                Text("Your refund will be credited to your original payment method within 2-3 business days.")
+                                    .font(.custom("Urbanist-Regular", size: 14))
+                                    .foregroundStyle(Color(hex: "6B7280"))
+                                    .fixedSize(horizontal: false, vertical: true)
+                            }
+                            .padding(16)
+                            .background(Color(hex: "EFF6FF"))
+                            .cornerRadius(12)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 12)
+                                    .stroke(Color(hex: "93C5FD"), lineWidth: 1.5)
+                            )
+                            .padding(.horizontal, 20)
+                        }
+                        
                         // Pickup Location
                         if let canteen = fullOrder.canteen {
                             VStack(alignment: .leading, spacing: 8) {

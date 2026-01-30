@@ -74,17 +74,23 @@ struct Order: Codable, Identifiable {
     let paymentStatus: PaymentStatus
     let paymentId: String?
     let qrCode: String?
+    let refundId: String?
     let createdAt: String
     let updatedAt: String
     
     // Populated fields (optional)
     let canteen: Canteen?
+    
+    // Computed property to check if order is refunded
+    var isRefunded: Bool {
+        return refundId != nil
+    }
 
     
     enum CodingKeys: String, CodingKey {
         case id = "_id"
         case orderId, userId, canteenId, items, totalAmount
-        case status, paymentStatus, paymentId, qrCode
+        case status, paymentStatus, paymentId, qrCode, refundId
         case createdAt, updatedAt, canteen
     }
     
@@ -128,6 +134,7 @@ struct Order: Codable, Identifiable {
         paymentStatus = (try? container.decode(PaymentStatus.self, forKey: .paymentStatus)) ?? .pending
         paymentId = try? container.decode(String.self, forKey: .paymentId)
         qrCode = try? container.decode(String.self, forKey: .qrCode)
+        refundId = try? container.decode(String.self, forKey: .refundId)
         createdAt = (try? container.decode(String.self, forKey: .createdAt)) ?? ""
         updatedAt = (try? container.decode(String.self, forKey: .updatedAt)) ?? ""
         
@@ -160,6 +167,7 @@ struct Order: Codable, Identifiable {
         try container.encode(paymentStatus, forKey: .paymentStatus)
         try container.encodeIfPresent(paymentId, forKey: .paymentId)
         try container.encodeIfPresent(qrCode, forKey: .qrCode)
+        try container.encodeIfPresent(refundId, forKey: .refundId)
         try container.encode(createdAt, forKey: .createdAt)
         try container.encode(updatedAt, forKey: .updatedAt)
     }

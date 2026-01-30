@@ -199,7 +199,28 @@ private struct OrdersTabCard: View {
                 
                 Spacer()
                 
-                StatusBadge(status: order.status)
+                // Show Refunded badge if refunded, otherwise show status badge
+                if order.isRefunded {
+                    HStack(spacing: 6) {
+                        Image(systemName: "arrow.uturn.backward")
+                            .font(.system(size: 16))
+                            .foregroundStyle(Color(hex: "1976D2"))
+                        
+                        Text("Refunded")
+                            .font(.urbanist(size: 14, weight: .bold))
+                            .foregroundStyle(Color(hex: "1976D2"))
+                    }
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 10)
+                    .background(Color(hex: "E3F2FD"))
+                    .cornerRadius(100)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 100)
+                            .stroke(Color(hex: "1976D2"), lineWidth: 1.5)
+                    )
+                } else {
+                    StatusBadge(status: order.status)
+                }
             }
             
             Divider()

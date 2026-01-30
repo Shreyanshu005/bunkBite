@@ -178,6 +178,34 @@ struct CartSheet: View {
                         .opacity(isAnimating ? 1 : 0)
                         .offset(y: isAnimating ? 0 : 30)
 
+                        // Pickup Policy Notice
+                        HStack(alignment: .top, spacing: 12) {
+                            Image(systemName: "exclamationmark.triangle.fill")
+                                .font(.system(size: 22))
+                                .foregroundStyle(.orange)
+                            
+                            VStack(alignment: .leading, spacing: 6) {
+                                Text("⏰ Pickup Policy")
+                                    .font(.urbanist(size: 15, weight: .bold))
+                                    .foregroundStyle(.black)
+                                
+                                Text("Please pick up your order within 12 hours. Orders not collected will be automatically cancelled and refunded within 2-3 business days.")
+                                    .font(.urbanist(size: 14, weight: .medium))
+                                    .foregroundStyle(Color(hex: "374151"))
+                                    .fixedSize(horizontal: false, vertical: true)
+                            }
+                        }
+                        .padding(16)
+                        .background(Color(hex: "FEF3C7"))
+                        .cornerRadius(12)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 12)
+                                .stroke(Color(hex: "F59E0B"), lineWidth: 1.5)
+                        )
+                        .padding(.horizontal, 24)
+                        .opacity(isAnimating ? 1 : 0)
+                        .offset(y: isAnimating ? 0 : 30)
+
                         // Proceed to Checkout Button
                         Button {
                             if isCanteenOpen {

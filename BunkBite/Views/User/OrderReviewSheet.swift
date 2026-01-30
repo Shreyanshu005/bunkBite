@@ -38,6 +38,8 @@ struct OrderReviewSheet: View {
                         
                         priceBreakdownView
                         
+                        pickupPolicyNotice
+                        
                         checkoutButton
                     }
                 }
@@ -154,6 +156,22 @@ struct OrderReviewSheet: View {
         .padding(.horizontal, 20)
     }
     
+    private var pickupPolicyNotice: some View {
+        HStack(spacing: 8) {
+            Image(systemName: "info.circle.fill")
+                .font(.system(size: 14))
+                .foregroundStyle(.gray)
+            
+            Text("Orders must be picked up within 12 hours or will be refunded.")
+                .font(.urbanist(size: 13, weight: .medium))
+                .foregroundStyle(.gray)
+        }
+        .padding(12)
+        .background(Color(hex: "F9FAFB"))
+        .cornerRadius(8)
+        .padding(.horizontal, 20)
+    }
+    
     private var checkoutButton: some View {
         Button {
             startCheckout()
@@ -179,7 +197,7 @@ struct OrderReviewSheet: View {
         }
         .disabled(isProcessing)
         .padding(.horizontal, 20)
-        .padding(.bottom, 20)
+        .padding(.bottom, 40) // Increased padding for better visibility
     }
     
     // MARK: - Checkout Logic

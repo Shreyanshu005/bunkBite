@@ -38,15 +38,21 @@ struct SimplifiedOrderStatusView: View {
                 } else if order.status == .cancelled {
                     // Cancelled State
                     VStack(spacing: 12) {
-                        Image(systemName: "xmark.circle.fill")
+                        Image(systemName: order.isRefunded ? "arrow.uturn.backward.circle.fill" : "xmark.circle.fill")
                             .font(.system(size: 64))
-                            .foregroundStyle(.red)
+                            .foregroundStyle(order.isRefunded ? .blue : .red)
                         
-                        Text("Order Cancelled")
+                        Text(order.isRefunded ? "Refunded ✓" : "Order Cancelled")
                             .font(.urbanist(size: 20, weight: .bold))
-                            .foregroundStyle(.red)
-                            
-
+                            .foregroundStyle(order.isRefunded ? .blue : .red)
+                        
+                        if order.isRefunded {
+                            Text("Refund will reflect in 2-3 business days")
+                                .font(.urbanist(size: 14, weight: .medium))
+                                .foregroundStyle(.gray)
+                                .multilineTextAlignment(.center)
+                                .padding(.horizontal, 20)
+                        }
                     }
                 } else {
                     // Cooking / Preparing (Default for Paid)
