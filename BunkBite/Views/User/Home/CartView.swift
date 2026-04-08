@@ -21,7 +21,11 @@ struct CartView: View {
     var body: some View {
         VStack(spacing: 0) {
                 VStack(alignment: .leading, spacing: 12) {
-                    HStack {
+                    HStack(spacing: 8) {
+                        Image(systemName: "cart.fill")
+                             .font(.system(size: 28))
+                             .foregroundStyle(Constants.primaryColor)
+                        
                         Text("My Cart")
                             .font(.custom("Urbanist-Bold", size: 28))
                             .foregroundStyle(.black)
@@ -141,24 +145,26 @@ struct CartView: View {
                             
                             VStack(spacing: 12) {
                                 Button {
-                                    initiatePayment()
+                                    if isCanteenOpen {
+                                        initiatePayment()
+                                    }
                                 } label: {
                                     ZStack {
                                         if isProcessing {
                                             ProgressView()
                                                 .tint(.white)
                                         } else {
-                                            Text("Proceed to Checkout")
+                                            Text(isCanteenOpen ? "Proceed to Checkout" : "Canteen Closed")
                                                 .font(.custom("Urbanist-Bold", size: 16))
                                                 .foregroundStyle(.white)
                                         }
                                     }
                                     .frame(maxWidth: .infinity)
                                     .padding(.vertical, 18)
-                                    .background(Color(hex: "0D1317"))
+                                    .background(isCanteenOpen ? Color(hex: "0D1317") : Color.gray)
                                     .cornerRadius(16)
                                 }
-                                .disabled(isProcessing)
+                                .disabled(!isCanteenOpen || isProcessing)
                                 
                                 // Warning when canteen is closed
                                 if !isCanteenOpen {

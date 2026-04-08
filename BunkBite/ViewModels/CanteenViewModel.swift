@@ -65,6 +65,22 @@ class CanteenViewModel: ObservableObject {
             for canteen in canteens {
                 print("   - \(canteen.name) at \(canteen.place)")
             }
+            
+            // Auto-select the first canteen if none is selected
+            // or if the previously selected canteen no longer exists
+            // 1. Try to restore the ongoing selection with fresh data
+            if let currentSelected = selectedCanteen,
+               let freshCanteen = canteens.first(where: { $0.id == currentSelected.id }) {
+                selectedCanteen = freshCanteen
+                print("🔄 Refreshed selected canteen with latest status: \(freshCanteen.name)")
+            } 
+            // 2. If no selection or previous selection is gone, auto-select first
+            else {
+                if let firstCanteen = canteens.first {
+                    selectedCanteen = firstCanteen
+                    print("📌 Auto-selected canteen: \(firstCanteen.name)")
+                }
+            }
         } catch {
             errorMessage = "Failed to fetch canteens"
             print("❌ Error fetching canteens: \(error.localizedDescription)")

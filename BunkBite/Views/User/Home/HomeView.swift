@@ -90,65 +90,100 @@ struct HomeView: View {
             Color.white.ignoresSafeArea() // Clean white background
             
             VStack(spacing: 0) {
+                // Sticky Header - Canteen selector + Cart icon
+                if let canteen = canteenViewModel.selectedCanteen {
+                    HStack {
+                        // Native iOS Picker for Canteen Selection
+                        HStack(spacing: 8) {
+                            Image(systemName: "mappin.and.ellipse")
+                                .font(.system(size: 20))
+                                .foregroundStyle(Constants.primaryColor)
+                            
+                            Picker("", selection: $canteenViewModel.selectedCanteen) {
+                                Text("Select Canteen").tag(nil as Canteen?)
+                                ForEach(canteenViewModel.canteens) { canteen in
+                                    Text(canteen.isOpen ? canteen.name : "\(canteen.name) (Closed)")
+                                        .tag(canteen as Canteen?)
+                                }
+                            }
+                            .pickerStyle(.menu)
+                            .labelsHidden()
+                            .lineLimit(1)
+                            .fixedSize()
+                            .accentColor(.gray)
+                        }
+                        
+                        Spacer()
+                        
+                        // Cart Icon
+                        NavigationLink(destination: CartView(cart: cart, authViewModel: authViewModel, selectedTab: .constant(.menu))) {
+                            ZStack(alignment: .topTrailing) {
+                                Image(systemName: "cart")
+                                    .font(.system(size: 22))
+                                    .foregroundStyle(.black)
+                                
+                                if cart.items.count > 0 {
+                                    Text("\(cart.items.reduce(0) { $0 + $1.quantity })")
+                                        .font(.system(size: 10, weight: .bold))
+                                        .foregroundStyle(.white)
+                                        .padding(4)
+                                        .background(Constants.primaryColor)
+                                        .clipShape(Circle())
+                                        .offset(x: 8, y: -8)
+                                }
+                            }
+                        }
+                    }
+                    .padding(.horizontal, 20)
+                    .padding(.top, 12)
+                    .padding(.bottom, 8)
+                    .background(Color.white)
+                } else {
+                    // When no canteen selected
+                    HStack(spacing: 8) {
+                        Image(systemName: "mappin.circle.fill")
+                            .foregroundStyle(Color.green)
+                        
+                        if canteenViewModel.isLoading && canteenViewModel.canteens.isEmpty {
+                            ProgressView()
+                                .progressViewStyle(CircularProgressViewStyle())
+                            Text("Loading canteens...")
+                                .font(.custom("Urbanist-Medium", size: 16))
+                                .foregroundStyle(.gray)
+                        } else {
+                            Picker("", selection: $canteenViewModel.selectedCanteen) {
+                                Text("Select Canteen").tag(nil as Canteen?)
+                                ForEach(canteenViewModel.canteens) { canteen in
+                                    Text(canteen.isOpen ? canteen.name : "\(canteen.name) (Closed)")
+                                        .tag(canteen as Canteen?)
+                                }
+                            }
+                            .pickerStyle(.menu)
+                            .labelsHidden()
+                            .accentColor(.gray)
+                        }
+                    }
+                    .padding(.horizontal, 20)
+                    .padding(.top, 12)
+                    .padding(.bottom, 8)
+                    .background(Color.white)
+                }
+                
                 // Main Scroll Content
                 ScrollView {
                     VStack(alignment: .leading, spacing: 24) {
                         
-                        // Header Section
+                        // Hero + Search Section
                         VStack(spacing: 24) {
                             if let canteen = canteenViewModel.selectedCanteen {
-                                // Header with canteen selector, cart, and bell
-                                HStack {
-                                    // Native iOS Picker for Canteen Selection
-                                    HStack(spacing: 8) {
-                                        Image(systemName: "mappin.and.ellipse")
-                                            .font(.system(size: 20))
-                                            .foregroundStyle(Constants.primaryColor)
-                                        
-                                        Picker("", selection: $canteenViewModel.selectedCanteen) {
-                                            Text("Select Canteen").tag(nil as Canteen?)
-                                            ForEach(canteenViewModel.canteens) { canteen in
-                                                Text(canteen.isOpen ? canteen.name : "\(canteen.name) (Closed)")
-                                                    .tag(canteen as Canteen?)
-                                            }
-                                        }
-                                        .pickerStyle(.menu)
-                                        .labelsHidden()
-                                        .lineLimit(1)
-                                        .fixedSize()
-                                        .accentColor(.gray)
-                                    }
-                                    
-                                    Spacer()
-                                    
-                                    // Cart Icon
-                                    NavigationLink(destination: CartView(cart: cart, authViewModel: authViewModel, selectedTab: .constant(.menu))) {
-                                        ZStack(alignment: .topTrailing) {
-                                            Image(systemName: "cart")
-                                                .font(.system(size: 22))
-                                                .foregroundStyle(.black)
-                                            
-                                            if cart.items.count > 0 {
-                                                Text("\(cart.items.reduce(0) { $0 + $1.quantity })")
-                                                    .font(.system(size: 10, weight: .bold))
-                                                    .foregroundStyle(.white)
-                                                    .padding(4)
-                                                    .background(Constants.primaryColor)
-                                                    .clipShape(Circle())
-                                                    .offset(x: 8, y: -8)
-                                            }
-                                        }
-                                    }
-                                }
-                                
                                 // Hero Text
                                 VStack(alignment: .leading, spacing: 4) {
                                     Text("Hungry?")
-                                        .font(.custom("Urbanist-Bold", size: 32)) // Extra Bold / Large
+                                        .font(.custom("Urbanist-Bold", size: 32))
                                         .foregroundStyle(Color(hex: "0D1317"))
                                     
                                     Text("Order & Eat.")
-                                        .font(.custom("Urbanist-Medium", size: 28)) // Slightly Lighter
+                                        .font(.custom("Urbanist-Medium", size: 28))
                                         .foregroundStyle(Color.gray)
                                 }
                                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -199,42 +234,15 @@ struct HomeView: View {
                                     .cornerRadius(12)
                                 }
                             } else {
-                                // When no canteen selected, show picker with Select Canteen placeholder
-                                VStack(alignment: .leading, spacing: 20) {
-                                    HStack(spacing: 8) {
-                                        Image(systemName: "mappin.circle.fill")
-                                            .foregroundStyle(Color.green)
-                                        
-                                        if canteenViewModel.isLoading && canteenViewModel.canteens.isEmpty {
-                                            ProgressView()
-                                                .progressViewStyle(CircularProgressViewStyle())
-                                            Text("Loading canteens...")
-                                                .font(.custom("Urbanist-Medium", size: 16))
-                                                .foregroundStyle(.gray)
-                                        } else {
-                                            Picker("", selection: $canteenViewModel.selectedCanteen) {
-                                                Text("Select Canteen").tag(nil as Canteen?)
-                                                ForEach(canteenViewModel.canteens) { canteen in
-                                                    Text(canteen.isOpen ? canteen.name : "\(canteen.name) (Closed)")
-                                                        .tag(canteen as Canteen?)
-                                                }
-                                            }
-                                            .pickerStyle(.menu)
-                                            .labelsHidden()
-                                            .accentColor(.gray)
-                                        }
-                                    }
+                                // Greeter when no canteen
+                                VStack(alignment: .leading, spacing: 4) {
+                                    Text("Hungry?")
+                                        .font(.custom("Urbanist-Bold", size: 34))
+                                        .foregroundStyle(.black)
                                     
-                                    // Greeter
-                                    VStack(alignment: .leading, spacing: 4) {
-                                        Text("Hungry?")
-                                            .font(.custom("Urbanist-Bold", size: 34))
-                                            .foregroundStyle(.black)
-                                        
-                                        Text("Beat the rush.")
-                                            .font(.custom("Urbanist-Italic", size: 24))
-                                            .foregroundStyle(.gray)
-                                    }
+                                    Text("Beat the rush.")
+                                        .font(.custom("Urbanist-Italic", size: 24))
+                                        .foregroundStyle(.gray)
                                 }
                             }
                         }
