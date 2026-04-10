@@ -42,7 +42,7 @@ struct HomeView: View {
             }
             return "Other"
         }
-        var cats = Array(Set(allCategories)).sorted()
+        let cats = Array(Set(allCategories)).sorted()
         // Ensure strictly Meals, Snacks, Drinks appear if items exist, or force them if desired by design
         // For now adhering to dynamic but mapping to design names
         return cats
@@ -91,7 +91,7 @@ struct HomeView: View {
             
             VStack(spacing: 0) {
                 // Sticky Header - Canteen selector + Cart icon
-                if let canteen = canteenViewModel.selectedCanteen {
+                if canteenViewModel.selectedCanteen != nil {
                     HStack {
                         // Native iOS Picker for Canteen Selection
                         HStack(spacing: 8) {

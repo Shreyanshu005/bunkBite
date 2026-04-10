@@ -45,70 +45,39 @@ struct NewUserMainView: View {
                 .padding(.bottom, 14) // Pixel perfect 14px from bottom
         }
         .ignoresSafeArea(.all, edges: .bottom)
-        .ignoresSafeArea(.keyboard) 
+        .ignoresSafeArea(.keyboard)
         .environmentObject(authViewModel)
         .environmentObject(canteenViewModel)
         .environmentObject(cart)
         .onAppear {
             authViewModel.checkExistingAuth()
-            
-            // Listen for tab switch notifications
-            NotificationCenter.default.addObserver(
-                forName: NSNotification.Name("SwitchToOrders"),
-                object: nil,
-                queue: .main
-            ) { _ in
-                selectedTab = .orders
-            }
-            
-            NotificationCenter.default.addObserver(
-                forName: NSNotification.Name("SwitchToHome"),
-                object: nil,
-                queue: .main
-            ) { _ in
-                selectedTab = .menu
-            }
-            
-            // Fetch orders after successful login
-            NotificationCenter.default.addObserver(
-                forName: NSNotification.Name("UserDidLogin"),
-                object: nil,
-                queue: .main
-            ) { _ in
-                Task {
-                    if let token = authViewModel.authToken {
-                        await orderViewModel.fetchMyOrders(token: token)
-                        orderViewModel.hasLoadedInitially = true
-                    }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: Notification.Name("SwitchToOrders"))) { _ in
+            selectedTab = .orders
+        }
+        .onReceive(NotificationCenter.default.publisher(for: Notification.Name("SwitchToHome"))) { _ in
+            selectedTab = .menu
+        }
+        .onReceive(NotificationCenter.default.publisher(for: Notification.Name("UserDidLogin"))) { _ in
+            Task {
+                if let token = authViewModel.authToken {
+                    await orderViewModel.fetchMyOrders(token: token)
+                    orderViewModel.hasLoadedInitially = true
                 }
             }
-            
-            // Refresh orders after order placement
-            NotificationCenter.default.addObserver(
-                forName: NSNotification.Name("RefreshOrders"),
-                object: nil,
-                queue: .main
-            ) { _ in
-                Task {
-                    if let token = authViewModel.authToken {
-                        await orderViewModel.fetchMyOrders(token: token)
-                    }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: Notification.Name("RefreshOrders"))) { _ in
+            Task {
+                if let token = authViewModel.authToken {
+                    await orderViewModel.fetchMyOrders(token: token)
                 }
             }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: Notification.Name("UserDidLogout"))) { _ in
+            orderViewModel.orders = []
+            orderViewModel.hasLoadedInitially = false
             
-            // Clear all data on logout
-            NotificationCenter.default.addObserver(
-                forName: NSNotification.Name("UserDidLogout"),
-                object: nil,
-                queue: .main
-            ) { _ in
-                // Clear orders
-                orderViewModel.orders = []
-                orderViewModel.hasLoadedInitially = false
-                
-                // Clear cart
-                cart.clear()
-            }
+            cart.clear()
         }
         .sheet(isPresented: $showLoginSheet) {
             NewLoginSheet(authViewModel: authViewModel, isPresented: $showLoginSheet)
