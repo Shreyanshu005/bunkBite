@@ -1,47 +1,31 @@
-//
-//  OrderSubmission.swift
-//  BunkBite
-//
-//  Created by Claude on 16/11/25.
-//
-
 import Foundation
 import UIKit
 
-// MARK: - Complete Order Submission Model
-// This captures ALL details needed to create an order on backend after payment
-
 struct OrderSubmission: Codable {
-    // Payment Details from Razorpay
+
     let razorpayPaymentId: String
     let razorpayOrderId: String
     let razorpaySignature: String
 
-    // Order Details
-    let orderId: String  // Your internal order ID (if any)
+    let orderId: String
     let totalAmount: Double
     let currency: String
     let itemCount: Int
 
-    // User Details
     let userId: String
     let userPhone: String?
     let userEmail: String?
     let userName: String?
 
-    // Canteen Details
     let canteenId: String
     let canteenName: String
 
-    // Cart Items
     let items: [OrderItem]
 
-    // Timestamps
     let orderCreatedAt: Date
     let paymentCompletedAt: Date
 
-    // Device Info
-    let platform: String  // "iOS"
+    let platform: String
     let appVersion: String
     let deviceModel: String
 
@@ -68,7 +52,6 @@ struct OrderSubmission: Codable {
     }
 }
 
-// MARK: - Order Item Model
 struct OrderItem: Codable {
     let menuItemId: String
     let name: String
@@ -89,10 +72,8 @@ struct OrderItem: Codable {
     }
 }
 
-// MARK: - Order Submission Helper
 class OrderSubmissionHelper {
 
-    // Create order submission from payment data
     static func createSubmission(
         from paymentResponse: RazorpayPaymentResponse,
         cart: Cart,
@@ -100,11 +81,9 @@ class OrderSubmissionHelper {
         userId: String
     ) -> OrderSubmission {
 
-        // Get app info
         let appVersion = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0"
         let deviceModel = UIDevice.current.model
 
-        // Convert cart items to order items
         let orderItems = cart.items.map { cartItem -> OrderItem in
             OrderItem(
                 menuItemId: cartItem.menuItem.id,
@@ -112,8 +91,8 @@ class OrderSubmissionHelper {
                 quantity: cartItem.quantity,
                 unitPrice: cartItem.menuItem.price,
                 totalPrice: cartItem.totalPrice,
-                category: nil,  // Add category if MenuItem has it
-                customizations: nil  // Add if you have customizations
+                category: nil,
+                customizations: nil
             )
         }
 
@@ -121,13 +100,13 @@ class OrderSubmissionHelper {
             razorpayPaymentId: paymentResponse.razorpayPaymentId,
             razorpayOrderId: paymentResponse.razorpayOrderId,
             razorpaySignature: paymentResponse.razorpaySignature,
-            orderId: "ORD_\(Date().timeIntervalSince1970)",  // Temporary local ID
+            orderId: "ORD_\(Date().timeIntervalSince1970)",
             totalAmount: cart.totalAmount,
-            currency: "INR", // Default to INR as per new model
+            currency: "INR",
             itemCount: cart.items.count,
             userId: userId,
-            userPhone: nil, // Not available in new response
-            userEmail: nil, // Not available in new response
+            userPhone: nil,
+            userEmail: nil,
             userName: UserDefaults.standard.string(forKey: "userName"),
             canteenId: canteen.id,
             canteenName: canteen.name,
@@ -140,13 +119,12 @@ class OrderSubmissionHelper {
         )
     }
 
-    // Save order submission locally for later sync
     static func saveOrderLocally(_ submission: OrderSubmission) {
         let encoder = JSONEncoder()
         encoder.dateEncodingStrategy = .iso8601
 
         if (try? encoder.encode(submission)) != nil {
-            // Save to UserDefaults (for now)
+
             var savedOrders = getSavedOrders()
             savedOrders.append(submission)
 
@@ -158,7 +136,6 @@ class OrderSubmissionHelper {
         }
     }
 
-    // Get all saved orders
     static func getSavedOrders() -> [OrderSubmission] {
         guard let data = UserDefaults.standard.data(forKey: "pendingOrders") else {
             return []
@@ -170,7 +147,6 @@ class OrderSubmissionHelper {
         return (try? decoder.decode([OrderSubmission].self, from: data)) ?? []
     }
 
-    // Print order details for debugging
     static func printOrderDetails(_ submission: OrderSubmission) {
         print("\n" + String(repeating: "=", count: 60))
         print("📋 ORDER SUBMISSION DETAILS")
@@ -221,7 +197,6 @@ class OrderSubmissionHelper {
         print(String(repeating: "=", count: 60) + "\n")
     }
 
-    // Generate JSON for backend
     static func generateJSON(_ submission: OrderSubmission) -> String? {
         let encoder = JSONEncoder()
         encoder.dateEncodingStrategy = .iso8601

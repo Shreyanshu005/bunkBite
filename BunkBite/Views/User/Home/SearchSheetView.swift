@@ -1,28 +1,26 @@
-
 import SwiftUI
 
 struct SearchSheetView: View {
     @Binding var searchText: String
-    // @Binding var isPresented: Bool // Not used, isSearchOpen is enough
+
     @Binding var isSearchOpen: Bool
-    
+
     var menuItems: [MenuItem]
     @ObservedObject var cart: Cart
     @ObservedObject var authViewModel: AuthViewModel
     @Binding var showLoginSheet: Bool
-    
-    // Recent Searches - Persisted
+
     @AppStorage("recentSearches") private var recentSearchesData: Data = Data()
     @State private var recentSearches: [String] = []
-    
+
     var searchResults: [MenuItem] {
         if searchText.isEmpty { return [] }
         return menuItems.filter { $0.name.localizedCaseInsensitiveContains(searchText) }
     }
-    
+
     var body: some View {
         VStack(spacing: 20) {
-            // Top Row: Back Button
+
             HStack {
                 Button {
                    withAnimation {
@@ -38,13 +36,12 @@ struct SearchSheetView: View {
                 Spacer()
             }
             .padding(.horizontal, 8)
-            
-            // Search Bar (Active)
+
             HStack(spacing: 12) {
                 Image(systemName: "magnifyingglass")
                     .font(.title3)
                     .foregroundStyle(.black)
-                
+
                 TextField("Search for food...", text: $searchText)
                     .font(.custom("Urbanist-Regular", size: 16))
                     .submitLabel(.search)
@@ -58,9 +55,9 @@ struct SearchSheetView: View {
                 RoundedRectangle(cornerRadius: 10)
                     .stroke(Color(hex: "E5E7EB"), lineWidth: 1.0)
             )
-            
+
             if !searchText.isEmpty {
-                // Search Results or Empty State
+
                 if searchResults.isEmpty {
                     VStack(spacing: 16) {
                         Image(systemName: "magnifyingglass")
@@ -69,7 +66,7 @@ struct SearchSheetView: View {
                         Text("No items found for \"\(searchText)\"")
                             .font(.custom("Urbanist-Bold", size: 18))
                             .foregroundStyle(.gray)
-                        Spacer() // Push content up
+                        Spacer()
                     }
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 40)
@@ -90,10 +87,10 @@ struct SearchSheetView: View {
                     .scrollIndicators(.hidden)
                 }
             } else {
-                // Recent and Suggested Searches Scrollable
+
                 ScrollView {
                     VStack(alignment: .leading, spacing: 24) {
-                        // Recent Searches
+
                         if !recentSearches.isEmpty {
                             VStack(alignment: .leading, spacing: 16) {
                                 HStack {
@@ -107,7 +104,7 @@ struct SearchSheetView: View {
                                             .foregroundStyle(Constants.primaryColor)
                                     }
                                 }
-                                
+
                                 FlowLayout(items: recentSearches.prefix(3)) { search in
                                     SearchChip(text: search, icon: "clock") {
                                         withAnimation { searchText = search }
@@ -115,14 +112,13 @@ struct SearchSheetView: View {
                                 }
                             }
                         }
-                        
-                        // Suggested Searches
+
                         VStack(alignment: .leading, spacing: 16) {
                             Text("Suggested for You")
                                 .font(.custom("Urbanist-Bold", size: 16))
                                 .foregroundStyle(.black)
-                            
-                            let suggestions = ["Samosa", "Coffee", "Rice"] // Limited to 3
+
+                            let suggestions = ["Samosa", "Coffee", "Rice"]
                             FlowLayout(items: suggestions) { search in
                                 SearchChip(text: search, icon: "sparkles") {
                                     withAnimation { searchText = search }
@@ -135,9 +131,9 @@ struct SearchSheetView: View {
             }
         }
         .padding(20)
-        .padding(.top, 50) 
+        .padding(.top, 50)
         .padding(.bottom, 20)
-        .contentShape(Rectangle()) // Ensure the whole area is tappable
+        .contentShape(Rectangle())
         .onTapGesture {
             hideKeyboard()
         }
@@ -146,42 +142,40 @@ struct SearchSheetView: View {
             isFocused = true
         }
     }
-    
+
     @FocusState private var isFocused: Bool
-    
-    // MARK: - Helpers
+
     private func addToHistory(_ text: String) {
         guard !text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return }
-        
+
         if let index = recentSearches.firstIndex(of: text) {
             recentSearches.remove(at: index)
         }
         recentSearches.insert(text, at: 0)
-        
-        // Limit to 10
+
         if recentSearches.count > 10 {
             recentSearches = Array(recentSearches.prefix(10))
         }
         saveHistory()
     }
-    
+
     private func saveHistory() {
         if let encoded = try? JSONEncoder().encode(recentSearches) {
             recentSearchesData = encoded
         }
     }
-    
+
     private func loadHistory() {
         if let decoded = try? JSONDecoder().decode([String].self, from: recentSearchesData) {
             recentSearches = decoded
         }
     }
-    
+
     private func clearHistory() {
         recentSearches.removeAll()
         saveHistory()
     }
-    
+
     private func hideKeyboard() {
         UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
     }
@@ -191,14 +185,14 @@ struct SearchChip: View {
     let text: String
     let icon: String
     let action: () -> Void
-    
+
     var body: some View {
         Button(action: action) {
             HStack(spacing: 6) {
                 Image(systemName: icon)
                     .font(.system(size: 14))
                     .foregroundStyle(.gray.opacity(0.7))
-                
+
                 Text(text)
                     .font(.custom("Urbanist-Medium", size: 14))
                     .foregroundStyle(.gray)
@@ -213,7 +207,6 @@ struct SearchChip: View {
     }
 }
 
-// Simple Flow Layout
 struct FlowLayout<Data: RandomAccessCollection, Content: View>: View where Data.Element: Hashable {
     let items: Data
     let content: (Data.Element) -> Content
@@ -241,7 +234,7 @@ struct FlowLayout<Data: RandomAccessCollection, Content: View>: View where Data.
                         }
                         let result = width
                         if item == self.items.last! {
-                            width = 0 //last item
+                            width = 0
                         } else {
                             width -= d.width
                         }
@@ -250,7 +243,7 @@ struct FlowLayout<Data: RandomAccessCollection, Content: View>: View where Data.
                     .alignmentGuide(.top, computeValue: {d in
                         let result = height
                         if item == self.items.last! {
-                            height = 0 // last item
+                            height = 0
                         }
                         return result
                     })
@@ -269,5 +262,3 @@ struct FlowLayout<Data: RandomAccessCollection, Content: View>: View where Data.
         }
     }
 }
-
-

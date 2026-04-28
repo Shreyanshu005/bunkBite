@@ -1,10 +1,3 @@
-//
-//  NewOwnerMainView.swift
-//  BunkBite
-//
-//  Created by Shreyanshu on 06/11/25.
-//
-
 import SwiftUI
 
 struct OwnerMainView: View {
@@ -23,10 +16,10 @@ struct OwnerMainView: View {
     var body: some View {
         Group {
             if !authViewModel.isAuthenticated {
-                // Show login prompt
+
                 loginPromptView
             } else {
-                // Show main tabs (even if no canteen selected)
+
                 mainTabView
             }
         }
@@ -63,7 +56,7 @@ struct OwnerMainView: View {
 
     private var mainTabView: some View {
         TabView(selection: $selectedTab) {
-            // Menu/Inventory Tab
+
             OwnerMenuTab(
                 canteen: canteenViewModel.selectedCanteen,
                 menuViewModel: menuViewModel,
@@ -78,7 +71,6 @@ struct OwnerMainView: View {
             }
             .tag(0)
 
-            // Orders Tab
             OwnerOrdersTab(
                 canteen: canteenViewModel.selectedCanteen,
                 authViewModel: authViewModel,
@@ -92,14 +84,12 @@ struct OwnerMainView: View {
             }
             .tag(1)
 
-            // Profile Tab
             OwnerProfileView(authViewModel: authViewModel, canteenViewModel: canteenViewModel, showLoginSheet: $showLoginSheet)
                 .tabItem {
                     Label("Profile", systemImage: "person")
                 }
                 .tag(2)
-            
-            // Scanner Tab
+
             Color.clear
                 .tabItem {
                     Label("Scan QR", systemImage: "qrcode.viewfinder")
@@ -110,19 +100,19 @@ struct OwnerMainView: View {
         .onChange(of: selectedTab) {
             if selectedTab == 3 {
                 showScanner = true
-                // Reset to previous tab after opening scanner
+
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                    selectedTab = 1 // Go back to Orders tab
+                    selectedTab = 1
                 }
             }
         }
         .fullScreenCover(isPresented: $showScanner) {
             ZStack(alignment: .topLeading) {
                 QRScannerView(viewModel: scannerViewModel, token: authViewModel.authToken ?? "")
-                
+
                 Button {
                     showScanner = false
-                    scannerViewModel.resetScan() // Reset when closing scanner
+                    scannerViewModel.resetScan()
                 } label: {
                     Image(systemName: "xmark.circle.fill")
                         .font(.system(size: 32))
@@ -130,7 +120,7 @@ struct OwnerMainView: View {
                         .padding()
                 }
             }
-            // Present result sheet ON TOP of the scanner
+
             .sheet(isPresented: $showScannedOrder) {
                 if let order = scannerViewModel.scannedOrder {
                     ScannedOrderSheet(
@@ -144,18 +134,17 @@ struct OwnerMainView: View {
                         }
                     )
                     .onDisappear {
-                        // Resume scanning when sheet is dismissed
-                        scannerViewModel.resetScan() 
+
+                        scannerViewModel.resetScan()
                     }
                 }
             }
         }
         .onChange(of: scannerViewModel.scannedOrder) {
-            // Only show sheet, do NOT close scanner
+
             if scannerViewModel.scannedOrder != nil {
                 showScannedOrder = true
             }
         }
     }
 }
-

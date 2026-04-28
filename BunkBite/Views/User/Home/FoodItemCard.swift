@@ -1,4 +1,3 @@
-
 import SwiftUI
 
 struct FoodItemCard: View {
@@ -6,16 +5,16 @@ struct FoodItemCard: View {
     @ObservedObject var cart: Cart
     @ObservedObject var authViewModel: AuthViewModel
     @Binding var showLoginSheet: Bool
-    
+
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            // Image Area
+
             ZStack {
                 if item.availableQuantity > 0 {
                     Image(systemName: "fork.knife")
                         .font(.largeTitle)
                         .foregroundStyle(.gray.opacity(0.3))
-                    
+
                     Image("food_placeholder")
                         .resizable()
                         .aspectRatio(contentMode: .fill)
@@ -23,7 +22,7 @@ struct FoodItemCard: View {
                         .frame(minWidth: 0, maxWidth: .infinity)
                         .clipped()
                 } else {
-                    // Out of stock overlay
+
                     ZStack {
                         Color.black
                         Text("Unavailable")
@@ -35,35 +34,32 @@ struct FoodItemCard: View {
             .frame(height: 120)
             .background(Color.gray.opacity(0.1))
             .clipped()
-            
-            // Content
+
             VStack(alignment: .leading, spacing: 8) {
-                // Name
+
                 Text(item.name)
                     .font(.custom("Urbanist-Bold", size: 16))
                     .foregroundStyle(.black)
                     .lineLimit(1)
-                
-                // Price and Quantity Left
+
                 HStack {
                     Text("₹\(Int(item.price))")
                         .font(.custom("Urbanist-Bold", size: 16))
                         .foregroundStyle(Constants.primaryColor)
-                    
+
                     Spacer()
-                    
+
                     if item.availableQuantity > 0 {
                         Text("\(item.availableQuantity) left")
                             .font(.custom("Urbanist-Medium", size: 12))
-                            .foregroundStyle(.gray) // Or subtle green
+                            .foregroundStyle(.gray)
                     } else {
                         Text("Sold Out")
                             .font(.custom("Urbanist-Bold", size: 10))
                             .foregroundStyle(.red)
                     }
                 }
-                
-                // Add Button (Full Width Dark)
+
                 if cart.getQuantity(for: item) > 0 {
                     HStack(spacing: 0) {
                         Button {
@@ -76,14 +72,14 @@ struct FoodItemCard: View {
                                 .background(Color(hex: "0D1317"))
                                 .cornerRadius(12, corners: [.topLeft, .bottomLeft])
                         }
-                        
+
                         Text("\(cart.getQuantity(for: item))")
                             .font(.custom("Urbanist-Bold", size: 16))
                             .foregroundStyle(.white)
                             .frame(maxWidth: .infinity)
                             .frame(height: 40)
                             .background(Color(hex: "0D1317"))
-                        
+
                         Button {
                             if cart.getQuantity(for: item) < item.availableQuantity {
                                 cart.addItem(item)
@@ -107,7 +103,7 @@ struct FoodItemCard: View {
                     } label: {
                         ZStack {
                             RoundedRectangle(cornerRadius: 12)
-                                .fill(Color(hex: "0D1317")) // Dark / Black
+                                .fill(Color(hex: "0D1317"))
                                 .frame(height: 40)
                                 .overlay(
                                     Group {
@@ -139,5 +135,3 @@ struct FoodItemCard: View {
         )
     }
 }
-
-

@@ -1,10 +1,3 @@
-//
-//  OrderReviewSheet.swift
-//  BunkBite
-//
-//  Created by Shreyanshu on 12/12/25.
-//
-
 import SwiftUI
 
 struct OrderReviewSheet: View {
@@ -12,34 +5,33 @@ struct OrderReviewSheet: View {
     @ObservedObject var orderViewModel: OrderViewModel
     @ObservedObject var authViewModel: AuthViewModel
     let canteen: Canteen
-    
+
     @Environment(\.dismiss) var dismiss
     @State private var showPaymentGateway = false
     @State private var createdOrder: Order?
     @State private var paymentData: RazorpayPaymentInitiation?
     @State private var isProcessing = false
     @State private var navigateToDetail = false
-    
-    // Blocking Logic State
+
     @State private var showBlockingAlert = false
     @State private var blockingMessage = ""
-    
+
     var body: some View {
         NavigationStack {
             ZStack {
-                // Background
+
                 LinearGradient(colors: [Constants.primaryColor.opacity(0.05), .white], startPoint: .top, endPoint: .bottom).ignoresSafeArea()
-                
+
                 ScrollView {
                     VStack(spacing: 24) {
                         headerView
-                        
+
                         orderItemsView
-                        
+
                         priceBreakdownView
-                        
+
                         pickupPolicyNotice
-                        
+
                         checkoutButton
                     }
                 }
@@ -51,7 +43,7 @@ struct OrderReviewSheet: View {
                     Button("Cancel") { dismiss() }
                 }
             }
-            // Razorpay Presentation
+
             .fullScreenCover(isPresented: $showPaymentGateway) {
                 if let data = paymentData {
                     RazorpayCheckoutView(
@@ -68,7 +60,7 @@ struct OrderReviewSheet: View {
                     )
                 }
             }
-            // Detail Navigation (Order Success)
+
             .fullScreenCover(isPresented: $navigateToDetail, onDismiss: {
                 if createdOrder != nil {
                      dismiss()
@@ -78,7 +70,7 @@ struct OrderReviewSheet: View {
                     OrderSuccessView(order: order)
                 }
             }
-            // Alerts
+
             .alert("Error", isPresented: .constant(orderViewModel.errorMessage != nil)) {
                 Button("OK") { orderViewModel.errorMessage = nil }
             } message: {
@@ -91,9 +83,7 @@ struct OrderReviewSheet: View {
             }
         }
     }
-    
-    // MARK: - Subviews
-    
+
     private var headerView: some View {
         VStack(spacing: 8) {
             Image(systemName: "cart.fill")
@@ -107,7 +97,7 @@ struct OrderReviewSheet: View {
         }
         .padding(.top, 20)
     }
-    
+
     private var orderItemsView: some View {
         VStack(alignment: .leading, spacing: 16) {
             Text("Order Items")
@@ -124,7 +114,7 @@ struct OrderReviewSheet: View {
         )
         .padding(.horizontal, 20)
     }
-    
+
     private var priceBreakdownView: some View {
         VStack(spacing: 12) {
             HStack {
@@ -155,13 +145,13 @@ struct OrderReviewSheet: View {
         )
         .padding(.horizontal, 20)
     }
-    
+
     private var pickupPolicyNotice: some View {
         HStack(spacing: 8) {
             Image(systemName: "info.circle.fill")
                 .font(.system(size: 14))
                 .foregroundStyle(.gray)
-            
+
             Text("Orders must be picked up within 12 hours or will be refunded.")
                 .font(.urbanist(size: 13, weight: .medium))
                 .foregroundStyle(.gray)
@@ -171,7 +161,7 @@ struct OrderReviewSheet: View {
         .cornerRadius(8)
         .padding(.horizontal, 20)
     }
-    
+
     private var checkoutButton: some View {
         Button {
             startCheckout()
@@ -197,28 +187,26 @@ struct OrderReviewSheet: View {
         }
         .disabled(isProcessing)
         .padding(.horizontal, 20)
-        .padding(.bottom, 40) // Increased padding for better visibility
+        .padding(.bottom, 40)
     }
-    
-    // MARK: - Checkout Logic
-    
+
     private func startCheckout() {
-        // Check Status First
+
         let (isAccepting, reason) = canteen.isAcceptingOrders
         if !isAccepting {
             blockingMessage = reason
             showBlockingAlert = true
             return
         }
-        
+
         guard let token = authViewModel.authToken else { return }
         isProcessing = true
-        
+
         Task {
-            // 1. Create Order
+
             if let order = await orderViewModel.createOrder(canteenId: canteen.id, cart: cart, token: token) {
                 createdOrder = order
-                // 2. Initiate Payment immediately
+
                 if let payData = await orderViewModel.initiatePayment(orderId: order.orderId, token: token) {
                     paymentData = payData
                     showPaymentGateway = true
@@ -230,11 +218,11 @@ struct OrderReviewSheet: View {
             }
         }
     }
-    
+
     private func verifyPayment(_ response: RazorpayPaymentResponse) {
         guard let token = authViewModel.authToken else { return }
         showPaymentGateway = false
-        
+
         Task {
             if let verifiedOrder = await orderViewModel.verifyPayment(
                 razorpayOrderId: response.razorpayOrderId,
@@ -244,18 +232,16 @@ struct OrderReviewSheet: View {
             ) {
                 if verifiedOrder.paymentStatus == .success {
                     createdOrder = verifiedOrder
-                    // 3. Clear Cart and Show Detail
+
                     cart.clear()
-                    
-                    // Trigger Local Notification
+
                     NotificationManager.shared.sendOrderPlacedNotification(
                         orderId: verifiedOrder.orderId,
                         canteenName: canteen.name
                     )
-                    
-                    // Notify other views that order is completed
+
                     NotificationCenter.default.post(name: NSNotification.Name("OrderCompleted"), object: nil)
-                    
+
                     navigateToDetail = true
                 } else {
                     isProcessing = false
@@ -268,7 +254,6 @@ struct OrderReviewSheet: View {
     }
 }
 
-// Helper Row
 struct OrderItemRow: View {
     let item: CartItem
     var body: some View {

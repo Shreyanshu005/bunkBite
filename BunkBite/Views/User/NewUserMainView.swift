@@ -1,4 +1,3 @@
-
 import SwiftUI
 
 struct NewUserMainView: View {
@@ -11,15 +10,13 @@ struct NewUserMainView: View {
     @State private var showLoginSheet = false
     @State private var showCanteenSelector = false
     @State private var selectedTab: CustomFloatingTabBar.Tab = .menu
-    
+
     init() {}
 
     var body: some View {
         ZStack(alignment: .bottom) {
             Color.white.ignoresSafeArea()
-            
-            // Main Content Area
-            // Switch between different tabs
+
             switch selectedTab {
             case .menu:
                 HomeView(
@@ -39,10 +36,9 @@ struct NewUserMainView: View {
                      showLoginSheet: $showLoginSheet
                 )
             }
-            
-            // Floating Tab Bar
+
             CustomFloatingTabBar(selectedTab: $selectedTab)
-                .padding(.bottom, 14) // Pixel perfect 14px from bottom
+                .padding(.bottom, 14)
         }
         .ignoresSafeArea(.all, edges: .bottom)
         .ignoresSafeArea(.keyboard)
@@ -76,7 +72,7 @@ struct NewUserMainView: View {
         .onReceive(NotificationCenter.default.publisher(for: Notification.Name("UserDidLogout"))) { _ in
             orderViewModel.orders = []
             orderViewModel.hasLoadedInitially = false
-            
+
             cart.clear()
         }
         .sheet(isPresented: $showLoginSheet) {

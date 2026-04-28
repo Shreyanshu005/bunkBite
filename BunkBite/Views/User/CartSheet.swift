@@ -1,10 +1,3 @@
-//
-//  CartSheet.swift
-//  BunkBite
-//
-//  Created by Shreyanshu on 06/11/25.
-//
-
 import SwiftUI
 
 struct CartSheet: View {
@@ -23,14 +16,14 @@ struct CartSheet: View {
     @State private var showSuccessSheet = false
     @State private var showFailureSheet = false
     @State private var paymentSuccessId = ""
-    
+
     private var isCanteenOpen: Bool {
         canteen?.isAcceptingOrders.0 ?? true
     }
 
     var body: some View {
         ZStack {
-            // Gradient Background
+
             LinearGradient(
                 colors: [
                     Constants.primaryColor.opacity(0.05),
@@ -42,7 +35,7 @@ struct CartSheet: View {
             .ignoresSafeArea()
 
             if cart.items.isEmpty {
-                // Empty Cart State
+
                 VStack(spacing: 32) {
                     Spacer()
 
@@ -75,7 +68,7 @@ struct CartSheet: View {
             } else {
                 ScrollView {
                     VStack(spacing: 32) {
-                        // Header with cart icon
+
                         VStack(spacing: 16) {
                             ZStack {
                                 Circle()
@@ -101,16 +94,15 @@ struct CartSheet: View {
                             }
                             .opacity(isAnimating ? 1 : 0)
                             .offset(y: isAnimating ? 0 : 20)
-                            
+
                             Rectangle()
                                 .fill(Color(hex: "E5E7EB"))
                                 .frame(height: 1.0)
-                                .padding(.horizontal, -24) // Touching screen edges
+                                .padding(.horizontal, -24)
                                 .padding(.top, 4)
                         }
                         .padding(.horizontal, 24)
 
-                        // Cart Items
                         VStack(spacing: 12) {
                             ForEach(cart.items) { cartItem in
                                 CartItemCard(cartItem: cartItem, cart: cart)
@@ -120,7 +112,6 @@ struct CartSheet: View {
                         .opacity(isAnimating ? 1 : 0)
                         .offset(y: isAnimating ? 0 : 30)
 
-                        // Bill Details Card
                         VStack(spacing: 16) {
                             Text("Bill Details")
                                 .font(.urbanist(size: 14, weight: .semibold))
@@ -153,7 +144,7 @@ struct CartSheet: View {
                                 Rectangle()
                                     .fill(Color(hex: "E5E7EB"))
                                     .frame(height: 1.0)
-                                    .padding(.horizontal, -24) // Touching screen edges
+                                    .padding(.horizontal, -24)
                                     .padding(.top, 4)
 
                                 HStack {
@@ -178,17 +169,16 @@ struct CartSheet: View {
                         .opacity(isAnimating ? 1 : 0)
                         .offset(y: isAnimating ? 0 : 30)
 
-                        // Pickup Policy Notice
                         HStack(alignment: .top, spacing: 12) {
                             Image(systemName: "exclamationmark.triangle.fill")
                                 .font(.system(size: 22))
                                 .foregroundStyle(.orange)
-                            
+
                             VStack(alignment: .leading, spacing: 6) {
                                 Text("⏰ Pickup Policy")
                                     .font(.urbanist(size: 15, weight: .bold))
                                     .foregroundStyle(.black)
-                                
+
                                 Text("Please pick up your order within 12 hours. Orders not collected will be automatically cancelled and refunded within 2-3 business days.")
                                     .font(.urbanist(size: 14, weight: .medium))
                                     .foregroundStyle(Color(hex: "374151"))
@@ -206,7 +196,6 @@ struct CartSheet: View {
                         .opacity(isAnimating ? 1 : 0)
                         .offset(y: isAnimating ? 0 : 30)
 
-                        // Proceed to Checkout Button
                         Button {
                             if isCanteenOpen {
                                 showOrderReview = true
@@ -246,7 +235,6 @@ struct CartSheet: View {
                 }
             }
 
-            // Close button
             VStack {
                 HStack {
                     Button {
@@ -277,7 +265,6 @@ struct CartSheet: View {
                 }
                 Spacer()
             }
-
 
         }
         .onAppear {
@@ -314,7 +301,7 @@ struct CartItemCard: View {
     var body: some View {
         VStack(spacing: 16) {
             HStack(spacing: 16) {
-                // Item image
+
                 Circle()
                     .fill(Constants.primaryColor.opacity(0.1))
                     .frame(width: 60, height: 60)
@@ -324,7 +311,6 @@ struct CartItemCard: View {
                             .foregroundStyle(Constants.primaryColor)
                     )
 
-                // Item details
                 VStack(alignment: .leading, spacing: 6) {
                     Text(cartItem.menuItem.name)
                         .font(.urbanist(size: 17, weight: .semibold))
@@ -337,13 +323,11 @@ struct CartItemCard: View {
 
                 Spacer()
 
-                // Total price for this item
                 Text("₹\(Int(cartItem.totalPrice))")
                     .font(.urbanist(size: 18, weight: .bold))
                     .foregroundStyle(Constants.primaryColor)
             }
 
-            // Quantity controls
             HStack {
                 Spacer()
 
@@ -397,10 +381,6 @@ struct CartItemCard: View {
     }
 }
 
-
-
-
-// MARK: - Payment Success Sheet
 struct PaymentSuccessSheet: View {
     let paymentId: String
     let onDismiss: () -> Void
@@ -423,7 +403,6 @@ struct PaymentSuccessSheet: View {
             VStack(spacing: 32) {
                 Spacer()
 
-                // Success icon with animation
                 ZStack {
                     Circle()
                         .fill(Constants.primaryColor.opacity(0.1))
@@ -452,7 +431,6 @@ struct PaymentSuccessSheet: View {
                         .foregroundStyle(.gray)
                         .opacity(isAnimating ? 1 : 0)
 
-                    // Payment ID
                     Text("Payment ID: \(paymentId.prefix(20))...")
                         .font(.urbanist(size: 12, weight: .regular))
                         .foregroundStyle(.gray.opacity(0.7))
@@ -462,7 +440,6 @@ struct PaymentSuccessSheet: View {
 
                 Spacer()
 
-                // Done button
                 Button {
                     onDismiss()
                 } label: {
@@ -500,7 +477,6 @@ struct PaymentSuccessSheet: View {
     }
 }
 
-// MARK: - Payment Failure Sheet
 struct PaymentFailureSheet: View {
     let errorMessage: String
     let onRetry: () -> Void
@@ -523,7 +499,6 @@ struct PaymentFailureSheet: View {
             VStack(spacing: 32) {
                 Spacer()
 
-                // Error icon with animation
                 ZStack {
                     Circle()
                         .fill(Color.red.opacity(0.1))
@@ -567,9 +542,8 @@ struct PaymentFailureSheet: View {
 
                 Spacer()
 
-                // Action buttons
                 VStack(spacing: 12) {
-                    // Retry button
+
                     Button {
                         onDismiss()
                         DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
@@ -596,7 +570,6 @@ struct PaymentFailureSheet: View {
                         .shadow(color: Constants.primaryColor.opacity(0.3), radius: 10, x: 0, y: 5)
                     }
 
-                    // Cancel button
                     Button {
                         onDismiss()
                     } label: {

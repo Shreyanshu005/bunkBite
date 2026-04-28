@@ -1,10 +1,3 @@
-//
-//  RootView.swift
-//  BunkBite
-//
-//  Created by Shreyanshu on 06/11/25.
-//
-
 import SwiftUI
 
 struct RootView: View {
@@ -16,7 +9,7 @@ struct RootView: View {
     var body: some View {
         Group {
             if versionManager.needsUpdate {
-                // Force update screen
+
                 VersionCheckView(
                     currentVersion: Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "Unknown",
                     minimumVersion: versionManager.minimumVersion,
@@ -25,26 +18,25 @@ struct RootView: View {
             } else if isCheckingAuth {
                 ProgressView()
             } else if !hasSeenWelcome {
-                // Show welcome screen for first-time users
+
                 WelcomeScreen(hasSeenWelcome: $hasSeenWelcome)
             } else {
-                // Check role: "admin" = owner, "user" = authenticated user, nil = guest
+
                 if userRole?.lowercased() == "admin" {
                     OwnerMainView()
                 } else {
-                    // Always show user view (supports both authenticated and guest mode)
+
                     NewUserMainView()
                 }
             }
         }
         .task {
-            // Check version on app launch
+
             await versionManager.checkVersion()
         }
         .onAppear {
             checkUserRole()
 
-            // Listen for authentication changes
             NotificationCenter.default.addObserver(
                 forName: NSNotification.Name("UserDidLogin"),
                 object: nil,

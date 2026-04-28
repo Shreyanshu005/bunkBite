@@ -1,10 +1,3 @@
-//
-//  MyOrdersView.swift
-//  BunkBite
-//
-//  Created by Shreyanshu on 12/12/25.
-//
-
 import SwiftUI
 
 struct MyOrdersView: View {
@@ -13,49 +6,48 @@ struct MyOrdersView: View {
     @EnvironmentObject var cart: Cart
     @EnvironmentObject var canteenViewModel: CanteenViewModel
     @Environment(\.dismiss) var dismiss
-    
+
     @State private var selectedFilter: OrderStatus? = nil
     @State private var selectedOrder: Order?
     @State private var showReorderConfirmation = false
     @State private var reorderedItemsCount = 0
     @State private var showCart = false
     @State private var showLoginSheet = false
-    
-    // Payment-related state
+
     @State private var showPaymentGateway = false
     @State private var paymentData: RazorpayPaymentInitiation?
     @State private var processingOrderId: String?
     @State private var isProcessing = false
-    
+
     var filteredOrders: [Order] {
-        // Show all orders
+
         let relevantOrders = orderViewModel.orders
-        
+
         if let filter = selectedFilter {
             return relevantOrders.filter { $0.status == filter }
         }
         return relevantOrders
     }
-    
+
     var body: some View {
         ZStack {
-            // Background
+
             Color.white
                 .ignoresSafeArea()
-            
+
             VStack(spacing: 0) {
-                // Header
+
                 VStack(alignment: .leading, spacing: 12) {
                     HStack(spacing: 16) {
                         Text("My Orders")
                             .font(.custom("Urbanist-Bold", size: 28))
                             .foregroundStyle(.black)
-                        
+
                         Spacer()
                     }
                     .padding(.horizontal, 20)
                     .padding(.top, 20)
-                    
+
                     Rectangle()
                         .fill(Color(hex: "E5E7EB"))
                         .frame(height: 1.0)
@@ -63,8 +55,7 @@ struct MyOrdersView: View {
                         .padding(.top, 4)
                 }
                 .background(Color.white)
-                
-                // Orders List
+
                 if orderViewModel.isLoading && orderViewModel.orders.isEmpty {
                     Spacer()
                     ProgressView()
@@ -94,10 +85,10 @@ struct MyOrdersView: View {
                             }
                         }
                         .padding(20)
-                        .padding(.bottom, 80) // Extra padding to scroll above tab bar
+                        .padding(.bottom, 80)
                     }
                     .refreshable {
-                        // Use detached task to prevent cancellation
+
                         await Task.detached { @MainActor in
                             guard let token = authViewModel.authToken else { return }
                             await orderViewModel.fetchMyOrders(token: token)
@@ -109,7 +100,7 @@ struct MyOrdersView: View {
         .onAppear {
             if !orderViewModel.hasLoadedInitially {
                 orderViewModel.hasLoadedInitially = true
-                // Use unstructured task that won't be cancelled
+
                 Task.detached { @MainActor in
                     guard let token = authViewModel.authToken else {
                         print("❌ No auth token available")
@@ -152,46 +143,45 @@ struct MyOrdersView: View {
                 Text("\(reorderedItemsCount) items have been added to your cart")
             }
     }
-    
+
     private func reorderItems(from order: Order) {
-        // Clear existing cart or add to existing items
+
         var addedCount = 0
-        
+
         for item in order.items {
-            // Create a MenuItem from OrderLineItem
+
             let menuItem = MenuItem(
                 id: item.menuItemId,
                 name: item.name,
                 image: nil,
                 price: item.price,
-                availableQuantity: 999, // Assume available
+                availableQuantity: 999,
                 createdAt: "",
                 updatedAt: ""
             )
-            
-            // Add the quantity from the order
+
             for _ in 0..<item.quantity {
                 cart.addItem(menuItem)
                 addedCount += 1
             }
         }
-        
+
         reorderedItemsCount = addedCount
         showReorderConfirmation = true
     }
-    
+
     private func fetchOrders() async {
-        guard let token = authViewModel.authToken else { 
-            return 
+        guard let token = authViewModel.authToken else {
+            return
         }
         await orderViewModel.fetchMyOrders(token: token)
     }
-    
+
     private func payForPendingOrder(_ order: Order) {
         guard let token = authViewModel.authToken else { return }
         isProcessing = true
         processingOrderId = order.id
-        
+
         Task {
             if let payData = await orderViewModel.initiatePayment(orderId: order.orderId, token: token) {
                 paymentData = payData
@@ -201,11 +191,11 @@ struct MyOrdersView: View {
             }
         }
     }
-    
+
     private func verifyPayment(_ response: RazorpayPaymentResponse) {
         guard let token = authViewModel.authToken else { return }
         showPaymentGateway = false
-        
+
         Task {
             if let verifiedOrder = await orderViewModel.verifyPayment(
                 razorpayOrderId: response.razorpayOrderId,
@@ -214,13 +204,11 @@ struct MyOrdersView: View {
                 token: token
             ) {
                 if verifiedOrder.paymentStatus == .success {
-                    // Refresh orders to show updated status
+
                     Task { await fetchOrders() }
-                    
-                    // Show detail view
+
                     selectedOrder = verifiedOrder
-                    
-                    // Clear state
+
                     isProcessing = false
                     processingOrderId = nil
                 } else {
@@ -238,7 +226,7 @@ struct OrderFilterChip: View {
     let title: String
     let isSelected: Bool
     let action: () -> Void
-    
+
     var body: some View {
         Button(action: action) {
             Text(title)
@@ -261,24 +249,23 @@ struct UserOrderCard: View {
     let onPayNow: (Order) -> Void
     let isProcessing: Bool
     let processingOrderId: String?
-    
+
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            // Header: Order ID + Status Badge
+
             HStack {
                 Text(order.orderId)
                     .font(.custom("Urbanist-Bold", size: 16))
                     .foregroundStyle(.black)
-                
+
                 Spacer()
-                
-                // Show Refunded badge if refunded, otherwise show status badge
+
                 if order.isRefunded {
                     HStack(spacing: 6) {
                         Image(systemName: "arrow.uturn.backward")
                             .font(.system(size: 16))
                             .foregroundStyle(Color(hex: "1976D2"))
-                        
+
                         Text("Refunded")
                             .font(.custom("Urbanist-Bold", size: 14))
                             .foregroundStyle(Color(hex: "1976D2"))
@@ -295,54 +282,48 @@ struct UserOrderCard: View {
                     StatusBadge(status: order.status)
                 }
             }
-            
-            // Timestamp
+
             Text(formatDate(order.createdAt))
                 .font(.custom("Urbanist-Medium", size: 14))
                 .foregroundStyle(Color(hex: "6B7280"))
-            
-            // Items count
+
             Text("\(order.items.count) item\(order.items.count == 1 ? "" : "s")")
                 .font(.custom("Urbanist-Regular", size: 14))
                 .foregroundStyle(Color(hex: "6B7280"))
                 .padding(.top, 4)
-            
-            // Item list (first 2 items)
+
             ForEach(order.items.prefix(2)) { item in
                 Text("\(item.name) x\(item.quantity)")
                     .font(.custom("Urbanist-Regular", size: 14))
                     .foregroundStyle(.black)
             }
-            
+
             if order.items.count > 2 {
                 Text("+\(order.items.count - 2) more")
                     .font(.custom("Urbanist-Regular", size: 14))
                     .foregroundStyle(Color(hex: "6B7280"))
             }
-            
-            // Separator before Total
+
             Rectangle()
                 .fill(Color(hex: "E5E7EB"))
                 .frame(height: 1)
                 .padding(.top, 8)
-            
-            // Total
+
             HStack {
                 Text("Total")
                     .font(.custom("Urbanist-Medium", size: 14))
                     .foregroundStyle(Color(hex: "6B7280"))
-                
+
                 Spacer()
-                
+
                 Text("₹\(Int(order.totalAmount))")
                     .font(.custom("Urbanist-Bold", size: 18))
                     .foregroundStyle(Constants.primaryColor)
             }
             .padding(.top, 8)
-            
-            // Action Buttons
+
             HStack(spacing: 12) {
-                // View Details Button
+
                 Button(action: onViewDetails) {
                     Text("View Details")
                         .font(.custom("Urbanist-Bold", size: 14))
@@ -357,8 +338,7 @@ struct UserOrderCard: View {
                         )
                 }
                 .buttonStyle(.plain)
-                
-                // Pay Now button for pending orders, Reorder for others
+
                 if order.status == .pending {
                     Button(action: { onPayNow(order) }) {
                         HStack(spacing: 6) {
@@ -408,13 +388,13 @@ struct UserOrderCard: View {
         )
         .shadow(color: Color.black.opacity(0.03), radius: 8, x: 0, y: 2)
     }
-    
+
     private func formatDate(_ dateString: String) -> String {
         let formatter = ISO8601DateFormatter()
         formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
-        
+
         guard let date = formatter.date(from: dateString) else {
-            // Fallback: try without fractional seconds
+
             formatter.formatOptions = [.withInternetDateTime]
             guard let date = formatter.date(from: dateString) else {
                 return dateString
@@ -423,7 +403,7 @@ struct UserOrderCard: View {
             displayFormatter.dateFormat = "MMM d, h:mm a"
             return displayFormatter.string(from: date)
         }
-        
+
         let displayFormatter = DateFormatter()
         displayFormatter.dateFormat = "MMM d, h:mm a"
         return displayFormatter.string(from: date)
@@ -432,7 +412,7 @@ struct UserOrderCard: View {
 
 struct StatusBadge: View {
     let status: OrderStatus
-    
+
     var badgeColor: (background: Color, text: Color, border: Color) {
         switch status {
         case .preparing:
@@ -449,7 +429,7 @@ struct StatusBadge: View {
             return (Color(hex: "F0FFF6"), Color(hex: "0B7D3B"), Color(hex: "AECEBB"))
         }
     }
-    
+
     var statusText: String {
         switch status {
         case .preparing: return "Cooking"
@@ -460,13 +440,13 @@ struct StatusBadge: View {
         case .completed: return "Completed"
         }
     }
-    
+
     var body: some View {
         HStack(spacing: 6) {
             Image(systemName: "clock")
                 .font(.system(size: 16))
                 .foregroundStyle(badgeColor.text)
-            
+
             Text(statusText)
                 .font(.custom("Urbanist-Bold", size: 14))
                 .foregroundStyle(badgeColor.text)
@@ -485,31 +465,31 @@ struct StatusBadge: View {
 struct EmptyOrdersView: View {
     let filter: OrderStatus?
     @Environment(\.dismiss) var dismiss
-    
+
     var body: some View {
         VStack(spacing: 24) {
             ZStack {
                 Circle()
                     .fill(Color(hex: "F3F4F6"))
                     .frame(width: 140, height: 140)
-                
+
                 Image(systemName: "shippingbox")
                     .font(.system(size: 60))
                     .foregroundStyle(.gray.opacity(0.6))
             }
-            
+
             VStack(spacing: 8) {
                 Text(filter == nil ? "No orders yet" : "No \(filter!.rawValue) orders")
                     .font(.custom("Urbanist-Bold", size: 22))
                     .foregroundStyle(.black)
-                
+
                 Text("Your order history will appear here")
                     .font(.custom("Urbanist-Medium", size: 16))
                     .foregroundStyle(.gray)
             }
-            
+
             Button {
-                // Return to home/menu
+
                 NotificationCenter.default.post(name: NSNotification.Name("SwitchToHome"), object: nil)
             } label: {
                 Text("Start Ordering")

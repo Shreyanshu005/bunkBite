@@ -1,10 +1,3 @@
-//
-//  AuthViewModel.swift
-//  BunkBite
-//
-//  Created by Shreyanshu on 06/11/25.
-//
-
 import Foundation
 import SwiftUI
 import Combine
@@ -31,8 +24,6 @@ class AuthViewModel: ObservableObject {
         isLoading = true
         errorMessage = nil
 
-        // APPLE REVIEW TEST CREDENTIALS EXCEPTION
-        // Skip API call for test@apple.com
         if email.lowercased() == "test@apple.com" {
             print("✅ Apple Review test email detected - skipping OTP send")
             isOTPSent = true
@@ -40,7 +31,6 @@ class AuthViewModel: ObservableObject {
             return
         }
 
-        // Regular OTP send flow
         do {
             let response = try await apiService.sendOTP(email: email)
             if response.success {
@@ -65,10 +55,8 @@ class AuthViewModel: ObservableObject {
         isLoading = true
         errorMessage = nil
 
-        // APPLE REVIEW TEST CREDENTIALS EXCEPTION
-        // For App Store review purposes only
         if email.lowercased() == "test@apple.com" && otp == "000000" {
-            // Create a test user for Apple Review
+
             let testUser = User(
                 id: "apple_review_test_user",
                 email: "test@apple.com",
@@ -81,10 +69,8 @@ class AuthViewModel: ObservableObject {
             authToken = testToken
             isAuthenticated = true
 
-            // Save to UserDefaults
             saveAuthData(user: testUser, token: testToken)
 
-            // Notify RootView about login
             NotificationCenter.default.post(name: NSNotification.Name("UserDidLogin"), object: nil)
 
             print("✅ Apple Review test user logged in")
@@ -92,35 +78,31 @@ class AuthViewModel: ObservableObject {
             return
         }
 
-        // Regular OTP verification flow
         do {
             let response = try await apiService.verifyOTP(email: email, otp: otp)
             if response.success, let token = response.token {
-                // Decode JWT to get user details
-                let claims = JWTDecoder.decode(jwtToken: token)
-                print("DEBUG: JWT Claims: \(claims)") // Add logging
 
-                // Try multiple keys for ID: 'sub', 'id', '_id', 'userId'
+                let claims = JWTDecoder.decode(jwtToken: token)
+                print("DEBUG: JWT Claims: \(claims)")
+
                 let userId = (claims["sub"] as? String) ??
                              (claims["id"] as? String) ??
                              (claims["_id"] as? String) ??
                              (claims["userId"] as? String)
 
                 if let userId = userId {
-                    let userRole = claims["role"] as? String ?? "user" // Default to user if role missing
+                    let userRole = claims["role"] as? String ?? "user"
                     let userName = claims["name"] as? String ?? "User"
                     let userEmail = claims["email"] as? String ?? email
-                    
+
                     let user = User(id: userId, email: userEmail, name: userName, role: userRole)
-                    
+
                     currentUser = user
                     authToken = token
                     isAuthenticated = true
 
-                    // Save to UserDefaults
                     saveAuthData(user: user, token: token)
 
-                    // Notify RootView about login
                     NotificationCenter.default.post(name: NSNotification.Name("UserDidLogin"), object: nil)
 
                     print("✅ User logged in with role: \(user.role)")
@@ -142,15 +124,14 @@ class AuthViewModel: ObservableObject {
 
     func deleteAccount() async -> Bool {
         guard let token = authToken else { return false }
-        
+
         isLoading = true
         errorMessage = nil
-        
+
         do {
             try await apiService.deleteAccount(token: token)
             print("✅ Account deleted successfully")
-            
-            // Log out locally after successful deletion on server
+
             logout()
             isLoading = false
             return true
@@ -170,21 +151,16 @@ class AuthViewModel: ObservableObject {
         otp = ""
         isOTPSent = false
 
-        // Clear ALL UserDefaults data
         UserDefaults.standard.removeObject(forKey: "authToken")
         UserDefaults.standard.removeObject(forKey: "userData")
         UserDefaults.standard.removeObject(forKey: "selectedCanteen")
-        
-        // Clear any other cached data
+
         UserDefaults.standard.synchronize()
 
-        // Notify app to clear all data
         NotificationCenter.default.post(name: NSNotification.Name("UserDidLogout"), object: nil)
 
-        // Notify to clear cart
         NotificationCenter.default.post(name: NSNotification.Name("ClearCart"), object: nil)
-        
-        // Notify RootView about logout
+
         NotificationCenter.default.post(name: NSNotification.Name("UserDidLogout"), object: nil)
 
         print("✅ User logged out - all data cleared")

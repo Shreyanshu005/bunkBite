@@ -1,10 +1,3 @@
-//
-//  OrderViewModel.swift
-//  BunkBite
-//
-//  Created by Shreyanshu on 12/12/25.
-//
-
 import Foundation
 import SwiftUI
 import Combine
@@ -16,24 +9,22 @@ class OrderViewModel: ObservableObject {
     @Published var isLoading = false
     @Published var errorMessage: String?
     @Published var hasLoadedInitially = false
-    
+
     private let apiService = APIService.shared
-    
-    // MARK: - Create Order
+
     func createOrder(canteenId: String, cart: Cart, token: String) async -> Order? {
         isLoading = true
         errorMessage = nil
-        
-        // Convert cart items to CreateOrderItem
+
         let orderItems = cart.items.map { cartItem in
             CreateOrderItem(
                 menuItemId: cartItem.menuItem.id,
                 quantity: cartItem.quantity
             )
         }
-        
+
         print("🛒 Creating order with \(orderItems.count) items")
-        
+
         do {
             let order = try await apiService.createOrder(
                 canteenId: canteenId,
@@ -41,7 +32,7 @@ class OrderViewModel: ObservableObject {
                 token: token
             )
             currentOrder = order
-            orders.insert(order, at: 0) // Add to beginning of list
+            orders.insert(order, at: 0)
             print("✅ Order created successfully: \(order.orderId)")
             isLoading = false
             return order
@@ -56,20 +47,19 @@ class OrderViewModel: ObservableObject {
             return nil
         }
     }
-    
-    // MARK: - Fetch Orders
+
     func fetchMyOrders(status: String? = nil, token: String) async {
-        // Prevent multiple simultaneous requests
+
         guard !isLoading else {
             print("⚠️ Already loading orders, skipping duplicate request")
             return
         }
-        
+
         isLoading = true
         errorMessage = nil
-        
+
         print("🔄 Fetching orders from API...")
-        
+
         do {
             let fetchedOrders = try await apiService.getMyOrders(status: status, token: token)
             orders = fetchedOrders
@@ -78,14 +68,14 @@ class OrderViewModel: ObservableObject {
             errorMessage = error.localizedDescription
             print("❌ Fetch orders error: \(error)")
         }
-        
+
         isLoading = false
     }
-    
+
     func fetchOrderById(id: String, token: String) async {
         isLoading = true
         errorMessage = nil
-        
+
         do {
             currentOrder = try await apiService.getOrderById(id: id, token: token)
             print("✅ Fetched order: \(currentOrder?.orderId ?? "")")
@@ -93,15 +83,14 @@ class OrderViewModel: ObservableObject {
             errorMessage = "Failed to fetch order details"
             print("❌ Fetch order error: \(error)")
         }
-        
+
         isLoading = false
     }
 
     func fetchOrder(orderId: String, internalId: String, token: String) async -> Order? {
-        // 1. Check if we already have this order in our list (Cache)
+
         if let existing = orders.first(where: { $0.id == internalId }) {
-            // If it has a QR code or full details, return it immediately for speed
-            // Still refresh in background to get latest status
+
             Task {
                 do {
                     let updated = try await apiService.getOrderById(id: internalId, token: token)
@@ -116,11 +105,10 @@ class OrderViewModel: ObservableObject {
             }
             return existing
         }
-        
-        // 2. Not in list, fetch from API
+
         do {
             let order = try await apiService.getOrderById(id: internalId, token: token)
-            // Add to list for future caching
+
             if !orders.contains(where: { $0.id == order.id }) {
                 orders.append(order)
             }
@@ -130,12 +118,11 @@ class OrderViewModel: ObservableObject {
             return nil
         }
     }
-    
-    // MARK: - Payment
+
     func initiatePayment(orderId: String, token: String) async -> RazorpayPaymentInitiation? {
         isLoading = true
         errorMessage = nil
-        
+
         do {
             let paymentData = try await apiService.initiatePayment(orderId: orderId, token: token)
             print("✅ Razorpay payment link created")
@@ -148,11 +135,11 @@ class OrderViewModel: ObservableObject {
             return nil
         }
     }
-    
+
     func verifyPayment(razorpayOrderId: String, razorpayPaymentId: String, razorpaySignature: String, token: String) async -> Order? {
         isLoading = true
         errorMessage = nil
-        
+
         do {
             let order = try await apiService.verifyPayment(
                 razorpayOrderId: razorpayOrderId,
@@ -161,12 +148,11 @@ class OrderViewModel: ObservableObject {
                 token: token
             )
             currentOrder = order
-            
-            // Update order in list if it exists
+
             if let index = orders.firstIndex(where: { $0.id == order.id }) {
                 orders[index] = order
             }
-            
+
             print("✅ Payment verified: \(order.paymentStatus)")
             isLoading = false
             return order
@@ -177,12 +163,11 @@ class OrderViewModel: ObservableObject {
             return nil
         }
     }
-    
-    // MARK: - Helper Methods
+
     func clearCurrentOrder() {
         currentOrder = nil
     }
-    
+
     func getOrdersByStatus(_ status: OrderStatus) -> [Order] {
         return orders.filter { $0.status == status }
     }

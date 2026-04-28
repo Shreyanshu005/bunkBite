@@ -1,10 +1,3 @@
-//
-//  MenuViewModel.swift
-//  BunkBite
-//
-//  Created by Shreyanshu on 06/11/25.
-//
-
 import Foundation
 import SwiftUI
 import Combine
@@ -20,7 +13,6 @@ class MenuViewModel: ObservableObject {
     func fetchMenu(canteenId: String) async {
         isLoading = true
         errorMessage = nil
-        // menuItems = [] // REMOVED: keep old items until new ones arrive for a smoother experience
 
         do {
             menuItems = try await apiService.getMenu(canteenId: canteenId)
@@ -73,7 +65,7 @@ class MenuViewModel: ObservableObject {
             try await apiService.updateMenuItemQuantity(canteenId: canteenId, itemId: itemId, quantity: quantity, token: token)
             if let index = menuItems.firstIndex(where: { $0.id == itemId }) {
                 let updatedItem = menuItems[index]
-                // Create a new MenuItem with updated quantity (since MenuItem properties are let)
+
                 menuItems[index] = MenuItem(
                     id: updatedItem.id,
                     name: updatedItem.name,

@@ -1,10 +1,3 @@
-//
-//  User.swift
-//  BunkBite
-//
-//  Created by Shreyanshu on 06/11/25.
-//
-
 import Foundation
 
 struct User: Codable, Identifiable {
@@ -22,4 +15,3 @@ struct AuthResponse: Codable {
     let success: Bool
     let token: String?
 }
-

@@ -5,16 +5,15 @@ struct CookingAnimationView: View {
     @State private var steamOffset: CGFloat = 0
     @State private var panRotate: Double = 0
     @State private var foodOffset: CGFloat = 0
-    
+
     var body: some View {
         ZStack {
-            // Pan Handle
+
             RoundedRectangle(cornerRadius: 10)
                 .fill(Color.gray)
                 .frame(width: 80, height: 12)
                 .offset(x: 60, y: 0)
-            
-            // Pan Body
+
             Path { path in
                 path.move(to: CGPoint(x: 0, y: 0))
                 path.addLine(to: CGPoint(x: 100, y: 0))
@@ -23,16 +22,14 @@ struct CookingAnimationView: View {
             }
             .fill(Color.black.opacity(0.8))
             .frame(width: 100, height: 40)
-            
-            // Food Items
+
             ForEach(0..<3) { i in
                 Circle()
                     .fill(i == 0 ? Color.orange : (i == 1 ? Color.green : Color.red))
                     .frame(width: 12, height: 12)
                     .offset(x: CGFloat(i * 15 - 15), y: foodOffset)
             }
-            
-            // Steam
+
             ForEach(0..<3) { i in
                 Path { path in
                     path.move(to: CGPoint(x: 20 + (i * 20), y: -20))
@@ -40,7 +37,7 @@ struct CookingAnimationView: View {
                 }
                 .stroke(Color.gray.opacity(0.6), style: StrokeStyle(lineWidth: 2, lineCap: .round))
                 .offset(y: steamOffset)
-                .opacity(1.0 - (steamOffset / -40.0)) // Fade out as it rises
+                .opacity(1.0 - (steamOffset / -40.0))
             }
         }
         .rotationEffect(.degrees(panRotate))

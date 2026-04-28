@@ -1,25 +1,18 @@
-//
-//  AnalyticsView.swift
-//  BunkBite
-//
-//  Created by Shreyanshu on 12/12/25.
-//
-
 import SwiftUI
 import Charts
 
 struct AnalyticsView: View {
     @StateObject private var viewModel: AnalyticsViewModel
     @Environment(\.dismiss) var dismiss
-    
+
     init(canteenId: String, token: String) {
         _viewModel = StateObject(wrappedValue: AnalyticsViewModel(canteenId: canteenId, token: token))
     }
-    
+
     var body: some View {
         ScrollView {
             VStack(spacing: 20) {
-                // Period Selector
+
                 Picker("Period", selection: $viewModel.selectedPeriod) {
                     ForEach(AnalyticsPeriod.allCases, id: \.self) { period in
                         Text(period.title).tag(period)
@@ -27,7 +20,7 @@ struct AnalyticsView: View {
                 }
                 .pickerStyle(.segmented)
                 .padding(.horizontal)
-                
+
                 if viewModel.isLoading {
                     ProgressView()
                         .frame(height: 200)
@@ -42,7 +35,7 @@ struct AnalyticsView: View {
                         }
                     }
                 } else if let summary = viewModel.summary {
-                    // Key Metrics Grid
+
                     LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 16) {
                         MetricCard(
                             title: "Total Revenue",
@@ -50,21 +43,21 @@ struct AnalyticsView: View {
                             icon: "indianrupeesign.circle.fill",
                             color: .green
                         )
-                        
+
                         MetricCard(
                             title: "Total Orders",
                             value: "\(summary.totalOrders)",
                             icon: "cart.fill",
                             color: .blue
                         )
-                        
+
                         MetricCard(
                             title: "Avg. Order Value",
                             value: "₹\(Int(summary.averageOrderValue))",
                             icon: "chart.pie.fill",
                             color: .orange
                         )
-                        
+
                         MetricCard(
                             title: "Cancelled",
                             value: "\(summary.ordersByStatus.cancelled)",
@@ -73,14 +66,13 @@ struct AnalyticsView: View {
                         )
                     }
                     .padding(.horizontal)
-                    
-                    // Earnings Chart
+
                     if let earnings = viewModel.earningsData, !earnings.dailyEarnings.isEmpty {
                         VStack(alignment: .leading, spacing: 12) {
                             Text("Earnings Trend")
                                 .font(.headline)
                                 .padding(.horizontal)
-                            
+
                             Chart {
                                 ForEach(earnings.dailyEarnings) { data in
                                     BarMark(
@@ -98,13 +90,12 @@ struct AnalyticsView: View {
                             .padding(.horizontal)
                         }
                     }
-                    
-                    // Top Items List
+
                     VStack(alignment: .leading, spacing: 12) {
                         Text("Top Selling Items")
                             .font(.headline)
                             .padding(.horizontal)
-                        
+
                         VStack(spacing: 0) {
                             ForEach(summary.topItems) { item in
                                 HStack {
@@ -112,21 +103,21 @@ struct AnalyticsView: View {
                                         Text(item.name)
                                             .font(.subheadline)
                                             .fontWeight(.medium)
-                                        
+
                                         Text("\(item.quantity) units sold")
                                             .font(.caption)
                                             .foregroundStyle(.gray)
                                     }
-                                    
+
                                     Spacer()
-                                    
+
                                     Text("₹\(Int(item.revenue))")
                                         .font(.subheadline)
                                         .fontWeight(.bold)
                                         .foregroundStyle(Constants.primaryColor)
                                 }
                                 .padding()
-                                
+
                                 if item.id != summary.topItems.last?.id {
                                     Divider()
                                         .padding(.leading)
@@ -155,23 +146,23 @@ struct MetricCard: View {
     let value: String
     let icon: String
     let color: Color
-    
+
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
                 Image(systemName: icon)
                     .font(.title2)
                     .foregroundStyle(color)
-                
+
                 Spacer()
             }
-            
+
             VStack(alignment: .leading, spacing: 4) {
                 Text(value)
                     .font(.title2)
                     .fontWeight(.bold)
                     .foregroundStyle(.black)
-                
+
                 Text(title)
                     .font(.caption)
                     .foregroundStyle(.gray)

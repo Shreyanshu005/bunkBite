@@ -1,13 +1,5 @@
-//
-//  FilterComponents.swift
-//  BunkBite
-//
-//  Created by Shreyanshu on 06/11/25.
-//
-
 import SwiftUI
 
-// MARK: - Menu Filter Chip Component
 struct MenuFilterChip: View {
     let title: String
     let isSelected: Bool
@@ -42,7 +34,6 @@ struct MenuFilterChip: View {
     }
 }
 
-// MARK: - Feature Card Component
 struct FeatureCard: View {
     let icon: String
     let title: String

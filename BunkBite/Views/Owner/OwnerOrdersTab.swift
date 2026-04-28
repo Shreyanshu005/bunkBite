@@ -1,10 +1,3 @@
-//
-//  OwnerOrdersTab.swift
-//  BunkBite
-//
-//  Created by Shreyanshu on 06/11/25.
-//
-
 import SwiftUI
 
 struct OwnerOrdersTab: View {
@@ -12,17 +5,17 @@ struct OwnerOrdersTab: View {
     @ObservedObject var authViewModel: AuthViewModel
     @Binding var orderCompletedTrigger: Bool
     let onSelectCanteen: () -> Void
-    
+
     @StateObject private var ordersViewModel = OwnerOrdersViewModel()
     @State private var selectedFilter: OrderStatusFilter = .all
-    
+
     enum OrderStatusFilter: String, CaseIterable {
         case all = "All"
         case pending = "Pending"
         case preparing = "Preparing"
         case ready = "Ready"
         case completed = "Completed"
-        
+
         var apiValue: String? {
             switch self {
             case .all: return nil
@@ -64,7 +57,7 @@ struct OwnerOrdersTab: View {
 
     private func ordersView(for selectedCanteen: Canteen) -> some View {
         VStack(spacing: 0) {
-            // Status Filter Tabs
+
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 12) {
                     ForEach(OrderStatusFilter.allCases, id: \.self) { filter in
@@ -83,10 +76,9 @@ struct OwnerOrdersTab: View {
                 .padding(.vertical, 12)
             }
             .background(Color(.systemBackground))
-            
+
             Divider()
-            
-            // Orders List
+
             if ordersViewModel.isLoading && ordersViewModel.orders.isEmpty {
                 ProgressView()
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -126,7 +118,7 @@ struct OwnerOrdersTab: View {
             }
         }
     }
-    
+
     private func loadOrders(for canteen: Canteen) async {
         guard let token = authViewModel.authToken else { return }
         await ordersViewModel.fetchOrders(
@@ -135,7 +127,7 @@ struct OwnerOrdersTab: View {
             token: token
         )
     }
-    
+
     private func updateStatus(orderId: String, newStatus: String) async {
         guard let token = authViewModel.authToken else { return }
         let success = await ordersViewModel.updateOrderStatus(
@@ -143,20 +135,19 @@ struct OwnerOrdersTab: View {
             newStatus: newStatus,
             token: token
         )
-        
+
         if success {
-            // Optionally show success feedback
+
             print("✅ Order status updated successfully")
         }
     }
 }
 
-// MARK: - Owner Filter Chip
 private struct OwnerFilterChip: View {
     let title: String
     let isSelected: Bool
     let action: () -> Void
-    
+
     var body: some View {
         Button(action: action) {
             Text(title)
@@ -170,42 +161,39 @@ private struct OwnerFilterChip: View {
     }
 }
 
-// MARK: - Orders Tab Card
 private struct OrdersTabCard: View {
     let order: Order
     let onStatusUpdate: (String) async -> Void
-    
+
     @State private var showStatusMenu = false
-    
+
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            // Header with Order ID and Status
+
             HStack {
                 VStack(alignment: .leading, spacing: 4) {
                     Text("Order #\(order.orderId)")
                         .font(.urbanist(size: 16, weight: .bold))
-                    
+
                     HStack(spacing: 12) {
                         Label(formatDate(order.createdAt), systemImage: "clock.fill")
                             .font(.urbanist(size: 12, weight: .medium))
                             .foregroundStyle(.secondary)
-                        
-                        // Show payment status
+
                         Label(order.paymentStatus.rawValue.capitalized, systemImage: order.paymentId != nil ? "creditcard.fill" : "banknote.fill")
                             .font(.urbanist(size: 12, weight: .medium))
                             .foregroundStyle(order.paymentStatus == .success ? .green : .secondary)
                     }
                 }
-                
+
                 Spacer()
-                
-                // Show Refunded badge if refunded, otherwise show status badge
+
                 if order.isRefunded {
                     HStack(spacing: 6) {
                         Image(systemName: "arrow.uturn.backward")
                             .font(.system(size: 16))
                             .foregroundStyle(Color(hex: "1976D2"))
-                        
+
                         Text("Refunded")
                             .font(.urbanist(size: 14, weight: .bold))
                             .foregroundStyle(Color(hex: "1976D2"))
@@ -222,10 +210,9 @@ private struct OrdersTabCard: View {
                     StatusBadge(status: order.status)
                 }
             }
-            
+
             Divider()
-            
-            // Items
+
             VStack(alignment: .leading, spacing: 8) {
                 ForEach(order.items) { item in
                     HStack(alignment: .top) {
@@ -233,40 +220,39 @@ private struct OrdersTabCard: View {
                             .font(.urbanist(size: 14, weight: .semibold))
                             .foregroundStyle(Constants.primaryColor)
                             .frame(width: 30, alignment: .leading)
-                        
+
                         VStack(alignment: .leading, spacing: 2) {
                             Text(item.name)
                                 .font(.urbanist(size: 14, weight: .medium))
-                            
+
                             Text("₹\(Int(item.price)) each")
                                 .font(.urbanist(size: 11, weight: .regular))
                                 .foregroundStyle(.secondary)
                         }
-                        
+
                         Spacer()
-                        
+
                         Text("₹\(Int(item.price) * item.quantity)")
                             .font(.urbanist(size: 14, weight: .semibold))
                     }
                 }
             }
-            
+
             Divider()
-            
-            // Footer with Total and Actions
+
             HStack {
                 VStack(alignment: .leading, spacing: 2) {
                     Text("Total Amount")
                         .font(.urbanist(size: 12, weight: .medium))
                         .foregroundStyle(.secondary)
-                    
+
                     Text("₹\(Int(order.totalAmount))")
                         .font(.urbanist(size: 18, weight: .bold))
                         .foregroundStyle(Constants.primaryColor)
                 }
-                
+
                 Spacer()
-                
+
                 if order.status != .completed && order.status != .cancelled {
                     if order.status == .preparing {
                         Button {
@@ -311,7 +297,7 @@ private struct OrdersTabCard: View {
         .clipShape(RoundedRectangle(cornerRadius: 12))
         .shadow(color: .black.opacity(0.05), radius: 8, x: 0, y: 2)
     }
-    
+
     private func formatDate(_ dateString: String) -> String {
         return DateFormatter.formatOrderDate(dateString)
     }

@@ -1,10 +1,3 @@
-//
-//  MenuItem.swift
-//  BunkBite
-//
-//  Created by Shreyanshu on 06/11/25.
-//
-
 import Foundation
 
 struct MenuItem: Codable, Identifiable, Hashable {
@@ -21,8 +14,6 @@ struct MenuItem: Codable, Identifiable, Hashable {
         case name, image, price, availableQuantity, createdAt, updatedAt
     }
 }
-
-
 
 struct Menu: Codable {
     let canteenId: String

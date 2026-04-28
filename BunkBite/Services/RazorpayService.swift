@@ -1,13 +1,5 @@
-//
-//  RazorpayService.swift
-//  BunkBite
-//
-//  Created by Claude on 11/11/25.
-//
-
 import Foundation
 
-// MARK: - Response Models
 struct RazorpayOrderResponse: Codable {
     let success: Bool
     let orderId: String
@@ -36,20 +28,11 @@ struct PaymentVerificationResponse: Codable {
     }
 }
 
-// MARK: - Razorpay Service
 class RazorpayService {
     static let shared = RazorpayService()
 
     private init() {}
 
-    // MARK: - Create Razorpay Order
-    /// Creates a Razorpay order on the backend
-    /// - Parameters:
-    ///   - amount: Total amount in rupees (will be converted to paise)
-    ///   - canteenId: ID of the canteen
-    ///   - items: Array of cart items
-    ///   - token: Authentication token
-    /// - Returns: RazorpayOrderResponse with order_id
     func createOrder(
         amount: Double,
         canteenId: String,
@@ -65,10 +48,8 @@ class RazorpayService {
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
 
-        // Convert amount to paise (1 rupee = 100 paise)
         let amountInPaise = Int(amount * 100)
 
-        // Convert cart items to dictionary format
         let itemsDict = items.map { item -> [String: Any] in
             return [
                 "menu_item_id": item.menuItem.id,
@@ -112,14 +93,6 @@ class RazorpayService {
         }
     }
 
-    // MARK: - Verify Payment
-    /// Verifies the payment with the backend
-    /// - Parameters:
-    ///   - orderId: Razorpay order ID
-    ///   - paymentId: Razorpay payment ID
-    ///   - signature: Payment signature from Razorpay
-    ///   - token: Authentication token
-    /// - Returns: PaymentVerificationResponse
     func verifyPayment(
         orderId: String,
         paymentId: String,
@@ -162,7 +135,6 @@ class RazorpayService {
     }
 }
 
-// MARK: - Razorpay Errors
 enum RazorpayError: Error, LocalizedError {
     case invalidURL
     case invalidResponse

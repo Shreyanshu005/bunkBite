@@ -19,6 +19,14 @@ A professional iOS canteen ordering app built with SwiftUI, featuring separate p
 - **Orders Tab**: View and manage incoming orders
 - **Profile Tab**: Business analytics and settings
 
+## App Screenshots
+
+| | | |
+| :---: | :---: | :---: |
+| <img src="https://i.ibb.co/HDLW88t/IMG-1770.png" width="200" /> | <img src="https://i.ibb.co/xqLD0CH/IMG-1771.png" width="200" /> | <img src="https://i.ibb.co/rR9TJ7f/IMG-1772-2.png" width="200" /> |
+| <img src="https://i.ibb.co/GQMGXTW/IMG-1774.png" width="200" /> | <img src="https://i.ibb.co/Hp3WY8W/IMG-1777-2.png" width="200" /> | <img src="https://i.ibb.co/0VYnk5x/IMG-1778-2.png" width="200" /> |
+| <img src="https://i.ibb.co/Mkjyh9M/IMG-1776.png" width="200" /> | | |
+
 ## Design
 - **Theme Colors**:
   - Primary: #f62f56 (Pink)

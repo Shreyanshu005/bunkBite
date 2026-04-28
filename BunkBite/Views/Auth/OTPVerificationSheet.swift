@@ -1,10 +1,3 @@
-//
-//  OTPVerificationSheet.swift
-//  BunkBite
-//
-//  Created by Shreyanshu on 15/01/26.
-//
-
 import SwiftUI
 
 struct OTPVerificationSheet: View {
@@ -12,30 +5,29 @@ struct OTPVerificationSheet: View {
     let email: String
     @Binding var isPresented: Bool
     @Binding var parentIsPresented: Bool
-    
+
     @State private var otp: String = ""
     @State private var isLoading = false
     @State private var isResending = false
-    
+
     var body: some View {
         VStack(spacing: 24) {
-            // Heading
+
             VStack(spacing: 8) {
                 Text("Enter OTP")
                     .font(.custom("Urbanist-Bold", size: 24))
                     .foregroundStyle(.black)
-                
+
                 Text("We've sent a code to \(maskEmail(email))")
                     .font(.custom("Urbanist-Regular", size: 16))
                     .foregroundStyle(Color(hex: "6B7280"))
             }
-            
-            // OTP Input
+
             VStack(alignment: .leading, spacing: 8) {
                 Text("Enter 6-digit code")
                     .font(.custom("Urbanist-Medium", size: 14))
                     .foregroundStyle(Color(hex: "374151"))
-                
+
                 TextField("", text: $otp)
                     .font(.custom("Urbanist-Regular", size: 16))
                     .padding()
@@ -48,8 +40,7 @@ struct OTPVerificationSheet: View {
                         }
                     }
             }
-            
-            // Verify Button
+
             Button(action: {
                 verifyOTP()
             }) {
@@ -70,8 +61,7 @@ struct OTPVerificationSheet: View {
             .cornerRadius(12)
             .disabled(otp.count != 6 || isLoading)
             .opacity(otp.count != 6 ? 0.5 : 1.0)
-            
-            // Resend OTP
+
             Button(action: {
                 resendOTP()
             }) {
@@ -85,8 +75,7 @@ struct OTPVerificationSheet: View {
                 }
             }
             .disabled(isResending)
-            
-            // Error message
+
             if let error = authViewModel.errorMessage {
                 Text(error)
                     .font(.custom("Urbanist-Regular", size: 14))
@@ -98,7 +87,7 @@ struct OTPVerificationSheet: View {
         .padding(.vertical, 32)
         .background(Color.white)
     }
-    
+
     private func verifyOTP() {
         isLoading = true
         authViewModel.email = email
@@ -106,15 +95,15 @@ struct OTPVerificationSheet: View {
         Task {
             await authViewModel.verifyOTP()
             isLoading = false
-            
+
             if authViewModel.errorMessage == nil {
-                // Success - close both sheets
+
                 isPresented = false
                 parentIsPresented = false
             }
         }
     }
-    
+
     private func resendOTP() {
         isResending = true
         authViewModel.email = email
@@ -123,18 +112,18 @@ struct OTPVerificationSheet: View {
             isResending = false
         }
     }
-    
+
     private func maskEmail(_ email: String) -> String {
         let components = email.split(separator: "@")
         guard components.count == 2 else { return email }
-        
+
         let username = String(components[0])
         let domain = String(components[1])
-        
+
         if username.count <= 2 {
             return "\(username)@\(domain)"
         }
-        
+
         let visibleChars = username.prefix(2)
         return "\(visibleChars)...@\(domain)"
     }

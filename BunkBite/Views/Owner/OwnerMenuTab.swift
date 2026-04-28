@@ -1,10 +1,3 @@
-//
-//  OwnerMenuTab.swift
-//  BunkBite
-//
-//  Created by Shreyanshu on 06/11/25.
-//
-
 import SwiftUI
 import PopupView
 
@@ -57,7 +50,7 @@ struct OwnerMenuTab: View {
 
     private func canteenMenuView(for selectedCanteen: Canteen) -> some View {
         List {
-            // Canteen Header
+
             Section {
                 VStack(alignment: .leading, spacing: 12) {
                     HStack {
@@ -80,7 +73,6 @@ struct OwnerMenuTab: View {
                         .tint(Constants.primaryColor)
                     }
 
-                        // Stats
                         HStack(spacing: 16) {
                             VStack(alignment: .leading) {
                                 Text("\(menuViewModel.menuItems.count)")
@@ -126,7 +118,6 @@ struct OwnerMenuTab: View {
                         .fill(.ultraThinMaterial)
                 )
 
-                // Menu Items
                 if menuViewModel.isLoading {
                     HStack {
                         Spacer()
@@ -153,7 +144,6 @@ struct OwnerMenuTab: View {
                                 showEditItem = item
                             }
 
-                            // Quick quantity buttons
                             Button {
                                 showQuantityUpdate = item
                             } label: {
@@ -227,7 +217,6 @@ struct OwnerMenuTab: View {
     }
 }
 
-// MARK: - Quick Quantity Update Sheet
 struct QuickQuantityUpdateSheet: View {
     let item: MenuItem
     let canteen: Canteen
@@ -321,6 +310,3 @@ struct QuickQuantityUpdateSheet: View {
         }
     }
 }
-
-// MARK: - Delete Canteen Popup
-

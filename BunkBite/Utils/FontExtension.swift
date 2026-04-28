@@ -1,14 +1,7 @@
-//
-//  FontExtension.swift
-//  BunkBite
-//
-//  Created by Shreyanshu on 06/11/25.
-//
-
 import SwiftUI
 
 extension Font {
-    // Urbanist Font Weights
+
     static func urbanist(size: CGFloat, weight: Font.Weight = .regular) -> Font {
         let fontName: String
 
@@ -33,7 +26,6 @@ extension Font {
     }
 }
 
-// View Modifier for easy font application
 struct UrbanistFontModifier: ViewModifier {
     let size: CGFloat
     let weight: Font.Weight
@@ -48,7 +40,7 @@ extension View {
     func urbanistFont(size: CGFloat, weight: Font.Weight = .regular) -> some View {
         modifier(UrbanistFontModifier(size: size, weight: weight))
     }
-    
+
     func cornerRadius(_ radius: CGFloat, corners: UIRectCorner) -> some View {
         clipShape(RoundedCorner(radius: radius, corners: corners))
     }

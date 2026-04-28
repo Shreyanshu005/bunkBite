@@ -1,10 +1,3 @@
-//
-//  UserMenuView.swift
-//  BunkBite
-//
-//  Created by Shreyanshu on 06/11/25.
-//
-
 import SwiftUI
 import PopupView
 import Shimmer
@@ -28,7 +21,7 @@ struct UserMenuView: View {
 
     var categories: [String] {
         let allCategories = menuViewModel.menuItems.compactMap { item -> String? in
-            // Extract category from item name or use a simple classification
+
             if item.name.localizedCaseInsensitiveContains("samosa") ||
                item.name.localizedCaseInsensitiveContains("pakora") {
                 return "Snacks"
@@ -65,12 +58,10 @@ struct UserMenuView: View {
     var filteredItems: [MenuItem] {
         var items = menuViewModel.menuItems
 
-        // Apply category filter
         if let category = selectedCategory {
             items = items.filter { getCategory(for: $0) == category }
         }
 
-        // Apply search filter
         if !searchText.isEmpty {
             items = items.filter { $0.name.localizedCaseInsensitiveContains(searchText) }
         }
@@ -83,7 +74,7 @@ struct UserMenuView: View {
     var body: some View {
         NavigationStack {
             Group {
-                // GUEST ACCESS: Allow menu browsing without authentication
+
                 if canteenViewModel.selectedCanteen != nil {
                      mainContent
                 } else {
@@ -103,7 +94,7 @@ struct UserMenuView: View {
             }
             .navigationTitle("Menu")
             .toolbar {
-                // Keep toolbar logic same ...
+
                 if canteenViewModel.selectedCanteen != nil {
                     ToolbarItem(placement: .topBarLeading) {
                         if !authViewModel.isAuthenticated {
@@ -161,22 +152,22 @@ struct UserMenuView: View {
 
     private var mainContent: some View {
         VStack(spacing: 0) {
-            
+
             if let canteen = canteenViewModel.selectedCanteen {
                 let (isOpen, statusMessage) = canteen.isAcceptingOrders
-                
+
                 if !isOpen {
-                    // CLOSED STATE
+
                     ScrollView {
                          VStack(spacing: 20) {
                              CanteenHeaderView(canteen: canteen, showCanteenSelector: $showCanteenSelector)
                                  .padding(.horizontal)
                                  .padding(.top, 16)
-                             
+
                              Spacer(minLength: 40)
-                             
+
                              HangingBannerView(message: "SORRY WE'RE CLOSED", subMessage: statusMessage)
-                             
+
                              Button {
                                  showReadOnlyMenu = true
                              } label: {
@@ -194,7 +185,7 @@ struct UserMenuView: View {
                         await canteenViewModel.refreshSelectedCanteen()
                     }
                 } else {
-                    // OPEN STATE - Show Normal Menu List
+
                     MenuListView(
                         canteenViewModel: canteenViewModel,
                         menuViewModel: menuViewModel,
@@ -205,20 +196,20 @@ struct UserMenuView: View {
                         selectedCategory: $selectedCategory,
                         categories: categories,
                         filteredItems: filteredItems,
-                        isReadOnly: false // Interactive
+                        isReadOnly: false
                     )
                 }
             }
         }
         .background(Constants.backgroundColor)
     }
-    
+
     private var loginPrompt: some View {
         VStack(spacing: 0) {
             Spacer()
 
             VStack(spacing: 32) {
-                // Icon with animation
+
                 ZStack {
                     Circle()
                         .fill(Constants.primaryColor.opacity(0.1))
@@ -231,7 +222,6 @@ struct UserMenuView: View {
                         .rotationEffect(.degrees(isAnimating ? 0 : -90))
                 }
 
-                // Message
                 VStack(spacing: 12) {
                     Text("Hungry?")
                         .font(.urbanist(size: 28, weight: .bold))
@@ -244,7 +234,6 @@ struct UserMenuView: View {
                 .opacity(isAnimating ? 1 : 0)
                 .offset(y: isAnimating ? 0 : 20)
 
-                // CTA Button
                 Button {
                     showLoginSheet = true
                 } label: {
@@ -278,7 +267,7 @@ struct UserMenuView: View {
             Spacer()
 
             VStack(spacing: 40) {
-                // Animated Icon
+
                 ZStack {
                     Circle()
                         .fill(Constants.primaryColor.opacity(0.1))
@@ -302,7 +291,6 @@ struct UserMenuView: View {
                         .scaleEffect(isAnimating ? 1 : 0.5)
                 }
 
-                // Message
                 VStack(spacing: 16) {
                     Text("Welcome to BunkBite!")
                         .font(.urbanist(size: 32, weight: .bold))
@@ -318,7 +306,6 @@ struct UserMenuView: View {
                 .opacity(isAnimating ? 1 : 0)
                 .offset(y: isAnimating ? 0 : 20)
 
-                // Enhanced Select Canteen Button
                 Button {
                     showCanteenSelector = true
                 } label: {
@@ -347,23 +334,6 @@ struct UserMenuView: View {
                 .scaleEffect(isAnimating ? 1 : 0.9)
                 .opacity(isAnimating ? 1 : 0)
 
-                // Guest info badge
-                // if !authViewModel.isAuthenticated {
-                //     HStack(spacing: 8) {
-                //         Image(systemName: "info.circle.fill")
-                //             .font(.system(size: 14))
-                //             .foregroundStyle(Constants.primaryColor)
-
-                //         Text("No login required to browse")
-                //             .font(.urbanist(size: 14, weight: .medium))
-                //             .foregroundStyle(.gray)
-                //     }
-                //     .padding(.horizontal, 16)
-                //     .padding(.vertical, 10)
-                //     .background(Constants.primaryColor.opacity(0.05))
-                //     .cornerRadius(20)
-                //     .opacity(isAnimating ? 1 : 0)
-                // }
             }
             .padding(.horizontal, 40)
 
@@ -379,7 +349,6 @@ struct UserMenuView: View {
     }
 }
 
-// Extracted Menu List for Reusability
 struct MenuListView: View {
     @ObservedObject var canteenViewModel: CanteenViewModel
     @ObservedObject var menuViewModel: MenuViewModel
@@ -391,12 +360,12 @@ struct MenuListView: View {
     let categories: [String]
     let filteredItems: [MenuItem]
     let isReadOnly: Bool
-    
+
     var body: some View {
         List {
-            // 1. Canteen Selection Header (First Item)
+
             Section {
-                 // Only show header if not read-only (or show simplified)
+
                  if !isReadOnly {
                      CanteenHeaderView(canteen: canteenViewModel.selectedCanteen, showCanteenSelector: $showCanteenSelector)
                  }
@@ -405,7 +374,6 @@ struct MenuListView: View {
             .listRowBackground(Color.clear)
             .listRowSeparator(.hidden)
 
-            // Category Filter Chips
             if !categories.isEmpty {
                 Section {
                     ScrollView(.horizontal, showsIndicators: false) {
@@ -422,8 +390,7 @@ struct MenuListView: View {
                 .listRowBackground(Color.clear)
                 .listRowSeparator(.hidden)
             }
-            
-            // Menu Items
+
             if menuViewModel.isLoading {
                 ForEach(0..<6, id: \.self) { _ in ShimmerMenuItemRow() }
             } else if filteredItems.isEmpty {
@@ -438,12 +405,12 @@ struct MenuListView: View {
                 }
             }
         }
-        .listStyle(.plain) // Use plain list style to avoid extra padding
+        .listStyle(.plain)
         .scrollContentBackground(.hidden)
         .background(Constants.backgroundColor)
         .refreshable {
             if let canteenId = canteenViewModel.selectedCanteen?.id {
-                // Run in parallel for better performance
+
                 await withTaskGroup(of: Void.self) { group in
                     group.addTask { await menuViewModel.fetchMenu(canteenId: canteenId) }
                     group.addTask { await canteenViewModel.refreshSelectedCanteen() }
@@ -453,7 +420,6 @@ struct MenuListView: View {
     }
 }
 
-// Read Only Sheet Wrapper
 struct ReadOnlyMenuSheet: View {
     @ObservedObject var canteenViewModel: CanteenViewModel
     @ObservedObject var menuViewModel: MenuViewModel
@@ -462,9 +428,9 @@ struct ReadOnlyMenuSheet: View {
     let categories: [String]
     let filteredItems: [MenuItem]
     @State private var selectedCategory: String? = nil
-    
+
     @Environment(\.dismiss) var dismiss
-    
+
     var body: some View {
         NavigationStack {
             MenuListView(
@@ -495,17 +461,16 @@ struct MenuItemRow: View {
     @ObservedObject var cart: Cart
     @ObservedObject var authViewModel: AuthViewModel
     @Binding var showLoginSheet: Bool
-    var isReadOnly: Bool = false // Add flag
-    
+    var isReadOnly: Bool = false
+
     var body: some View {
         HStack(alignment: .top, spacing: 12) {
-            // Item image placeholder with glass effect
+
             RoundedRectangle(cornerRadius: 12)
                 .fill(.ultraThinMaterial)
                 .frame(width: 80, height: 80)
                 .overlay(Image(systemName: "fork.knife").font(.title).foregroundStyle(.secondary))
 
-            // Item details
             VStack(alignment: .leading, spacing: 6) {
                 Text(item.name).font(.urbanist(size: 17, weight: .semibold))
                 Text("₹\(Int(item.price))").font(.urbanist(size: 20, weight: .bold)).foregroundStyle(Constants.primaryColor)
@@ -520,14 +485,13 @@ struct MenuItemRow: View {
 
             Spacer()
 
-            // Hide buttons if read only
             if !isReadOnly && item.availableQuantity > 0 {
-                // Add to cart button
+
                 if cart.getQuantity(for: item) > 0 {
                     HStack(spacing: 12) {
                         Button {
                            let currentQuantity = cart.getQuantity(for: item)
-                           if currentQuantity > 1 { cart.updateQuantity(for: item, quantity: currentQuantity - 1) } 
+                           if currentQuantity > 1 { cart.updateQuantity(for: item, quantity: currentQuantity - 1) }
                            else { cart.removeItem(item) }
                         } label: {
                             Image(systemName: cart.getQuantity(for: item) == 1 ? "trash.fill" : "minus.circle.fill")
@@ -542,13 +506,13 @@ struct MenuItemRow: View {
                             .frame(minWidth: 30)
 
                         Button {
-                            if authViewModel.isAuthenticated { 
-                                // Check if cart quantity is less than available quantity
+                            if authViewModel.isAuthenticated {
+
                                 if cart.getQuantity(for: item) < item.availableQuantity {
-                                    cart.addItem(item) 
+                                    cart.addItem(item)
                                 }
-                            } else { 
-                                showLoginSheet = true 
+                            } else {
+                                showLoginSheet = true
                             }
                         } label: {
                             Image(systemName: "plus.circle.fill")
@@ -573,17 +537,15 @@ struct MenuItemRow: View {
     }
 }
 
-// MARK: - Shimmer Loading Skeleton
 struct ShimmerMenuItemRow: View {
     var body: some View {
         HStack(spacing: 16) {
-            // Placeholder image
+
             RoundedRectangle(cornerRadius: 12)
                 .fill(Color.gray.opacity(0.3))
                 .frame(width: 70, height: 70)
                 .shimmering()
 
-            // Placeholder text
             VStack(alignment: .leading, spacing: 8) {
                 RoundedRectangle(cornerRadius: 4)
                     .fill(Color.gray.opacity(0.3))
@@ -598,7 +560,6 @@ struct ShimmerMenuItemRow: View {
 
             Spacer()
 
-            // Placeholder button
             RoundedRectangle(cornerRadius: 20)
                 .fill(Color.gray.opacity(0.3))
                 .frame(width: 60, height: 36)
@@ -608,7 +569,6 @@ struct ShimmerMenuItemRow: View {
     }
 }
 
-// MARK: - View Extension
 extension View {
     @ViewBuilder
     func `if`<Transform: View>(_ condition: Bool, transform: (Self) -> Transform) -> some View {
@@ -623,21 +583,21 @@ extension View {
 struct CanteenHeaderView: View {
     let canteen: Canteen?
     @Binding var showCanteenSelector: Bool
-    
+
     var body: some View {
         HStack {
             VStack(alignment: .leading, spacing: 4) {
                 Text(canteen?.name ?? "")
                     .font(.urbanist(size: 22, weight: .bold))
                     .foregroundStyle(.black)
-                
+
                 Label(canteen?.place ?? "", systemImage: "mappin.circle")
                     .font(.urbanist(size: 14, weight: .regular))
                     .foregroundStyle(.secondary)
             }
-            
+
             Spacer()
-            
+
             Button("Change") {
                 showCanteenSelector = true
             }

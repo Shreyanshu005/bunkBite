@@ -1,10 +1,3 @@
-//
-//  BunkBiteApp.swift
-//  BunkBite
-//
-//  Created by Shreyanshu on 06/11/25.
-//
-
 import SwiftUI
 import SafariServices
 
@@ -22,15 +15,15 @@ struct BunkBiteApp: App {
 
 class AppDelegate: NSObject, UIApplicationDelegate {
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
-        // Force light mode for all windows
+
         if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene {
             windowScene.windows.forEach { window in
                 window.overrideUserInterfaceStyle = .light
             }
         }
-        
+
         NotificationManager.shared.requestPermission()
-        
+
         return true
     }
 

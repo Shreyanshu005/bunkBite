@@ -1,10 +1,3 @@
-//
-//  AddMenuItemSheet.swift
-//  BunkBite
-//
-//  Created by Shreyanshu on 06/11/25.
-//
-
 import SwiftUI
 
 struct AddMenuItemSheet: View {

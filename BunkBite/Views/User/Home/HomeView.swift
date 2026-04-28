@@ -1,4 +1,3 @@
-
 import SwiftUI
 
 struct HomeView: View {
@@ -9,22 +8,19 @@ struct HomeView: View {
 
     @Binding var showLoginSheet: Bool
     @Binding var showCanteenSelector: Bool
-    
-    // Local State
+
     @State private var searchText = ""
     @State private var selectedCategory: String? = nil
     @State private var isSearchOpen = false
-    
-    // Animated placeholder state
+
     @State private var currentFoodIndex = 0
     @State private var currentText = ""
     @State private var isDeleting = false
-    
+
     let foodItems = ["samosa", "tea", "coffee", "burger", "pizza"]
-    
+
     @State private var menuLoadingTask: Task<Void, Never>? = nil
-    
-    // Computed Properties for Logic
+
     var categories: [String] {
         let allCategories = menuViewModel.menuItems.compactMap { item -> String? in
             if item.name.localizedCaseInsensitiveContains("samosa") ||
@@ -33,21 +29,20 @@ struct HomeView: View {
             } else if item.name.localizedCaseInsensitiveContains("rice") ||
                       item.name.localizedCaseInsensitiveContains("dal") ||
                       item.name.localizedCaseInsensitiveContains("chawal") {
-                return "Meals" // Changed to Matches Design "Meals"
+                return "Meals"
             } else if item.name.localizedCaseInsensitiveContains("tea") ||
                       item.name.localizedCaseInsensitiveContains("coffee") ||
                       item.name.localizedCaseInsensitiveContains("chai") ||
                       item.name.localizedCaseInsensitiveContains("shake") {
-                return "Drinks" // Changed to Matches Design "Drinks"
+                return "Drinks"
             }
             return "Other"
         }
         let cats = Array(Set(allCategories)).sorted()
-        // Ensure strictly Meals, Snacks, Drinks appear if items exist, or force them if desired by design
-        // For now adhering to dynamic but mapping to design names
+
         return cats
     }
-    
+
     func getCategory(for item: MenuItem) -> String {
         if item.name.localizedCaseInsensitiveContains("samosa") ||
            item.name.localizedCaseInsensitiveContains("pakora") {
@@ -64,41 +59,38 @@ struct HomeView: View {
         }
         return "Other"
     }
-    
+
     var filteredItems: [MenuItem] {
         var items = menuViewModel.menuItems
-        
-        // Filter by Category
+
         if let category = selectedCategory {
             items = items.filter { getCategory(for: $0) == category }
         }
-        
-        // Filter by Search
+
         if !searchText.isEmpty {
             items = items.filter { $0.name.localizedCaseInsensitiveContains(searchText) }
         }
-        
+
         return items
     }
 
-    // Namespace for matched geometry animations if needed, or simple transitions
     @Namespace private var animation
-    
+
     var body: some View {
         NavigationStack {
             ZStack(alignment: .top) {
-            Color.white.ignoresSafeArea() // Clean white background
-            
+            Color.white.ignoresSafeArea()
+
             VStack(spacing: 0) {
-                // Sticky Header - Canteen selector + Cart icon
+
                 if canteenViewModel.selectedCanteen != nil {
                     HStack {
-                        // Native iOS Picker for Canteen Selection
+
                         HStack(spacing: 8) {
                             Image(systemName: "mappin.and.ellipse")
                                 .font(.system(size: 20))
                                 .foregroundStyle(Constants.primaryColor)
-                            
+
                             Picker("", selection: $canteenViewModel.selectedCanteen) {
                                 Text("Select Canteen").tag(nil as Canteen?)
                                 ForEach(canteenViewModel.canteens) { canteen in
@@ -112,16 +104,15 @@ struct HomeView: View {
                             .fixedSize()
                             .accentColor(.gray)
                         }
-                        
+
                         Spacer()
-                        
-                        // Cart Icon
+
                         NavigationLink(destination: CartView(cart: cart, authViewModel: authViewModel, selectedTab: .constant(.menu))) {
                             ZStack(alignment: .topTrailing) {
                                 Image(systemName: "cart")
                                     .font(.system(size: 22))
                                     .foregroundStyle(.black)
-                                
+
                                 if cart.items.count > 0 {
                                     Text("\(cart.items.reduce(0) { $0 + $1.quantity })")
                                         .font(.system(size: 10, weight: .bold))
@@ -139,11 +130,11 @@ struct HomeView: View {
                     .padding(.bottom, 8)
                     .background(Color.white)
                 } else {
-                    // When no canteen selected
+
                     HStack(spacing: 8) {
                         Image(systemName: "mappin.circle.fill")
                             .foregroundStyle(Color.green)
-                        
+
                         if canteenViewModel.isLoading && canteenViewModel.canteens.isEmpty {
                             ProgressView()
                                 .progressViewStyle(CircularProgressViewStyle())
@@ -168,27 +159,24 @@ struct HomeView: View {
                     .padding(.bottom, 8)
                     .background(Color.white)
                 }
-                
-                // Main Scroll Content
+
                 ScrollView {
                     VStack(alignment: .leading, spacing: 24) {
-                        
-                        // Hero + Search Section
+
                         VStack(spacing: 24) {
                             if let canteen = canteenViewModel.selectedCanteen {
-                                // Hero Text
+
                                 VStack(alignment: .leading, spacing: 4) {
                                     Text("Hungry?")
                                         .font(.custom("Urbanist-Bold", size: 32))
                                         .foregroundStyle(Color(hex: "0D1317"))
-                                    
+
                                     Text("Order & Eat.")
                                         .font(.custom("Urbanist-Medium", size: 28))
                                         .foregroundStyle(Color.gray)
                                 }
                                 .frame(maxWidth: .infinity, alignment: .leading)
-                                
-                                // Search Button (Simple Rounded)
+
                                 if !isSearchOpen {
                                     Button {
                                         withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
@@ -199,11 +187,11 @@ struct HomeView: View {
                                             Image(systemName: "magnifyingglass")
                                                 .foregroundStyle(.black)
                                                 .font(.system(size: 20))
-                                            
+
                                             Text("Search for \(currentText)")
                                                 .font(.custom("Urbanist-Medium", size: 16))
                                                 .foregroundStyle(Color(hex: "4B5563"))
-                                            
+
                                             Spacer()
                                         }
                                         .padding(16)
@@ -217,8 +205,7 @@ struct HomeView: View {
                                     .buttonStyle(.scale)
                                     .transition(.move(edge: .top).combined(with: .opacity))
                                 }
-                                
-                                // Closed Status Banner (if needed)
+
                                 let (isOpen, statusMessage) = canteen.isAcceptingOrders
                                 if !isOpen {
                                     HStack {
@@ -234,23 +221,22 @@ struct HomeView: View {
                                     .cornerRadius(12)
                                 }
                             } else {
-                                // Greeter when no canteen
+
                                 VStack(alignment: .leading, spacing: 4) {
                                     Text("Hungry?")
                                         .font(.custom("Urbanist-Bold", size: 34))
                                         .foregroundStyle(.black)
-                                    
+
                                     Text("Beat the rush.")
                                         .font(.custom("Urbanist-Italic", size: 24))
                                         .foregroundStyle(.gray)
                                 }
                             }
                         }
-                        
-                        // Categories (Modern Horizontal Scroll with 'All')
+
                         ScrollView(.horizontal, showsIndicators: false) {
                             HStack(spacing: 12) {
-                                // 'All' Category (Custom Logic)
+
                                 Button {
                                     withAnimation { selectedCategory = nil }
                                 } label: {
@@ -284,14 +270,13 @@ struct HomeView: View {
                             }
                             .padding(.horizontal, 4)
                         }
-                        
+
                         Rectangle()
                             .fill(Color(hex: "E5E7EB"))
                             .frame(height: 1.0)
                             .padding(.horizontal, -20)
                             .padding(.top, 4)
-                        
-                        // Food Grid
+
                         if menuViewModel.isLoading {
                             VStack(spacing: 20) {
                                 ProgressView()
@@ -323,7 +308,7 @@ struct HomeView: View {
                                         showLoginSheet: $showLoginSheet
                                     )
                                     .transition(.scale.combined(with: .opacity))
-                                    // Staggered appear animation idea (commented out to avoid complex state, relying on standard transition)
+
                                 }
                             }
                             .animation(.spring(response: 0.4, dampingFraction: 0.8), value: filteredItems)
@@ -331,21 +316,20 @@ struct HomeView: View {
                     }
                     .padding(.horizontal, 20)
                     .padding(.top, 20)
-                    .padding(.bottom, 100) // Space for floating bar
+                    .padding(.bottom, 100)
                 }
                 .refreshable {
-                    // Fetch canteens and menu on pull-to-refresh
+
                     await canteenViewModel.fetchAllCanteens()
                     if let canteenId = canteenViewModel.selectedCanteen?.id {
                         await menuViewModel.fetchMenu(canteenId: canteenId)
                     }
                 }
             }
-            
-            // Search Overlay
+
             ZStack {
                 if isSearchOpen {
-                    // Dimmer
+
                     Color.black.opacity(0.4)
                         .ignoresSafeArea()
                         .onTapGesture {
@@ -354,8 +338,7 @@ struct HomeView: View {
                             }
                         }
                         .transition(.opacity)
-                    
-                    // Sheet Content
+
                     VStack(spacing: 0) {
                         SearchSheetView(
                             searchText: $searchText,
@@ -365,7 +348,7 @@ struct HomeView: View {
                             authViewModel: authViewModel,
                             showLoginSheet: $showLoginSheet
                         )
-                        .frame(maxHeight: searchText.isEmpty ? 350 : .infinity) // Small when empty, full when typing
+                        .frame(maxHeight: searchText.isEmpty ? 350 : .infinity)
                         .background(Color.white)
                         .clipShape(RoundedCorner(radius: 30, corners: [.bottomLeft, .bottomRight]))
                         .overlay(
@@ -386,7 +369,7 @@ struct HomeView: View {
             }
         }
         .onAppear {
-            // Start typing animation
+
             startTypingAnimation()
         }
         .onChange(of: canteenViewModel.selectedCanteen) { _, newCanteen in
@@ -396,17 +379,15 @@ struct HomeView: View {
              }
         }
         .task {
-            // Fetch canteens only if empty (first time)
+
             if canteenViewModel.canteens.isEmpty {
                 await canteenViewModel.fetchAllCanteens()
             }
-            
-            // Always ensure a canteen is selected (even if canteens were already loaded)
+
             if canteenViewModel.selectedCanteen == nil, let firstCanteen = canteenViewModel.canteens.first {
                 canteenViewModel.selectedCanteen = firstCanteen
             }
-            
-            // Fetch menu only if we have a canteen and menu is empty
+
             if let canteen = canteenViewModel.selectedCanteen, menuViewModel.menuItems.isEmpty {
                 await menuViewModel.fetchMenu(canteenId: canteen.id)
             }
@@ -414,19 +395,18 @@ struct HomeView: View {
             .toolbar(.hidden, for: .navigationBar)
         }
     }
-    
-    // MARK: - Typing Animation
+
     private func startTypingAnimation() {
         Timer.scheduledTimer(withTimeInterval: 0.08, repeats: true) { timer in
             let targetWord = foodItems[currentFoodIndex]
-            
+
             if !isDeleting {
-                // Typing
+
                 if currentText.count < targetWord.count {
                     let index = targetWord.index(targetWord.startIndex, offsetBy: currentText.count)
                     currentText.append(targetWord[index])
                 } else {
-                    // Pause before deleting
+
                     timer.invalidate()
                     DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
                         isDeleting = true
@@ -434,11 +414,11 @@ struct HomeView: View {
                     }
                 }
             } else {
-                // Deleting
+
                 if currentText.count > 0 {
                     currentText.removeLast()
                 } else {
-                    // Move to next word
+
                     timer.invalidate()
                     isDeleting = false
                     currentFoodIndex = (currentFoodIndex + 1) % foodItems.count
@@ -451,7 +431,6 @@ struct HomeView: View {
     }
 }
 
-// Button Style Helper
 struct ScaleButtonStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label

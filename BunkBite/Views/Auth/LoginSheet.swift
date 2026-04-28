@@ -1,10 +1,3 @@
-//
-//  LoginSheet.swift
-//  BunkBite
-//
-//  Created by Shreyanshu on 06/11/25.
-//
-
 import SwiftUI
 
 struct LoginSheet: View {
@@ -17,17 +10,17 @@ struct LoginSheet: View {
         if showOTPSheet {
             OTPSheet(authViewModel: authViewModel, onSuccess: {
                 showOTPSheet = false
-                dismiss() // This dismisses the LoginSheet
+                dismiss()
             })
 
         } else {
             loginContent
         }
     }
-    
+
     var loginContent: some View {
         ZStack {
-            // Gradient Background
+
             LinearGradient(
                 colors: [
                     Constants.primaryColor.opacity(0.05),
@@ -40,9 +33,9 @@ struct LoginSheet: View {
 
             ScrollView {
                 VStack(spacing: 32) {
-                    // Header with animation
+
                     VStack(spacing: 16) {
-                        // Animated logo
+
                         ZStack {
                             Circle()
                                 .fill(Constants.primaryColor.opacity(0.1))
@@ -72,7 +65,6 @@ struct LoginSheet: View {
                     }
                     .padding(.horizontal, 24)
 
-                    // Email input card
                     VStack(alignment: .leading, spacing: 16) {
                         Text("Enter your email")
                             .font(.urbanist(size: 14, weight: .semibold))
@@ -109,7 +101,6 @@ struct LoginSheet: View {
                     .opacity(isAnimating ? 1 : 0)
                     .offset(y: isAnimating ? 0 : 20)
 
-                    // Features
                     VStack(spacing: 12) {
                         FeatureRow(icon: "bolt.fill", text: "Quick & Easy Login")
                         FeatureRow(icon: "lock.shield.fill", text: "Secure OTP Verification")
@@ -119,7 +110,6 @@ struct LoginSheet: View {
                     .opacity(isAnimating ? 1 : 0)
                     .offset(y: isAnimating ? 0 : 30)
 
-                    // Send OTP Button
                     Button {
                         Task {
                             await authViewModel.sendOTP()
@@ -169,7 +159,6 @@ struct LoginSheet: View {
                 }
             }
 
-            // Close button
             VStack {
                 HStack {
                     Spacer()
@@ -226,7 +215,7 @@ struct OTPSheet: View {
 
     var body: some View {
         ZStack {
-            // Gradient Background
+
             LinearGradient(
                 colors: [
                     Constants.primaryColor.opacity(0.05),
@@ -239,9 +228,9 @@ struct OTPSheet: View {
 
             ScrollView {
                 VStack(spacing: 32) {
-                    // Header
+
                     VStack(spacing: 16) {
-                        // Animated envelope
+
                         ZStack {
                             Circle()
                                 .fill(Constants.primaryColor.opacity(0.1))
@@ -273,7 +262,6 @@ struct OTPSheet: View {
                     }
                     .padding(.horizontal, 24)
 
-                    // OTP Input Card
                     VStack(spacing: 20) {
                         Text("Enter 6-Digit Code")
                             .font(.urbanist(size: 14, weight: .semibold))
@@ -281,7 +269,6 @@ struct OTPSheet: View {
                             .textCase(.uppercase)
                             .tracking(1)
 
-                        // OTP Input
                         TextField("", text: $authViewModel.otp, prompt: Text("000000").foregroundColor(.gray.opacity(0.3)))
                             .textContentType(.oneTimeCode)
                             .keyboardType(.numberPad)
@@ -317,7 +304,6 @@ struct OTPSheet: View {
                     .opacity(isAnimating ? 1 : 0)
                     .offset(y: isAnimating ? 0 : 20)
 
-                    // Verify Button
                     Button {
                         Task {
                             await authViewModel.verifyOTP()
@@ -360,7 +346,6 @@ struct OTPSheet: View {
                     .opacity(isAnimating ? 1 : 0)
                     .scaleEffect(isAnimating ? 1 : 0.9)
 
-                    // Resend section
                     VStack(spacing: 8) {
                         if canResend {
                             Button {
@@ -394,7 +379,6 @@ struct OTPSheet: View {
                 }
             }
 
-            // Back button
             VStack {
                 HStack {
                     Button {

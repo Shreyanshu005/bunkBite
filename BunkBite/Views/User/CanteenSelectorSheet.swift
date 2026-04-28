@@ -1,10 +1,3 @@
-//
-//  CanteenSelectorSheet.swift
-//  BunkBite
-//
-//  Created by Anjali on 06/11/25.
-//
-
 import SwiftUI
 import Shimmer
 
@@ -29,7 +22,7 @@ struct CanteenSelectorSheet: View {
 
     var body: some View {
         ZStack {
-            // Gradient Background
+
             LinearGradient(
                 colors: [
                     Constants.primaryColor.opacity(0.05),
@@ -41,7 +34,7 @@ struct CanteenSelectorSheet: View {
             .ignoresSafeArea()
 
             VStack(spacing: 0) {
-                // Header with icon
+
                 VStack(spacing: 16) {
                     ZStack {
                         Circle()
@@ -71,7 +64,6 @@ struct CanteenSelectorSheet: View {
                 .padding(.horizontal, 24)
                 .padding(.bottom, 24)
 
-                // Search bar
                 HStack {
                     Image(systemName: "magnifyingglass")
                         .foregroundStyle(.gray)
@@ -90,7 +82,6 @@ struct CanteenSelectorSheet: View {
                 .padding(.bottom, 16)
                 .opacity(isAnimating ? 1 : 0)
 
-                // Canteen List
                 ScrollView {
                     VStack(spacing: 12) {
                         if canteenViewModel.isLoading {
@@ -165,7 +156,6 @@ struct CanteenSelectorSheet: View {
                 .opacity(isAnimating ? 1 : 0)
             }
 
-            // Close button
             VStack {
                 HStack {
                     Button {
@@ -191,20 +181,19 @@ struct CanteenSelectorSheet: View {
             }
         }
         .task {
-            // GUEST ACCESS: Public endpoint, no authentication required
+
             await canteenViewModel.fetchAllCanteens()
         }
     }
 }
 
-// MARK: - Canteen Card
 struct CanteenCard: View {
     let canteen: Canteen
     let isSelected: Bool
 
     var body: some View {
         HStack(spacing: 16) {
-            // Icon
+
             Circle()
                 .fill(Constants.primaryColor.opacity(0.1))
                 .frame(width: 60, height: 60)
@@ -214,7 +203,6 @@ struct CanteenCard: View {
                         .foregroundStyle(Constants.primaryColor)
                 )
 
-            // Details
             VStack(alignment: .leading, spacing: 6) {
                 Text(canteen.name)
                     .font(.urbanist(size: 18, weight: .semibold))
@@ -258,17 +246,15 @@ struct CanteenCard: View {
     }
 }
 
-// MARK: - Shimmer Loading Skeleton
 struct ShimmerCanteenCard: View {
     var body: some View {
         HStack(spacing: 16) {
-            // Placeholder icon
+
             Circle()
                 .fill(Color.gray.opacity(0.3))
                 .frame(width: 60, height: 60)
                 .shimmering()
 
-            // Placeholder text
             VStack(alignment: .leading, spacing: 6) {
                 RoundedRectangle(cornerRadius: 4)
                     .fill(Color.gray.opacity(0.3))

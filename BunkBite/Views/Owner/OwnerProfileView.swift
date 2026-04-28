@@ -1,15 +1,8 @@
-//
-//  OwnerProfileView2.swift
-//  BunkBite
-//
-//  Created by Shreyanshu on 06/11/25.
-//
-
 import SwiftUI
 
 struct OwnerProfileView: View {
     @ObservedObject var authViewModel: AuthViewModel
-    @ObservedObject var canteenViewModel: CanteenViewModel // Added dependency
+    @ObservedObject var canteenViewModel: CanteenViewModel
     @Binding var showLoginSheet: Bool
 
     @State private var showLogoutAlert = false
@@ -40,11 +33,11 @@ struct OwnerProfileView: View {
             .tint(Constants.primaryColor)
         }
     }
-    
+
     private var profileContent: some View {
         List {
             Section {
-// ...
+
             }
 
             Section {
@@ -54,7 +47,7 @@ struct OwnerProfileView: View {
                     } label: {
                         Label("Canteen Settings", systemImage: "gear.circle.fill")
                     }
-                    
+
                     NavigationLink {
                         if let canteen = canteenViewModel.selectedCanteen {
                             AnalyticsView(canteenId: canteen.id, token: authViewModel.authToken ?? "")
@@ -63,14 +56,14 @@ struct OwnerProfileView: View {
                         Label("Analytics", systemImage: "chart.bar.fill")
                     }
                 } else {
-                    // Disabled State
+
                     HStack {
                         Label("Canteen Settings", systemImage: "gear.circle.fill")
                         Spacer()
                         Image(systemName: "lock.fill").font(.caption).foregroundStyle(.secondary)
                     }
                     .foregroundStyle(.tertiary)
-                    
+
                     HStack {
                         Label("Analytics", systemImage: "chart.bar.fill")
                         Spacer()

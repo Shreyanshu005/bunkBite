@@ -1,10 +1,3 @@
-//
-//  RazorpayCheckoutView.swift
-//  BunkBite
-//
-//  Created by Shreyanshu on 12/12/25.
-//
-
 import SwiftUI
 import WebKit
 
@@ -13,42 +6,40 @@ struct RazorpayCheckoutView: UIViewRepresentable {
     let onSuccess: (RazorpayPaymentResponse) -> Void
     let onFailure: (String) -> Void
     let onDismiss: () -> Void
-    
+
     func makeCoordinator() -> Coordinator {
         Coordinator(onSuccess: onSuccess, onFailure: onFailure, onDismiss: onDismiss)
     }
-    
+
     func makeUIView(context: Context) -> WKWebView {
         let configuration = WKWebViewConfiguration()
         let userContentController = WKUserContentController()
-        
-        // Add message handlers for payment callbacks
+
         userContentController.add(context.coordinator, name: "paymentSuccess")
         userContentController.add(context.coordinator, name: "paymentFailure")
         userContentController.add(context.coordinator, name: "paymentDismiss")
-        
+
         configuration.userContentController = userContentController
-        
+
         let webView = WKWebView(frame: .zero, configuration: configuration)
         webView.navigationDelegate = context.coordinator
-        
-        // Load HTML only once during creation
+
         let html = generateRazorpayHTML()
         webView.loadHTMLString(html, baseURL: nil)
         context.coordinator.hasLoaded = true
-        
+
         return webView
     }
-    
+
     func updateUIView(_ webView: WKWebView, context: Context) {
-        // Don't reload if already loaded - prevents reload on app resume
+
         if !context.coordinator.hasLoaded {
             let html = generateRazorpayHTML()
             webView.loadHTMLString(html, baseURL: nil)
             context.coordinator.hasLoaded = true
         }
     }
-    
+
     private func generateRazorpayHTML() -> String {
         """
         <!DOCTYPE html>
@@ -90,7 +81,7 @@ struct RazorpayCheckoutView: UIViewRepresentable {
                 <div class="spinner"></div>
                 <p>Opening Razorpay Checkout...</p>
             </div>
-            
+
             <script>
                 var options = {
                     key: "\(paymentData.razorpayKeyId)",
@@ -117,9 +108,9 @@ struct RazorpayCheckoutView: UIViewRepresentable {
                         }
                     }
                 };
-                
+
                 var rzp = new Razorpay(options);
-                
+
                 rzp.on('payment.failed', function (response){
                     // Payment failed
                     window.webkit.messageHandlers.paymentFailure.postMessage({
@@ -127,7 +118,7 @@ struct RazorpayCheckoutView: UIViewRepresentable {
                         code: response.error.code
                     });
                 });
-                
+
                 // Auto-open checkout
                 setTimeout(function() {
                     rzp.open();
@@ -137,13 +128,13 @@ struct RazorpayCheckoutView: UIViewRepresentable {
         </html>
         """
     }
-    
+
     class Coordinator: NSObject, WKNavigationDelegate, WKScriptMessageHandler {
         let onSuccess: (RazorpayPaymentResponse) -> Void
         let onFailure: (String) -> Void
         let onDismiss: () -> Void
         var hasLoaded = false
-        
+
         init(onSuccess: @escaping (RazorpayPaymentResponse) -> Void,
              onFailure: @escaping (String) -> Void,
              onDismiss: @escaping () -> Void) {
@@ -151,10 +142,10 @@ struct RazorpayCheckoutView: UIViewRepresentable {
             self.onFailure = onFailure
             self.onDismiss = onDismiss
         }
-        
+
         func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
             print("📱 Received message from JavaScript: \(message.name)")
-            
+
             switch message.name {
             case "paymentSuccess":
                 if let body = message.body as? [String: Any],
@@ -164,7 +155,7 @@ struct RazorpayCheckoutView: UIViewRepresentable {
                     print("Payment ID: \(response.razorpayPaymentId)")
                     onSuccess(response)
                 }
-                
+
             case "paymentFailure":
                 if let body = message.body as? [String: Any],
                    let error = body["error"] as? String {
@@ -173,28 +164,27 @@ struct RazorpayCheckoutView: UIViewRepresentable {
                 } else {
                     onFailure("Payment failed")
                 }
-                
+
             case "paymentDismiss":
                 print("🚫 Payment dismissed by user")
                 onDismiss()
-                
+
             default:
                 break
             }
         }
-        
+
         func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction, decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
             if let url = navigationAction.request.url {
                 let urlString = url.absoluteString
-                
-                // Intercept UPI and other payment-related deep links
-                if urlString.hasPrefix("upi://") || 
-                   urlString.hasPrefix("phonepe://") || 
-                   urlString.hasPrefix("paytmmp://") || 
-                   urlString.hasPrefix("tez://") || 
-                   urlString.hasPrefix("gpay://") || 
+
+                if urlString.hasPrefix("upi://") ||
+                   urlString.hasPrefix("phonepe://") ||
+                   urlString.hasPrefix("paytmmp://") ||
+                   urlString.hasPrefix("tez://") ||
+                   urlString.hasPrefix("gpay://") ||
                    urlString.hasPrefix("whatsapp://") {
-                    
+
                     UIApplication.shared.open(url, options: [:]) { success in
                         if !success {
                             print("❌ Failed to open deep link: \(urlString)")
@@ -206,11 +196,11 @@ struct RazorpayCheckoutView: UIViewRepresentable {
             }
             decisionHandler(.allow)
         }
-        
+
         func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
             print("🌐 WebView loaded successfully")
         }
-        
+
         func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
             print("❌ WebView failed to load: \(error.localizedDescription)")
             onFailure("Failed to load payment page")

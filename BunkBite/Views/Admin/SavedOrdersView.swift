@@ -1,13 +1,5 @@
-//
-//  SavedOrdersView.swift
-//  BunkBite
-//
-//  Created by Claude on 16/11/25.
-//
-
 import SwiftUI
 
-// MARK: - View to Display Saved Orders (for debugging/testing)
 struct SavedOrdersView: View {
     @State private var savedOrders: [OrderSubmission] = []
     @State private var selectedOrder: OrderSubmission?
@@ -43,7 +35,7 @@ struct SavedOrdersView: View {
                 } else {
                     ScrollView {
                         VStack(spacing: 16) {
-                            // Header
+
                             HStack {
                                 VStack(alignment: .leading, spacing: 4) {
                                     Text("Saved Orders")
@@ -67,7 +59,6 @@ struct SavedOrdersView: View {
                             .padding(.horizontal, 24)
                             .padding(.top, 20)
 
-                            // Orders List
                             ForEach(Array(savedOrders.enumerated()), id: \.offset) { index, order in
                                 SavedOrderCard(order: order) {
                                     selectedOrder = order
@@ -103,7 +94,6 @@ struct SavedOrdersView: View {
     }
 }
 
-// MARK: - Saved Order Card
 struct SavedOrderCard: View {
     let order: OrderSubmission
     let onTap: () -> Void
@@ -113,7 +103,7 @@ struct SavedOrderCard: View {
             onTap()
         } label: {
             VStack(alignment: .leading, spacing: 16) {
-                // Header
+
                 HStack {
                     VStack(alignment: .leading, spacing: 4) {
                         Text(order.canteenName)
@@ -134,7 +124,6 @@ struct SavedOrderCard: View {
 
                 Divider()
 
-                // Items
                 VStack(alignment: .leading, spacing: 8) {
                     Text("\(order.itemCount) Items")
                         .font(.urbanist(size: 14, weight: .semibold))
@@ -168,7 +157,6 @@ struct SavedOrderCard: View {
                     }
                 }
 
-                // Footer
                 HStack {
                     Label {
                         Text(formatDate(order.paymentCompletedAt))
@@ -201,7 +189,6 @@ struct SavedOrderCard: View {
     }
 }
 
-// MARK: - Order JSON View
 struct OrderJSONView: View {
     let order: OrderSubmission
     @Environment(\.dismiss) var dismiss

@@ -1,10 +1,3 @@
-//
-//  OwnerCanteenSelectorSheet.swift
-//  BunkBite
-//
-//  Created by Shreyanshu on 06/11/25.
-//
-
 import SwiftUI
 
 struct OwnerCanteenSelectorSheet: View {
@@ -54,14 +47,14 @@ struct OwnerCanteenSelectorSheet: View {
                     }
                     .listRowBackground(Color.clear)
                 }
-                
+
                 ForEach(filteredCanteens) { canteen in
                     Button {
                         canteenViewModel.selectedCanteen = canteen
                         dismiss()
                     } label: {
                         HStack(spacing: 16) {
-                            // Icon
+
                             Circle()
                                 .fill(Constants.primaryColor.opacity(0.1))
                                 .frame(width: 50, height: 50)
@@ -71,7 +64,6 @@ struct OwnerCanteenSelectorSheet: View {
                                         .font(.title3)
                                 )
 
-                            // Details
                             VStack(alignment: .leading, spacing: 4) {
                                 Text(canteen.name)
                                     .font(.headline)
@@ -167,7 +159,7 @@ struct OwnerCanteenSelectorSheet: View {
             }
         }
     }
-    
+
     private func performDeletion() async {
         guard let canteen = canteenToDelete,
               let token = authViewModel.authToken,
@@ -175,20 +167,19 @@ struct OwnerCanteenSelectorSheet: View {
             deleteError = "Missing required information"
             return
         }
-        
-        // Verify email matches
+
         guard deleteConfirmationEmail.lowercased() == userEmail.lowercased() else {
             deleteError = "Email does not match your account email"
             return
         }
-        
+
         isDeleting = true
         deleteError = nil
-        
+
         let success = await canteenViewModel.deleteCanteen(id: canteen.id, token: token)
-        
+
         isDeleting = false
-        
+
         if success {
             showDeleteConfirmation = false
             deleteConfirmationEmail = ""
@@ -206,72 +197,69 @@ struct DeleteCanteenConfirmationSheet: View {
     @Binding var isDeleting: Bool
     @Binding var errorMessage: String?
     let onConfirm: () -> Void
-    
+
     @Environment(\.dismiss) var dismiss
     @FocusState private var isEmailFieldFocused: Bool
-    
+
     var body: some View {
         NavigationStack {
             VStack(spacing: 24) {
-                // Warning Icon
+
                 Image(systemName: "exclamationmark.triangle.fill")
                     .font(.system(size: 60))
                     .foregroundStyle(.red)
                     .padding(.top, 20)
-                
-                // Warning Text
+
                 VStack(spacing: 8) {
                     Text("Delete Canteen?")
                         .font(.urbanist(size: 24, weight: .bold))
-                    
+
                     if let canteen = canteen {
                         Text("You are about to delete \"\(canteen.name)\"")
                             .font(.urbanist(size: 16, weight: .regular))
                             .foregroundStyle(.secondary)
                             .multilineTextAlignment(.center)
                     }
-                    
+
                     Text("This action cannot be undone.")
                         .font(.urbanist(size: 14, weight: .medium))
                         .foregroundStyle(.red)
                 }
-                
-                // Email Verification
+
                 VStack(alignment: .leading, spacing: 8) {
                     Text("Type your email to confirm:")
                         .font(.urbanist(size: 14, weight: .medium))
                         .foregroundStyle(.secondary)
-                    
+
                     TextField("Email", text: $confirmationEmail)
                         .textFieldStyle(.roundedBorder)
                         .textInputAutocapitalization(.never)
                         .autocorrectionDisabled()
                         .keyboardType(.emailAddress)
                         .focused($isEmailFieldFocused)
-                    
+
                     Text("Your email: \(userEmail)")
                         .font(.urbanist(size: 12, weight: .regular))
                         .foregroundStyle(.secondary)
                 }
                 .padding(.horizontal)
-                
+
                 if let error = errorMessage {
                     Text(error)
                         .font(.urbanist(size: 14, weight: .medium))
                         .foregroundStyle(.red)
                         .padding(.horizontal)
                 }
-                
+
                 Spacer()
-                
-                // Action Buttons
+
                 HStack(spacing: 12) {
                     Button("Cancel") {
                         dismiss()
                     }
                     .buttonStyle(.bordered)
                     .frame(maxWidth: .infinity)
-                    
+
                     Button {
                         onConfirm()
                     } label: {
@@ -293,7 +281,7 @@ struct DeleteCanteenConfirmationSheet: View {
             }
             .navigationBarTitleDisplayMode(.inline)
             .onAppear {
-                // Focus the text field when sheet appears
+
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                     isEmailFieldFocused = true
                 }

@@ -1,10 +1,3 @@
-//
-//  Cart.swift
-//  BunkBite
-//
-//  Created by Shreyanshu on 06/11/25.
-//
-
 import Foundation
 import Combine
 
@@ -38,9 +31,9 @@ class Cart: ObservableObject {
     var totalItems: Int {
         items.reduce(0) { $0 + $1.quantity }
     }
-    
+
     init() {
-        // Listen for logout notification to clear cart
+
         NotificationCenter.default.addObserver(
             forName: NSNotification.Name("ClearCart"),
             object: nil,

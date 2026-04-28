@@ -1,6 +1,5 @@
 #!/bin/bash
 
-# Script to add new onboarding files to Xcode project
 
 echo "📝 New Onboarding Files to Add to Xcode Project:"
 echo ""

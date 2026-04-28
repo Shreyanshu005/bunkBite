@@ -1,10 +1,3 @@
-//
-//  InventorySheet.swift
-//  BunkBite
-//
-//  Created by Shreyanshu on 06/11/25.
-//
-
 import SwiftUI
 import PopupView
 
@@ -28,7 +21,7 @@ struct InventorySheet: View {
     var body: some View {
         NavigationStack {
             List {
-                // Header Section
+
                 Section {
                     VStack(alignment: .leading, spacing: 8) {
                         Text(canteen.name)
@@ -84,7 +77,6 @@ struct InventorySheet: View {
                         .fill(.ultraThinMaterial)
                 )
 
-                // Menu Items
                 if menuViewModel.isLoading {
                     HStack {
                         Spacer()
@@ -174,7 +166,7 @@ struct InventoryItemRow: View {
 
     var body: some View {
         HStack(spacing: 12) {
-            // Item image
+
             RoundedRectangle(cornerRadius: 8)
                 .fill(.ultraThinMaterial)
                 .frame(width: 60, height: 60)
@@ -183,7 +175,6 @@ struct InventoryItemRow: View {
                         .foregroundStyle(.secondary)
                 )
 
-            // Item details
             VStack(alignment: .leading, spacing: 4) {
                 Text(item.name)
                     .font(.headline)

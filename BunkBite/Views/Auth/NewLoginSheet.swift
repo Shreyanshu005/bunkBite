@@ -1,10 +1,3 @@
-//
-//  NewLoginSheet.swift
-//  BunkBite
-//
-//  Created by Shreyanshu on 15/01/26.
-//
-
 import SwiftUI
 
 struct NewLoginSheet: View {
@@ -13,26 +6,25 @@ struct NewLoginSheet: View {
     @State private var email: String = ""
     @State private var showOTPSheet = false
     @State private var isLoading = false
-    
+
     var body: some View {
         VStack(spacing: 24) {
-            // Heading
+
             VStack(spacing: 8) {
                 Text("Welcome to BunkBite")
                     .font(.custom("Urbanist-Bold", size: 24))
                     .foregroundStyle(.black)
-                
+
                 Text("Order food from your favourite canteen")
                     .font(.custom("Urbanist-Regular", size: 16))
                     .foregroundStyle(Color(hex: "6B7280"))
             }
-            
-            // Email Input
+
             VStack(alignment: .leading, spacing: 8) {
                 Text("Enter your Email")
                     .font(.custom("Urbanist-Medium", size: 14))
                     .foregroundStyle(Color(hex: "374151"))
-                
+
                 TextField("you@example.com", text: $email)
                     .font(.custom("Urbanist-Regular", size: 16))
                     .padding()
@@ -41,8 +33,7 @@ struct NewLoginSheet: View {
                     .autocapitalization(.none)
                     .keyboardType(.emailAddress)
             }
-            
-            // Continue Button
+
             Button(action: {
                 sendOTP()
             }) {
@@ -63,8 +54,7 @@ struct NewLoginSheet: View {
             .cornerRadius(12)
             .disabled(email.isEmpty || isLoading)
             .opacity(email.isEmpty ? 0.5 : 1.0)
-            
-            // Error message
+
             if let error = authViewModel.errorMessage {
                 Text(error)
                     .font(.custom("Urbanist-Regular", size: 14))
@@ -88,14 +78,14 @@ struct NewLoginSheet: View {
             .interactiveDismissDisabled(false)
         }
     }
-    
+
     private func sendOTP() {
         isLoading = true
         authViewModel.email = email
         Task {
             await authViewModel.sendOTP()
             isLoading = false
-            
+
             if authViewModel.errorMessage == nil {
                 showOTPSheet = true
             }

@@ -1,35 +1,32 @@
-
 import SwiftUI
 
 struct CustomFloatingTabBar: View {
     @Binding var selectedTab: Tab
     @EnvironmentObject var cart: Cart
-    
+
     enum Tab: String {
         case menu
         case orders
         case profile
     }
-    
+
     var body: some View {
         HStack(spacing: 25) {
-            // Menu Tab
+
             TabBarButton(
                 icon: "fork.knife",
                 text: "Menu",
                 isSelected: selectedTab == .menu,
                 action: { selectedTab = .menu }
             )
-            
-            // Orders Tab (was Cart)
+
             TabBarButton(
                 icon: "bag",
                 text: "Orders",
                 isSelected: selectedTab == .orders,
                 action: { selectedTab = .orders }
             )
-            
-            // Profile Tab
+
             TabBarButton(
                 icon: "person",
                 text: "Profile",
@@ -43,7 +40,7 @@ struct CustomFloatingTabBar: View {
         .clipShape(Capsule())
         .padding(.horizontal, 40)
         .animation(.spring(response: 0.5, dampingFraction: 0.7, blendDuration: 0), value: selectedTab)
-        .ignoresSafeArea(.keyboard) 
+        .ignoresSafeArea(.keyboard)
     }
 }
 
@@ -53,7 +50,7 @@ struct TabBarButton: View {
     let isSelected: Bool
     var badgeCount: Int = 0
     let action: () -> Void
-    
+
     var body: some View {
         Button(action: action) {
             HStack(spacing: 8) {
@@ -61,7 +58,7 @@ struct TabBarButton: View {
                     Image(systemName: icon)
                         .font(.system(size: 20))
                         .frame(width: 24, height: 24)
-                    
+
                     if badgeCount > 0 {
                         Text("\(badgeCount)")
                             .font(.system(size: 10, weight: .bold))
@@ -72,7 +69,7 @@ struct TabBarButton: View {
                             .offset(x: 8, y: -8)
                     }
                 }
-                
+
                 if isSelected {
                     Text(text)
                         .font(.custom("Urbanist-Bold", size: 14))

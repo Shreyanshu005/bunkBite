@@ -1,10 +1,3 @@
-//
-//  CanteenViewModel.swift
-//  BunkBite
-//
-//  Created by Shreyanshu on 06/11/25.
-//
-
 import Foundation
 import SwiftUI
 import Combine
@@ -15,7 +8,7 @@ class CanteenViewModel: ObservableObject {
     @Published var selectedCanteen: Canteen? {
         didSet {
             saveSelectedCanteen()
-            // Notify observers that the selected canteen has changed
+
             if let canteen = selectedCanteen {
                 NotificationCenter.default.post(name: .canteenDidChange, object: nil, userInfo: ["canteen": canteen])
             }
@@ -65,16 +58,13 @@ class CanteenViewModel: ObservableObject {
             for canteen in canteens {
                 print("   - \(canteen.name) at \(canteen.place)")
             }
-            
-            // Auto-select the first canteen if none is selected
-            // or if the previously selected canteen no longer exists
-            // 1. Try to restore the ongoing selection with fresh data
+
             if let currentSelected = selectedCanteen,
                let freshCanteen = canteens.first(where: { $0.id == currentSelected.id }) {
                 selectedCanteen = freshCanteen
                 print("🔄 Refreshed selected canteen with latest status: \(freshCanteen.name)")
-            } 
-            // 2. If no selection or previous selection is gone, auto-select first
+            }
+
             else {
                 if let firstCanteen = canteens.first {
                     selectedCanteen = firstCanteen
@@ -147,7 +137,7 @@ class CanteenViewModel: ObservableObject {
         errorMessage = nil
 
         print("🗑️ Attempting to delete canteen with ID: \(id)")
-        
+
         do {
             try await apiService.deleteCanteen(id: id, token: token)
             canteens.removeAll { $0.id == id }
@@ -168,9 +158,9 @@ class CanteenViewModel: ObservableObject {
 
     func refreshSelectedCanteen() async {
         guard let currentId = selectedCanteen?.id else { return }
-        // Don't set global isLoading to avoid full screen spinner on pull-to-refresh
+
         do {
-            // Using getAllCanteens (public) to ensure we get status even without token
+
             let allCanteens = try await apiService.getAllCanteens()
             if let updated = allCanteens.first(where: { $0.id == currentId }) {
                 selectedCanteen = updated
@@ -180,11 +170,11 @@ class CanteenViewModel: ObservableObject {
             print("❌ Failed to refresh selected canteen: \(error.localizedDescription)")
         }
     }
-    
+
     func fetchSelectedCanteenDetails(token: String) async {
         guard let currentId = selectedCanteen?.id else { return }
         isLoading = true
-        
+
         do {
             let updatedCanteen = try await apiService.getCanteenById(id: currentId, token: token)
             selectedCanteen = updatedCanteen
@@ -193,7 +183,7 @@ class CanteenViewModel: ObservableObject {
             print("❌ Failed to fetch canteen details: \(error.localizedDescription)")
             errorMessage = "Failed to refresh canteen details"
         }
-        
+
         isLoading = false
     }
 }
