@@ -23,9 +23,9 @@ A professional iOS canteen ordering app built with SwiftUI, featuring separate p
 
 | | | |
 | :---: | :---: | :---: |
-| <img src="https://i.ibb.co/HDLW88t/IMG-1770.png" width="200" /> | <img src="https://i.ibb.co/xqLD0CH/IMG-1771.png" width="200" /> | <img src="https://i.ibb.co/rR9TJ7f/IMG-1772-2.png" width="200" /> |
-| <img src="https://i.ibb.co/GQMGXTW/IMG-1774.png" width="200" /> | <img src="https://i.ibb.co/Hp3WY8W/IMG-1777-2.png" width="200" /> | <img src="https://i.ibb.co/0VYnk5x/IMG-1778-2.png" width="200" /> |
-| <img src="https://i.ibb.co/Mkjyh9M/IMG-1776.png" width="200" /> | | |
+| <img src="https://i.ibb.co/JRWfBBwj/IMG-1770.png" width="200" /> | <img src="https://i.ibb.co/3md7qWt9/IMG-1771.png" width="200" /> | <img src="https://i.ibb.co/zTdjwnQP/IMG-1772-2.png" width="200" /> |
+| <img src="https://i.ibb.co/DfMmNCkk/IMG-1774.png" width="200" /> | <img src="https://i.ibb.co/S7GhPxMN/IMG-1777-2.png" width="200" /> | <img src="https://i.ibb.co/mFhRmqys/IMG-1778-2.png" width="200" /> |
+| <img src="https://i.ibb.co/Qvx7Db4C/IMG-1776.png" width="200" /> | | |
 
 ## Design
 - **Theme Colors**:
